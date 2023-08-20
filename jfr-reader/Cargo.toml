@@ -1,0 +1,13 @@
+[package]
+name = "jfr-reader"
+version = "0.1.0"
+edition = "2021"
+description = "Read Java Flight Recorder (JFR) recordings and their events"
+rust-version = "1.65"
+license = "Apache-2.0 OR MIT"
+keywords = ["java", "jfr"]
+homepage = "https://github.com/indygreg/java-rs"
+repository = "https://github.com/indygreg/java-rs.git"
+readme = "README.md"
+
+[dependencies]
