@@ -5,9 +5,17 @@ edition = "2021"
 description = "Read Java Flight Recorder (JFR) recordings and their events"
 rust-version = "1.65"
 license = "Apache-2.0 OR MIT"
-keywords = ["java", "jfr"]
+keywords = ["java", "jfr", "jvm"]
 homepage = "https://github.com/indygreg/java-rs"
 repository = "https://github.com/indygreg/java-rs.git"
 readme = "README.md"
 
 [dependencies]
+nom = "7.1.3"
+num_enum = "0.7.0"
+strum = { version = "0.25.0", features = ["derive"] }
+thiserror = "1.0.44"
+
+[dev-dependencies]
+hex = "0.4.3"
+indoc = "2.0.3"
