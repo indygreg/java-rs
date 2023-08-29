@@ -1,6 +1,7 @@
 [workspace]
 members = [
     'jfr-reader',
+    'jvm-attach',
 ]
 resolver = "2"
 
