@@ -103,6 +103,9 @@ pub enum Error {
 
     #[error("event parsing: {0}")]
     EventParse(String),
+
+    #[error("setting parsing: {0}")]
+    SettingParse(String),
 }
 
 impl From<nom::Err<NomParseError>> for Error {
