@@ -22,14 +22,25 @@ use crate::{
 
 use std::collections::HashMap;
 
+/// Describes an entity that can resolve constants.
+pub trait ConstantResolver<'a>: Sized {
+    /// Get the value of a constant.
+    fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>>;
+
+    /// Get the value of a constant and recursively expand constant references.
+    fn get_recursive(&self, class_id: i64, index: i64) -> Option<Result<Value<'a>>> {
+        self.get(class_id, index)
+            .map(|v| v.clone().resolve_constants(self))
+    }
+}
+
 /// Holds resolved values in the constants pool.
 pub struct ConstantPoolValues<'a> {
     inner: HashMap<i64, HashMap<i64, Value<'a>>>,
 }
 
-impl<'a> ConstantPoolValues<'a> {
-    /// Resolve the value for a constant.
-    pub fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>> {
+impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
+    fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>> {
         self.inner.get(&class_id).and_then(|x| x.get(&index))
     }
 }
@@ -80,7 +91,7 @@ impl<'a> Value<'a> {
     /// Resolve all constants references in this value recursively.
     ///
     /// The resulting Value should not have any instances of the Value::ConstantPool variant.
-    pub fn resolve_constants(self, constants: &ConstantPoolValues<'a>) -> Result<Self> {
+    pub fn resolve_constants(self, constants: &impl ConstantResolver<'a>) -> Result<Self> {
         match self {
             Self::Primitive(v) => Ok(Self::Primitive(v)),
             Self::Object(mut o) => {
@@ -96,11 +107,9 @@ impl<'a> Value<'a> {
                 class_id,
                 constant_index,
             } => {
-                match constants.get(class_id, constant_index) {
-                    Some(value) => {
-                        // Resolved value could itself have constants. So we need to resolve recursively.
-                        value.clone().resolve_constants(constants)
-                    }
+                // Resolved value could itself have constants. So we need to resolve recursively.
+                match constants.get_recursive(class_id, constant_index) {
+                    Some(res) => res,
                     None => {
                         //println!("Missing constants pool: {} {}", class_id, constant_index);
 
