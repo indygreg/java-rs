@@ -193,7 +193,7 @@ impl<'a> EventResolver<'a> {
     }
 
     /// Obtain a data structure allowing retrieval of resolved constant pool values.
-    pub fn constant_pool_values<'v: 'a, 'slf: 'v>(&'slf self) -> Result<ConstantPoolValues<'v>> {
+    pub fn constant_pool_values(&self) -> Result<ConstantPoolValues<'_>> {
         let mut inner = FxHashMap::<i64, FxHashMap<i64, Value>>::default();
 
         for e in &self.constant_pools {
@@ -215,11 +215,7 @@ impl<'a> EventResolver<'a> {
     ///
     /// This function does not concern itself with annotations, settings, or resolving
     /// constant pool references.
-    pub fn parse_value<'v: 'a, 'slf: 'v>(
-        &'slf self,
-        s: &'a [u8],
-        class_id: i64,
-    ) -> Result<(&'a [u8], Value<'v>)> {
+    pub fn parse_value(&self, s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Value<'_>)> {
         let class = self
             .get_class(class_id)
             .ok_or(Error::ClassNotFound(class_id))?;
@@ -258,11 +254,11 @@ impl<'a> EventResolver<'a> {
     ///
     /// Classes are composed of fields. This function decodes a single field within
     /// a class.
-    pub fn parse_field_single<'v: 'a, 'slf: 'v>(
-        &'slf self,
+    pub fn parse_field_single(
+        &self,
         s: &'a [u8],
         field: &FieldElement<'a>,
-    ) -> Result<(&'a [u8], Value<'v>)> {
+    ) -> Result<(&'a [u8], Value<'_>)> {
         // This seems to always be "true" if present. Don't bother checking it.
         if field.constant_pool.is_some() {
             let (s, constant_index) = leb128_i64(s).map_err(Error::from)?;
@@ -282,11 +278,11 @@ impl<'a> EventResolver<'a> {
     ///
     /// This is a special variant of [Self::parse_field_array] that should be called when
     /// the field is an array.
-    pub fn parse_field_array<'v: 'a, 'slf: 'v>(
-        &'slf self,
+    pub fn parse_field_array(
+        &self,
         s: &'a [u8],
         field: &FieldElement<'a>,
-    ) -> Result<(&'a [u8], Value<'v>)> {
+    ) -> Result<(&'a [u8], Value<'_>)> {
         let (mut s, array_length) = leb128_i32(s).map_err(Error::from)?;
 
         let mut els = Vec::with_capacity(array_length as _);

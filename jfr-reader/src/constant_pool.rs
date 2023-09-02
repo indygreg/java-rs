@@ -58,11 +58,11 @@ impl ConstantPoolHeader {
     }
 }
 
-fn parse_constant_pool_value<'a, 'v: 'a, 'resolver: 'v>(
+fn parse_constant_pool_value<'a, 'r>(
     s: &'a [u8],
-    resolver: &'resolver EventResolver<'a>,
+    resolver: &'r EventResolver<'a>,
     class_id: i64,
-) -> Result<(&'a [u8], i64, Value<'v>)> {
+) -> Result<(&'a [u8], i64, Value<'r>)> {
     let (s, pool_index) = leb128_i64(s)?;
 
     let (s, value) = resolver.parse_value(s, class_id)?;
@@ -70,10 +70,10 @@ fn parse_constant_pool_value<'a, 'v: 'a, 'resolver: 'v>(
     Ok((s, pool_index, value))
 }
 
-fn parse_constant_pool_class<'a, 'v: 'a, 'resolver: 'v>(
+fn parse_constant_pool_class<'a, 'r>(
     s: &'a [u8],
-    resolver: &'resolver EventResolver<'a>,
-) -> Result<(&'a [u8], i64, Vec<(i64, Value<'v>)>)> {
+    resolver: &'r EventResolver<'a>,
+) -> Result<(&'a [u8], i64, Vec<(i64, Value<'r>)>)> {
     let (mut s, (class_id, constant_count)) = context(
         "parsing constant pool class entry",
         pair(leb128_i64, leb128_i32),
@@ -122,10 +122,10 @@ impl<'a> ConstantPoolEvent<'a> {
     /// values because the entries do not encode their own size. We need to
     /// decode each entry in full using the chunk's typing metadata in order
     /// to identify boundaries between constants in the pool.
-    pub fn iter_constants<'v: 'a, 'r: 'v>(
+    pub fn iter_constants<'r>(
         &self,
         resolver: &'r EventResolver<'a>,
-    ) -> impl Iterator<Item = Result<(i64, i64, Value<'v>)>> + '_ {
+    ) -> impl Iterator<Item = Result<(i64, i64, Value<'r>)>> {
         let mut s = self.pool_data;
 
         (0..self.header.pool_count).flat_map(move |_| {
