@@ -342,6 +342,17 @@ impl<'a> ClassElement<'a> {
             id,
         })
     }
+
+    /// Obtain an iterable of all referenced annotations in this class definition.
+    ///
+    /// Resolves the annotations for the class, fields, and settings. There may
+    /// be duplicate entries in the stream.
+    pub fn all_annotations(&self) -> impl Iterator<Item = &AnnotationElement<'a>> + '_ {
+        self.annotations
+            .iter()
+            .chain(self.fields.iter().flat_map(|f| f.annotations.iter()))
+            .chain(self.settings.iter().flat_map(|s| s.annotations.iter()))
+    }
 }
 
 #[derive(Clone, Debug)]
