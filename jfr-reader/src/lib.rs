@@ -43,6 +43,7 @@
 //! [chunk::ChunkReader::iter_event_records] then call [event::EventRecord::resolve_value]
 //! with the resolver to parse the event data into a [resolver::Value].
 
+pub mod annotations;
 pub mod chunk;
 pub mod common;
 pub mod constant_pool;

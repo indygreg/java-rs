@@ -104,6 +104,9 @@ pub enum Error {
     #[error("event parsing: {0}")]
     EventParse(String),
 
+    #[error("annotation parsing: {0}")]
+    AnnotationParse(String),
+
     #[error("setting parsing: {0}")]
     SettingParse(String),
 }
