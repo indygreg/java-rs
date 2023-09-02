@@ -75,7 +75,8 @@ use {
         string_table::{LazyStringTable, StringRecord},
     },
     nom::{error::context, multi::count, sequence::pair},
-    std::{borrow::Cow, collections::HashMap, str::FromStr},
+    rustc_hash::FxHashMap,
+    std::{borrow::Cow, str::FromStr},
 };
 
 /// The static header portion of a metadata event.
@@ -902,7 +903,7 @@ pub struct Metadata<'a> {
     pub root: RootElement<'a>,
 
     /// A mapping of class / type IDs to class elements describing them.
-    pub class_map: HashMap<i64, ClassElement<'a>>,
+    pub class_map: FxHashMap<i64, ClassElement<'a>>,
 }
 
 impl<'a> Metadata<'a> {
@@ -940,7 +941,10 @@ impl<'a> Metadata<'a> {
 
         // TODO consider using a sparse vec since class IDs appear to be mostly
         // sequential. Incurring a key hash seems like avoidable overhead.
-        let mut class_map = HashMap::with_capacity(root.metadata.classes.len());
+        let mut class_map = FxHashMap::with_capacity_and_hasher(
+            root.metadata.classes.len(),
+            std::hash::BuildHasherDefault::<rustc_hash::FxHasher>::default(),
+        );
 
         for class in root.metadata.classes.iter() {
             class_map.insert(class.id, class.clone());

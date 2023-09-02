@@ -19,8 +19,7 @@ use crate::{
     metadata::{ClassElement, FieldElement, Metadata},
     value::Primitive,
 };
-
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
 pub trait ConstantResolver<'a>: Sized {
@@ -36,7 +35,7 @@ pub trait ConstantResolver<'a>: Sized {
 
 /// Holds resolved values in the constants pool.
 pub struct ConstantPoolValues<'a> {
-    inner: HashMap<i64, HashMap<i64, Value<'a>>>,
+    inner: FxHashMap<i64, FxHashMap<i64, Value<'a>>>,
 }
 
 impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
@@ -152,7 +151,7 @@ impl<'a> Value<'a> {
 /// all of this without parsing the constants pool at all. This enables consumers
 /// to filter on event field values without having to pay additional costs.
 pub struct EventResolver<'a> {
-    classes: HashMap<i64, ClassElement<'a>>,
+    classes: FxHashMap<i64, ClassElement<'a>>,
     constant_pools: Vec<ConstantPoolEvent<'a>>,
 }
 
@@ -162,7 +161,7 @@ impl<'a> EventResolver<'a> {
         metadata: Metadata<'a>,
         constant_pools: impl Iterator<Item = ConstantPoolEvent<'a>>,
     ) -> Result<Self> {
-        let classes = HashMap::from_iter(
+        let classes = FxHashMap::from_iter(
             metadata
                 .root
                 .metadata
@@ -195,7 +194,7 @@ impl<'a> EventResolver<'a> {
 
     /// Obtain a data structure allowing retrieval of resolved constant pool values.
     pub fn constant_pool_values<'v: 'a, 'slf: 'v>(&'slf self) -> Result<ConstantPoolValues<'v>> {
-        let mut inner = HashMap::<i64, HashMap<i64, Value>>::new();
+        let mut inner = FxHashMap::<i64, FxHashMap<i64, Value>>::default();
 
         for e in &self.constant_pools {
             for res in e.iter_constants(self) {
