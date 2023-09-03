@@ -16,7 +16,6 @@ use crate::{
     resolver::{EventResolver, Value},
 };
 use nom::{bytes::streaming::take, error::context};
-use std::borrow::Cow;
 
 /// The event type ID referring to a metadata event.
 pub const EVENT_TYPE_METADATA: i64 = 0;
@@ -58,17 +57,17 @@ impl EventHeader {
 }
 
 /// Describes an event record inside a chunk.
-pub trait ChunkEvent {
+pub trait ChunkEvent<'a> {
     /// Obtain the parsed event header.
     fn header(&self) -> &EventHeader;
 
     /// Obtain a reference to the full data for this event, inclusive of the header.
-    fn event_data(&self) -> Result<&[u8]>;
+    fn event_data(&self) -> Result<&'a [u8]>;
 
     /// Obtain a reference to the fields data for this event.
     ///
     /// Effectively event_data() without the event header.
-    fn fields_data(&self) -> Result<&[u8]>;
+    fn fields_data(&self) -> Result<&'a [u8]>;
 
     /// Attempt to resolve the start and duration fields for this event.
     ///
@@ -95,7 +94,9 @@ pub struct EventRecord<'a> {
     pub header: EventHeader,
 
     /// Full event data, inclusive of header.
-    event_data: Cow<'a, [u8]>,
+    // We can't use a Cow here because we can't "steal" a lifetime from a Cow
+    // because in the owned case a reference has the lifetime of the Cow itself.
+    event_data: &'a [u8],
 
     /// Offset of start of fields data within the event data.
     fields_data_offset: usize,
@@ -120,7 +121,7 @@ impl<'a> EventRecord<'a> {
             s,
             Self {
                 header,
-                event_data: Cow::Borrowed(event_data),
+                event_data,
                 fields_data_offset: header_size,
             },
         ))
@@ -137,26 +138,23 @@ impl<'a> EventRecord<'a> {
     }
 
     /// Parse the event fields in this instance in a [Value] using an [EventResolver].
-    pub fn resolve_value<'v: 'a, 'slf: 'v, 'r: 'v>(
-        &'slf self,
-        resolver: &'r EventResolver,
-    ) -> Result<Value<'v>> {
+    pub fn resolve_value<'r>(&self, resolver: &'r EventResolver<'a>) -> Result<Value<'r>> {
         let (_, v) = resolver.parse_value(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
     }
 }
 
-impl<'a> ChunkEvent for EventRecord<'a> {
+impl<'a> ChunkEvent<'a> for EventRecord<'a> {
     fn header(&self) -> &EventHeader {
         &self.header
     }
 
-    fn event_data(&self) -> Result<&[u8]> {
+    fn event_data(&self) -> Result<&'a [u8]> {
         Ok(&self.event_data)
     }
 
-    fn fields_data(&self) -> Result<&[u8]> {
+    fn fields_data(&self) -> Result<&'a [u8]> {
         Ok(&self.event_data[self.fields_data_offset..])
     }
 }
