@@ -137,55 +137,82 @@ impl<'a> From<f64> for Primitive<'a> {
 }
 
 impl<'a> Primitive<'a> {
-    pub fn try_parse_from_name(name: &str, s: &'a [u8]) -> ParseResult<'a, Option<Primitive<'a>>> {
+    pub fn parse_boolean(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_boolean(s)?;
+        Ok((s, Self::Boolean(v)))
+    }
+
+    pub fn parse_char(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_char(s)?;
+        Ok((s, Self::Character(v)))
+    }
+
+    pub fn parse_float(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_float(s)?;
+        Ok((s, Self::Float(v)))
+    }
+
+    pub fn parse_double(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_double(s)?;
+        Ok((s, Self::Double(v)))
+    }
+
+    pub fn parse_byte(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_byte(s)?;
+        Ok((s, Self::Byte(v)))
+    }
+
+    pub fn parse_short(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_short(s)?;
+        Ok((s, Self::Short(v)))
+    }
+
+    pub fn parse_int(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_int(s)?;
+        Ok((s, Self::Integer(v)))
+    }
+
+    pub fn parse_long(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_long(s)?;
+        Ok((s, Self::Long(v)))
+    }
+
+    pub fn parse_string(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+        let (s, v) = parse_java_lang_string(s)?;
+
+        let v = match v {
+            StringValue::Null => Self::NullString,
+            StringValue::String(s) => Self::String(s),
+            StringValue::ConstantPoolRef(index) => Self::StringConstantPool(index),
+        };
+
+        Ok((s, v))
+    }
+
+    /// Resolve a parser function for a primitive value, if available.
+    pub fn resolve_parser(name: &str) -> Option<fn(&'a [u8]) -> ParseResult<'a, Primitive<'a>>> {
         match name {
-            // This seems to be the order of the constant class IDs that are
-            // emitted. But order doesn't matter and we make no assumptions
-            // about the class IDs.
-            "boolean" => {
-                let (s, v) = parse_boolean(s)?;
-                Ok((s, Some(Self::Boolean(v))))
-            }
-            "char" => {
-                let (s, v) = parse_char(s)?;
-                Ok((s, Some(Self::Character(v))))
-            }
-            "float" => {
-                let (s, v) = parse_float(s)?;
-                Ok((s, Some(Self::Float(v))))
-            }
-            "double" => {
-                let (s, v) = parse_double(s)?;
-                Ok((s, Some(Self::Double(v))))
-            }
-            "byte" => {
-                let (s, v) = parse_byte(s)?;
-                Ok((s, Some(Self::Byte(v))))
-            }
-            "short" => {
-                let (s, v) = parse_short(s)?;
-                Ok((s, Some(Self::Short(v))))
-            }
-            "int" => {
-                let (s, v) = parse_int(s)?;
-                Ok((s, Some(Self::Integer(v))))
-            }
-            "long" => {
-                let (s, v) = parse_long(s)?;
-                Ok((s, Some(Self::Long(v))))
-            }
-            "java.lang.String" => {
-                let (s, v) = parse_java_lang_string(s)?;
+            "boolean" => Some(Self::parse_boolean),
+            "char" => Some(Self::parse_char),
+            "float" => Some(Self::parse_float),
+            "double" => Some(Self::parse_double),
+            "byte" => Some(Self::parse_byte),
+            "short" => Some(Self::parse_short),
+            "int" => Some(Self::parse_int),
+            "long" => Some(Self::parse_long),
+            "java.lang.String" => Some(Self::parse_string),
+            _ => None,
+        }
+    }
 
-                let v = Some(match v {
-                    StringValue::Null => Self::NullString,
-                    StringValue::String(s) => Self::String(s),
-                    StringValue::ConstantPoolRef(index) => Self::StringConstantPool(index),
-                });
-
-                Ok((s, v))
-            }
-            _ => Ok((s, None)),
+    /// Attempt to parse data as a primitive having the specified class name.
+    ///
+    /// If the name is not a known primitive, no data should be read.
+    pub fn try_parse_from_name(name: &str, s: &'a [u8]) -> ParseResult<'a, Option<Primitive<'a>>> {
+        if let Some(parser) = Self::resolve_parser(name) {
+            parser(s).map(|(s, v)| (s, Some(v)))
+        } else {
+            Ok((s, None))
         }
     }
 }

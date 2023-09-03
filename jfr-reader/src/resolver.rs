@@ -15,7 +15,7 @@
 use crate::{
     common::{leb128_i32, leb128_i64},
     constant_pool::ConstantPoolEvent,
-    error::{Error, Result},
+    error::{Error, ParseResult, Result},
     metadata::{ClassElement, FieldElement, Metadata},
     value::Primitive,
 };
@@ -153,6 +153,7 @@ impl<'a> Value<'a> {
 pub struct EventResolver<'a> {
     classes: FxHashMap<i64, ClassElement<'a>>,
     constant_pools: Vec<ConstantPoolEvent<'a>>,
+    primitive_parsers: FxHashMap<i64, fn(&'a [u8]) -> ParseResult<'a, Primitive<'a>>>,
 }
 
 impl<'a> EventResolver<'a> {
@@ -172,9 +173,18 @@ impl<'a> EventResolver<'a> {
 
         let constant_pools = constant_pools.collect::<Vec<_>>();
 
+        let mut primitive_parsers = FxHashMap::default();
+
+        for class in classes.values() {
+            if let Some(parser) = Primitive::resolve_parser(class.name.as_ref()) {
+                primitive_parsers.insert(class.id, parser);
+            }
+        }
+
         Ok(Self {
             classes,
             constant_pools,
+            primitive_parsers,
         })
     }
 
@@ -217,20 +227,19 @@ impl<'a> EventResolver<'a> {
     ///
     /// This function does not concern itself with annotations, settings, or resolving
     /// constant pool references.
-    pub fn parse_value(&self, s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Value<'_>)> {
-        let class = self
-            .get_class(class_id)
-            .ok_or(Error::ClassNotFound(class_id))?;
+    pub fn parse_value(&self, mut s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Value<'_>)> {
+        // Use a cached lookup table of parsers for common classes so we can avoid both the class
+        // lookup (fast) and the string compare to locate the parser function (slow).
+        // TODO support registering additional parser functions to make this fully generic.
+        if let Some(parser) = self.primitive_parsers.get(&class_id) {
+            let (remaining, v) = parser(s)?;
 
-        // TODO we could maintain an integer lookup table to the parser functions to make
-        // this faster by avoiding string compares.
-        let (remaining, primitive) = Primitive::try_parse_from_name(class.name.as_ref(), s)?;
-
-        if let Some(v) = primitive {
             return Ok((remaining, Value::Primitive(v)));
         }
 
-        let mut s = remaining;
+        let class = self
+            .get_class(class_id)
+            .ok_or(Error::ClassNotFound(class_id))?;
 
         let mut fields = Vec::with_capacity(class.fields.len());
 
