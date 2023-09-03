@@ -122,26 +122,21 @@ impl<'a> ConstantPoolEvent<'a> {
     /// values because the entries do not encode their own size. We need to
     /// decode each entry in full using the chunk's typing metadata in order
     /// to identify boundaries between constants in the pool.
-    pub fn iter_constants<'r>(
+    pub fn resolve_constants<'r>(
         &self,
         resolver: &'r EventResolver<'a>,
-    ) -> impl Iterator<Item = Result<(i64, i64, Value<'r>)>> {
+    ) -> Result<Vec<(i64, Vec<(i64, Value<'r>)>)>> {
         let mut s = self.pool_data;
 
-        (0..self.header.pool_count).flat_map(move |_| {
-            // TODO avoid the intermediate vector.
-            match parse_constant_pool_class(s, resolver) {
-                Ok((remaining, class_id, values)) => {
-                    s = remaining;
+        let mut res = Vec::new();
 
-                    values
-                        .into_iter()
-                        .map(|(index, value)| Ok((class_id, index, value)))
-                        .collect::<Vec<_>>()
-                }
-                Err(err) => vec![Err(err)],
-            }
-            .into_iter()
-        })
+        for _ in 0..self.header.pool_count {
+            let (remaining, class_id, values) = parse_constant_pool_class(s, resolver)?;
+            s = remaining;
+
+            res.push((class_id, values));
+        }
+
+        Ok(res)
     }
 }

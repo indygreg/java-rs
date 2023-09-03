@@ -197,10 +197,12 @@ impl<'a> EventResolver<'a> {
         let mut inner = FxHashMap::<i64, FxHashMap<i64, Value>>::default();
 
         for e in &self.constant_pools {
-            for res in e.iter_constants(self) {
-                let (class_id, index, v) = res?;
+            for (class_id, values) in e.resolve_constants(self)? {
+                let entry = inner.entry(class_id).or_default();
 
-                inner.entry(class_id).or_default().insert(index, v);
+                for (index, v) in values {
+                    entry.insert(index, v);
+                }
             }
         }
 
