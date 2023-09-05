@@ -13,7 +13,7 @@
 use crate::{
     common::{leb128_i32, leb128_i64},
     error::{ParseResult, Result},
-    resolver::{EventResolver, Value},
+    resolver::{EventResolver, Object},
 };
 use nom::{bytes::streaming::take, error::context};
 
@@ -138,8 +138,8 @@ impl<'a> EventRecord<'a> {
     }
 
     /// Parse the event fields in this instance in a [Value] using an [EventResolver].
-    pub fn resolve_value<'r>(&self, resolver: &'r EventResolver<'a>) -> Result<Value<'r>> {
-        let (_, v) = resolver.parse_value(self.fields_data()?, self.header.event_type)?;
+    pub fn resolve_object<'r>(&self, resolver: &'r EventResolver<'a>) -> Result<Object<'r>> {
+        let (_, v) = resolver.parse_fields_data(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
     }

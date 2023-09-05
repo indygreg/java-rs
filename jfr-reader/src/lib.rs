@@ -40,7 +40,7 @@
 //! it into stronger types data structures.
 //!
 //! Once you have a [resolver::EventResolver] you can call
-//! [chunk::ChunkReader::iter_event_records] then call [event::EventRecord::resolve_value]
+//! [chunk::ChunkReader::iter_event_records] then call [event::EventRecord::resolve_object]
 //! with the resolver to parse the event data into a [resolver::Value].
 
 pub mod annotations;

@@ -61,6 +61,17 @@ impl<'a> Object<'a> {
     pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'a>> + '_ {
         self.fields.iter()
     }
+
+    /// Resolve all constants references in this instance recursively.
+    pub fn resolve_constants(mut self, constants: &impl ConstantResolver<'a>) -> Result<Self> {
+        self.fields = self
+            .fields
+            .into_iter()
+            .map(|v| v.resolve_constants(constants))
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(self)
+    }
 }
 
 /// Enumeration for different value types.
@@ -237,6 +248,26 @@ impl<'a> EventResolver<'a> {
         Ok(ConstantPoolValues { inner })
     }
 
+    /// Parse event fields data into an [Object].
+    ///
+    /// The class ID of the event class to resolve is passed in. The value
+    /// should come from the event's header in the chunk data.
+    ///
+    /// The goal of this function is to parse the input buffer as completely
+    /// as possible and nothing else. Annotations, settings, and constant
+    /// pool references are not resolved.
+    pub fn parse_fields_data(&self, s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Object<'_>)> {
+        let (s, v) = self.parse_value(s, class_id)?;
+
+        if let Value::Object(o) = v {
+            Ok((s, o))
+        } else {
+            Err(Error::EventParse(
+                "parsed value is not an Object (this should not happen)".to_string(),
+            ))
+        }
+    }
+
     /// Resolve a dynamic value from an input buffer.
     ///
     /// The class ID of the value to resolve is passed in. This function looks up
@@ -244,8 +275,13 @@ impl<'a> EventResolver<'a> {
     /// value is fully constructed.
     ///
     /// This function does not concern itself with annotations, settings, or resolving
-    /// constant pool references.
-    pub fn parse_value(&self, mut s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Value<'_>)> {
+    /// constant pool references. The goal is to recursively interpret the passed in
+    /// slice so all referenced data is captured.
+    pub(crate) fn parse_value(
+        &self,
+        mut s: &'a [u8],
+        class_id: i64,
+    ) -> Result<(&'a [u8], Value<'_>)> {
         // Use a cached lookup table of parsers for common classes so we can avoid both the class
         // lookup (fast) and the string compare to locate the parser function (slow).
         // TODO support registering additional parser functions to make this fully generic.
@@ -283,7 +319,7 @@ impl<'a> EventResolver<'a> {
     ///
     /// Classes are composed of fields. This function decodes a single field within
     /// a class.
-    pub fn parse_field_single(
+    fn parse_field_single(
         &self,
         s: &'a [u8],
         field: &FieldElement<'a>,
@@ -307,7 +343,7 @@ impl<'a> EventResolver<'a> {
     ///
     /// This is a special variant of [Self::parse_field_array] that should be called when
     /// the field is an array.
-    pub fn parse_field_array(
+    fn parse_field_array(
         &self,
         s: &'a [u8],
         field: &FieldElement<'a>,
