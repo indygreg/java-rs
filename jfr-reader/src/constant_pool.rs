@@ -65,6 +65,8 @@ fn parse_constant_pool_value<'a, 'r>(
 ) -> Result<(&'a [u8], i64, Value<'r>)> {
     let (s, pool_index) = leb128_i64(s)?;
 
+    // Constant pool values can resolve to primitives (notably strings). So
+    // we need to resolve Value here and not Object.
     let (s, value) = resolver.parse_value(s, class_id)?;
 
     Ok((s, pool_index, value))
