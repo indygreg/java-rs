@@ -215,4 +215,81 @@ impl<'a> Primitive<'a> {
             Ok((s, None))
         }
     }
+
+    /// Obtain the boolean value if a boolean is stored.
+    pub fn as_boolean(&self) -> Option<bool> {
+        if let Self::Boolean(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_byte(&self) -> Option<i8> {
+        if let Self::Byte(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_short(&self) -> Option<i16> {
+        if let Self::Short(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_integer(&self) -> Option<i32> {
+        if let Self::Integer(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_long(&self) -> Option<i64> {
+        if let Self::Long(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_float(&self) -> Option<f32> {
+        if let Self::Float(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_double(&self) -> Option<f64> {
+        if let Self::Double(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_char(&self) -> Option<char> {
+        if let Self::Character(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    /// Obtain the string representation if a resolved string is stored.
+    ///
+    /// Only returns Some if we are storing a string value. Null strings and
+    /// strings in the constant pool return None.
+    pub fn as_str(&self) -> Option<&str> {
+        if let Self::String(v) = self {
+            Some(v.as_ref())
+        } else {
+            None
+        }
+    }
 }

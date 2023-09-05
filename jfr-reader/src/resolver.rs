@@ -87,6 +87,24 @@ pub enum Value<'a> {
 }
 
 impl<'a> Value<'a> {
+    /// Obtain the inner [Object] if this is an object variant.
+    pub fn as_object(&self) -> Option<&Object<'a>> {
+        if let Value::Object(o) = self {
+            Some(o)
+        } else {
+            None
+        }
+    }
+
+    /// Obtain the inner [Primitive] if this is a primitive variant.
+    pub fn as_primitive(&self) -> Option<&Primitive<'a>> {
+        if let Value::Primitive(p) = self {
+            Some(p)
+        } else {
+            None
+        }
+    }
+
     /// Resolve all constants references in this value recursively.
     ///
     /// The resulting Value should not have any instances of the Value::ConstantPool variant.
