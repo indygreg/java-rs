@@ -17,7 +17,7 @@ use crate::{
     constant_pool::ConstantPoolEvent,
     error::{Error, ParseResult, Result},
     metadata::{ClassElement, FieldElement, Metadata},
-    value::Primitive,
+    primitive::Primitive,
 };
 use rustc_hash::FxHashMap;
 
