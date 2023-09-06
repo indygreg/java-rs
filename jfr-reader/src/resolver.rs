@@ -90,8 +90,10 @@ pub enum Value<'a> {
     /// The value can be found in the `class_id` type in slot `constant_index`.
     ConstantPool { class_id: i64, constant_index: i64 },
 
-    /// A reference to a constant in the constants pool. But that entry is not found.
-    ConstantPoolMissing { class_id: i64, constant_index: i64 },
+    /// A constant pool reference that expanded to NULL.
+    ///
+    /// The special constant index 0 is used to represent NULL.
+    ConstantPoolNull,
 
     /// An array of other values.
     Array(Vec<Value<'a>>),
@@ -139,22 +141,18 @@ impl<'a> Value<'a> {
                 match constants.get_recursive(class_id, constant_index) {
                     Some(res) => res,
                     None => {
-                        //println!("Missing constants pool: {} {}", class_id, constant_index);
-
-                        Ok(Self::ConstantPoolMissing {
-                            class_id,
-                            constant_index,
-                        })
+                        if constant_index == 0 {
+                            Ok(Self::ConstantPoolNull)
+                        } else {
+                            Err(Error::EventParse(format!(
+                                "constant pool entry {}:{} is missing",
+                                class_id, constant_index
+                            )))
+                        }
                     }
                 }
             }
-            Self::ConstantPoolMissing {
-                class_id,
-                constant_index,
-            } => Ok(Self::ConstantPoolMissing {
-                class_id,
-                constant_index,
-            }),
+            Self::ConstantPoolNull => Ok(Self::ConstantPoolNull),
             Self::Array(a) => {
                 let a = a
                     .into_iter()
