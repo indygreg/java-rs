@@ -246,15 +246,18 @@ impl<'a> EventResolver<'a> {
         Ok(ConstantPoolValues { inner })
     }
 
-    /// Parse event fields data into an [Object].
+    /// Parse event fields data into a [Value].
     ///
     /// The class ID of the event class to resolve is passed in. The value
     /// should come from the event's header in the chunk data.
+    pub fn parse_event_value(&self, s: &'a [u8], class_id: i64) -> Result<(&[u8], Value<'_>)> {
+        self.parse_value(s, class_id)
+    }
+
+    /// Parse event fields data into an [Object].
     ///
-    /// The goal of this function is to parse the input buffer as completely
-    /// as possible and nothing else. Annotations, settings, and constant
-    /// pool references are not resolved.
-    pub fn parse_fields_data(&self, s: &'a [u8], class_id: i64) -> Result<(&'a [u8], Object<'_>)> {
+    /// Like [Self::parse_event_value()] but downcasts to an [Object].
+    pub fn parse_event_object(&self, s: &'a [u8], class_id: i64) -> Result<(&[u8], Object<'_>)> {
         let (s, v) = self.parse_value(s, class_id)?;
 
         if let Value::Object(o) = v {
