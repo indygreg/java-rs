@@ -23,23 +23,6 @@ pub const EVENT_TYPE_METADATA: i64 = 0;
 /// The event type ID referring to a constant pool event.
 pub const EVENT_TYPE_CONSTANT_POOL: i64 = 1;
 
-/// Describes recognized event types.
-pub enum EventType {
-    Metadata,
-    ConstantPool,
-    Other(i64),
-}
-
-impl From<i64> for EventType {
-    fn from(v: i64) -> Self {
-        match v {
-            EVENT_TYPE_METADATA => Self::Metadata,
-            EVENT_TYPE_CONSTANT_POOL => Self::ConstantPool,
-            v => Self::Other(v),
-        }
-    }
-}
-
 /// Generic header for events within a chunk.
 #[derive(Clone, Debug, Default)]
 pub struct EventHeader {
