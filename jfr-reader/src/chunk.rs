@@ -21,9 +21,9 @@
 //! are special events denoting metadata and constant pools.
 
 use crate::{
+    chunk_event::EventRecord,
     constant_pool::ConstantPoolEvent,
     error::{ParseResult, Result},
-    event::EventRecord,
     metadata::{Metadata, MetadataHeader},
     resolver::EventResolver,
 };
