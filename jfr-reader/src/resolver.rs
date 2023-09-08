@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Event resolutions functionality.
+//! Event resolution functionality.
 //!
 //! Events as encoded in chunks are exceptionally low level and need to use
 //! class metadata and constants pools to resolve event values. This module
@@ -16,6 +16,7 @@ use crate::{
     common::{leb128_i32, leb128_i64},
     constant_pool::ConstantPoolEvent,
     error::{Error, ParseResult, Result},
+    event::GenericEvent,
     metadata::{ClassElement, FieldElement, Metadata},
     primitive::Primitive,
 };
@@ -60,6 +61,11 @@ impl<'a> Object<'a> {
     /// Iterate over field values in this instance.
     pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'a>> + '_ {
         self.fields.iter()
+    }
+
+    /// Obtain the field [Value] at a given field index.
+    pub fn field_at(&self, index: usize) -> Option<&Value<'a>> {
+        self.fields.get(index)
     }
 
     /// Resolve all constants references in this instance recursively.
@@ -244,6 +250,20 @@ impl<'a> EventResolver<'a> {
         }
 
         Ok(ConstantPoolValues { inner })
+    }
+
+    /// Parse event fields data into a [GenericEvent].
+    pub fn parse_event<'slf, 'cr, CR: ConstantResolver<'slf>>(
+        &'slf self,
+        s: &'a [u8],
+        class_id: i64,
+        cr: &'cr CR,
+    ) -> Result<(&[u8], GenericEvent<'slf, 'cr, CR>)> {
+        let (s, o) = self.parse_event_object(s, class_id)?;
+
+        let res = GenericEvent::new(o, cr);
+
+        Ok((s, res))
     }
 
     /// Parse event fields data into a [Value].

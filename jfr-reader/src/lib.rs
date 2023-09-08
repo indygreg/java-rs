@@ -49,6 +49,7 @@ pub mod chunk_event;
 pub mod common;
 pub mod constant_pool;
 pub mod error;
+pub mod event;
 pub mod metadata;
 pub mod primitive;
 pub mod recording;
