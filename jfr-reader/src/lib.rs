@@ -57,3 +57,4 @@ pub mod resolver;
 pub mod settings;
 pub mod specification;
 pub mod string_table;
+pub mod value;

@@ -11,7 +11,8 @@
 use crate::{
     error::{Error, Result},
     metadata::{ClassElement, FieldElement},
-    resolver::{ConstantResolver, Object, Value},
+    resolver::ConstantResolver,
+    value::{Object, Value},
 };
 
 pub struct GenericEvent<'a, 'cr, CR>

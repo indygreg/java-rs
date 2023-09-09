@@ -14,7 +14,8 @@ use crate::{
     common::{leb128_i32, leb128_i64},
     error::{ParseResult, Result},
     event::GenericEvent,
-    resolver::{ConstantResolver, EventResolver, Object, Value},
+    resolver::{ConstantResolver, EventResolver},
+    value::{Object, Value},
 };
 use nom::{bytes::streaming::take, error::context};
 

@@ -12,7 +12,8 @@ use {
     crate::{
         common::{leb128_i32, leb128_i64},
         error::{ParseResult, Result},
-        resolver::{EventResolver, Value},
+        resolver::EventResolver,
+        value::Value,
     },
     nom::{bytes::streaming::take, error::context, number::streaming::be_i8, sequence::pair},
 };
