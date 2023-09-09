@@ -25,6 +25,10 @@ use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
 pub trait ConstantResolver<'a>: Sized {
+    // TODO consider returning an enum so that null values (index == 0) can be
+    // encoded explicitly, as Option<T> is otherwise ambiguous and requires callers
+    // to handle index == 0 special case.
+
     /// Get the value of a constant.
     fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>>;
 

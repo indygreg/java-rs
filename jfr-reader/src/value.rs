@@ -12,6 +12,12 @@ use crate::{
     primitive::Primitive,
     resolver::ConstantResolver,
 };
+use serde::{
+    de::{
+        value::StrDeserializer, DeserializeSeed, IntoDeserializer, MapAccess, SeqAccess, Visitor,
+    },
+    forward_to_deserialize_any, Deserialize, Deserializer,
+};
 
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
@@ -51,6 +57,55 @@ impl<'a> Object<'a> {
 
         Ok(self)
     }
+}
+
+/// A deserializer for [Object] instances.
+struct ObjectDeserializer<'de, 'a: 'de, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    object: &'de Object<'a>,
+    constants: &'de CR,
+    field_index: usize,
+}
+
+impl<'de, 'a: 'de, CR> MapAccess<'de> for ObjectDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+
+    fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
+    where
+        K: DeserializeSeed<'de>,
+    {
+        if let Some(field) = self.object.class().fields.get(self.field_index) {
+            let key = field.name.as_ref();
+            let key: StrDeserializer<Self::Error> = key.into_deserializer();
+            let key: K::Value = seed.deserialize(key)?;
+
+            Ok(Some(key))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn next_value_seed<V>(&mut self, seed: V) -> Result<V::Value, Self::Error>
+    where
+        V: DeserializeSeed<'de>,
+    {
+        let field_value = self.object.field_at(self.field_index).unwrap();
+
+        let value = seed.deserialize(ValueDeserializer {
+            value: field_value,
+            constants: self.constants,
+        })?;
+        self.field_index += 1;
+
+        Ok(value)
+    }
+
+    // TODO implement size_hint()?
 }
 
 /// Enumeration for different value types.
@@ -141,5 +196,174 @@ impl<'a> Value<'a> {
                 Ok(Self::Array(a))
             }
         }
+    }
+
+    /// Deserialize an instance to a type.
+    pub fn deserialize<'de, 'slf: 'de, 'cr: 'de, T>(
+        &'slf self,
+        constants: &'cr impl ConstantResolver<'a>,
+    ) -> Result<T>
+    where
+        T: Deserialize<'de>,
+    {
+        Ok(T::deserialize(ValueDeserializer::new(self, constants))?)
+    }
+}
+
+/// A deserializer for an array of values.
+struct ArrayDeserializer<'de, 'a: 'de, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    array: &'de Vec<Value<'a>>,
+    constants: &'de CR,
+    index: usize,
+}
+
+impl<'de, 'a: 'de, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+
+    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        if let Some(value) = &self.array.get(self.index) {
+            let deserializer = ValueDeserializer {
+                value,
+                constants: self.constants,
+            };
+            let value = seed.deserialize(deserializer)?;
+            self.index += 1;
+
+            Ok(Some(value))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn size_hint(&self) -> Option<usize> {
+        Some(self.array.len() - self.index)
+    }
+}
+
+/// A deserializer for a [Value].
+pub struct ValueDeserializer<'de, 'a: 'de, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    value: &'de Value<'a>,
+    constants: &'de CR,
+}
+
+impl<'de, 'a: 'de, CR> ValueDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    /// Construct an instance from a [Value].
+    pub fn new(value: &'de Value<'a>, constants: &'de CR) -> Self {
+        Self { value, constants }
+    }
+}
+
+impl<'de, 'a: 'de, CR> Deserializer<'de> for ValueDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.value {
+            Value::Primitive(p) => match p {
+                Primitive::Boolean(v) => visitor.visit_bool(*v),
+                Primitive::Byte(v) => visitor.visit_i8(*v),
+                Primitive::Short(v) => visitor.visit_i16(*v),
+                Primitive::Integer(v) => visitor.visit_i32(*v),
+                Primitive::Long(v) => visitor.visit_i64(*v),
+                Primitive::Float(v) => visitor.visit_f32(*v),
+                Primitive::Double(v) => visitor.visit_f64(*v),
+                Primitive::Character(v) => visitor.visit_char(*v),
+                Primitive::NullString => visitor.visit_none(),
+                Primitive::String(v) => visitor.visit_borrowed_str(v.as_ref()),
+                Primitive::StringConstantPool(index) => {
+                    // TODO implement this. Requires feeding the class id of java.lang.String
+                    // into the instance somehow.
+                    Err(Error::Deserialize(
+                        "resolving string constant pool references not yet implemented".to_string(),
+                    ))
+                }
+            },
+            Value::Object(o) => visitor.visit_map(ObjectDeserializer {
+                object: o,
+                constants: self.constants,
+                field_index: 0,
+            }),
+            Value::Array(array) => visitor.visit_seq(ArrayDeserializer {
+                array,
+                constants: self.constants,
+                index: 0,
+            }),
+            Value::ConstantPool {
+                class_id,
+                constant_index,
+            } => {
+                if let Some(v) = self.constants.get(*class_id, *constant_index) {
+                    let de = ValueDeserializer {
+                        value: v,
+                        constants: self.constants,
+                    };
+                    Self::deserialize_any(de, visitor)
+                } else if *constant_index == 0 {
+                    // The constant index of 0 represents null, which we map to None.
+                    visitor.visit_none()
+                } else {
+                    Err(Error::Deserialize(format!(
+                        "constant pool {}:{} not found",
+                        class_id, constant_index
+                    )))
+                }
+            }
+            Value::ConstantPoolNull => visitor.visit_none(),
+        }
+    }
+
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match self.value {
+            Value::Primitive(Primitive::NullString) => visitor.visit_none(),
+            Value::ConstantPool {
+                class_id,
+                constant_index,
+            } => {
+                if let Some(v) = self.constants.get(*class_id, *constant_index) {
+                    let de = ValueDeserializer {
+                        value: v,
+                        constants: self.constants,
+                    };
+                    visitor.visit_some(de)
+                } else if *constant_index == 0 {
+                    visitor.visit_none()
+                } else {
+                    Err(Error::Deserialize(format!(
+                        "constant pool {}:{} not found",
+                        class_id, constant_index
+                    )))
+                }
+            }
+            _ => visitor.visit_some(self),
+        }
+    }
+
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf unit unit_struct newtype_struct seq tuple
+        tuple_struct map struct enum identifier ignored_any
     }
 }

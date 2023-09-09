@@ -10,6 +10,7 @@ use nom::{
     error::{ContextError, ErrorKind, ParseError},
     IResult,
 };
+use std::fmt::Display;
 use thiserror::Error;
 
 #[derive(Clone, Debug, Error)]
@@ -109,6 +110,9 @@ pub enum Error {
 
     #[error("setting parsing: {0}")]
     SettingParse(String),
+
+    #[error("deserialization error: {0}")]
+    Deserialize(String),
 }
 
 impl From<nom::Err<NomParseError>> for Error {
@@ -124,6 +128,15 @@ impl From<nom::Err<NomParseError>> for Error {
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Self::Io(e.to_string())
+    }
+}
+
+impl serde::de::Error for Error {
+    fn custom<T>(msg: T) -> Self
+    where
+        T: Display,
+    {
+        Error::Deserialize(msg.to_string())
     }
 }
 
