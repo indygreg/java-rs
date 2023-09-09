@@ -19,6 +19,25 @@ use serde::{
     forward_to_deserialize_any, Deserialize, Deserializer,
 };
 
+/// Holds a constant's value.
+pub enum ConstantValue<'a, 'r> {
+    /// The constant evaluates to null.
+    Null,
+    /// The value of the constant.
+    ///
+    /// Can contain other constant pool references.
+    Value(&'r Value<'a>),
+    /// No constant known. Missing index in the constant pool.
+    Missing,
+}
+
+/// Holds a constant's value with all constants resolved recursively.
+pub enum ResolvedConstantValue<'a> {
+    Null,
+    Value(Result<Value<'a>>),
+    Missing,
+}
+
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
 pub struct Object<'a> {
@@ -108,6 +127,8 @@ where
     // TODO implement size_hint()?
 }
 
+// TODO consider exposing a variant for null. Maybe as a primitive variant?
+// Reconcile with Primitive::NullString.
 /// Enumeration for different value types.
 #[derive(Clone, Debug)]
 pub enum Value<'a> {
@@ -173,17 +194,12 @@ impl<'a> Value<'a> {
             } => {
                 // Resolved value could itself have constants. So we need to resolve recursively.
                 match constants.get_recursive(class_id, constant_index) {
-                    Some(res) => res,
-                    None => {
-                        if constant_index == 0 {
-                            Ok(Self::ConstantPoolNull)
-                        } else {
-                            Err(Error::EventParse(format!(
-                                "constant pool entry {}:{} is missing",
-                                class_id, constant_index
-                            )))
-                        }
-                    }
+                    ResolvedConstantValue::Null => Ok(Self::ConstantPoolNull),
+                    ResolvedConstantValue::Value(res) => res,
+                    ResolvedConstantValue::Missing => Err(Error::EventParse(format!(
+                        "constant pool entry {}:{} is missing",
+                        class_id, constant_index
+                    ))),
                 }
             }
             Self::ConstantPoolNull => Ok(Self::ConstantPoolNull),
@@ -311,23 +327,20 @@ where
             Value::ConstantPool {
                 class_id,
                 constant_index,
-            } => {
-                if let Some(v) = self.constants.get(*class_id, *constant_index) {
+            } => match self.constants.get(*class_id, *constant_index) {
+                ConstantValue::Null => visitor.visit_none(),
+                ConstantValue::Value(v) => {
                     let de = ValueDeserializer {
                         value: v,
                         constants: self.constants,
                     };
                     Self::deserialize_any(de, visitor)
-                } else if *constant_index == 0 {
-                    // The constant index of 0 represents null, which we map to None.
-                    visitor.visit_none()
-                } else {
-                    Err(Error::Deserialize(format!(
-                        "constant pool {}:{} not found",
-                        class_id, constant_index
-                    )))
                 }
-            }
+                ConstantValue::Missing => Err(Error::Deserialize(format!(
+                    "constant pool {}:{} not found",
+                    class_id, constant_index
+                ))),
+            },
             Value::ConstantPoolNull => visitor.visit_none(),
         }
     }
@@ -341,22 +354,20 @@ where
             Value::ConstantPool {
                 class_id,
                 constant_index,
-            } => {
-                if let Some(v) = self.constants.get(*class_id, *constant_index) {
+            } => match self.constants.get(*class_id, *constant_index) {
+                ConstantValue::Null => visitor.visit_none(),
+                ConstantValue::Value(v) => {
                     let de = ValueDeserializer {
                         value: v,
                         constants: self.constants,
                     };
                     visitor.visit_some(de)
-                } else if *constant_index == 0 {
-                    visitor.visit_none()
-                } else {
-                    Err(Error::Deserialize(format!(
-                        "constant pool {}:{} not found",
-                        class_id, constant_index
-                    )))
                 }
-            }
+                ConstantValue::Missing => Err(Error::Deserialize(format!(
+                    "constant pool {}:{} not found",
+                    class_id, constant_index
+                ))),
+            },
             _ => visitor.visit_some(self),
         }
     }

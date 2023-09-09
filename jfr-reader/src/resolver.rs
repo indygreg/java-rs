@@ -19,23 +19,24 @@ use crate::{
     event::GenericEvent,
     metadata::{ClassElement, FieldElement, Metadata},
     primitive::Primitive,
-    value::{Object, Value},
+    value::{ConstantValue, Object, ResolvedConstantValue, Value},
 };
 use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
 pub trait ConstantResolver<'a>: Sized {
-    // TODO consider returning an enum so that null values (index == 0) can be
-    // encoded explicitly, as Option<T> is otherwise ambiguous and requires callers
-    // to handle index == 0 special case.
-
     /// Get the value of a constant.
-    fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>>;
+    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_>;
 
     /// Get the value of a constant and recursively expand constant references.
-    fn get_recursive(&self, class_id: i64, index: i64) -> Option<Result<Value<'a>>> {
-        self.get(class_id, index)
-            .map(|v| v.clone().resolve_constants(self))
+    fn get_recursive(&self, class_id: i64, index: i64) -> ResolvedConstantValue<'a> {
+        match self.get(class_id, index) {
+            ConstantValue::Null => ResolvedConstantValue::Null,
+            ConstantValue::Missing => ResolvedConstantValue::Missing,
+            ConstantValue::Value(v) => {
+                ResolvedConstantValue::Value(v.clone().resolve_constants(self))
+            }
+        }
     }
 }
 
@@ -45,8 +46,15 @@ pub struct ConstantPoolValues<'a> {
 }
 
 impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
-    fn get(&self, class_id: i64, index: i64) -> Option<&Value<'a>> {
-        self.inner.get(&class_id).and_then(|x| x.get(&index))
+    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_> {
+        match self.inner.get(&class_id) {
+            Some(x) => match x.get(&index) {
+                Some(v) => ConstantValue::Value(v),
+                None if index == 0 => ConstantValue::Null,
+                None => ConstantValue::Missing,
+            },
+            None => ConstantValue::Missing,
+        }
     }
 }
 
