@@ -15,6 +15,14 @@ use crate::{
     value::{Object, Value},
 };
 
+/// Common interface for event types.
+///
+/// Structs mimicking Java classes defining JFR events implement this trait.
+pub trait EventType {
+    /// The Java class / event name without any dots.
+    const NAME: &'static str;
+}
+
 pub struct GenericEvent<'a, 'cr, CR>
 where
     CR: ConstantResolver<'a>,

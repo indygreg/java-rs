@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use crate::event::EventType;
 use serde::Deserialize;
 ///Bytecode Instruction
 #[derive(Clone, Debug, Deserialize)]
@@ -528,6 +529,9 @@ pub struct AllocationRequiringGC {
     #[serde(rename = "size")]
     pub size: u64,
 }
+impl EventType for AllocationRequiringGC {
+    const NAME: &'static str = "AllocationRequiringGC";
+}
 ///Revoked biases for all instances of a class
 #[derive(Clone, Debug, Deserialize)]
 pub struct BiasedLockClassRevocation {
@@ -540,6 +544,9 @@ pub struct BiasedLockClassRevocation {
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
+}
+impl EventType for BiasedLockClassRevocation {
+    const NAME: &'static str = "BiasedLockClassRevocation";
 }
 ///Revoked bias of object
 #[derive(Clone, Debug, Deserialize)]
@@ -554,12 +561,18 @@ pub struct BiasedLockRevocation {
     #[serde(rename = "previousOwner")]
     pub previous_owner: Option<Thread>,
 }
+impl EventType for BiasedLockRevocation {
+    const NAME: &'static str = "BiasedLockRevocation";
+}
 ///Revoked bias of object biased towards own thread
 #[derive(Clone, Debug, Deserialize)]
 pub struct BiasedLockSelfRevocation {
     ///Class of object whose biased lock was revoked
     #[serde(rename = "lockClass")]
     pub lock_class: Option<Class>,
+}
+impl EventType for BiasedLockSelfRevocation {
+    const NAME: &'static str = "BiasedLockSelfRevocation";
 }
 ///BooleanFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -573,6 +586,9 @@ pub struct BooleanFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for BooleanFlag {
+    const NAME: &'static str = "BooleanFlag";
 }
 ///BooleanFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -589,6 +605,9 @@ pub struct BooleanFlagChanged {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for BooleanFlagChanged {
+    const NAME: &'static str = "BooleanFlagChanged";
 }
 ///Characteristics and descriptions of the processor(s) the JVM is running on
 #[derive(Clone, Debug, Deserialize)]
@@ -609,6 +628,9 @@ pub struct CPUInformation {
     #[serde(rename = "hwThreads")]
     pub hw_threads: u32,
 }
+impl EventType for CPUInformation {
+    const NAME: &'static str = "CPUInformation";
+}
 ///Information about the recent CPU usage of the JVM process
 #[derive(Clone, Debug, Deserialize)]
 pub struct CPULoad {
@@ -621,6 +643,9 @@ pub struct CPULoad {
     ///Machine Total
     #[serde(rename = "machineTotal")]
     pub machine_total: f32,
+}
+impl EventType for CPULoad {
+    const NAME: &'static str = "CPULoad";
 }
 ///Information about the CPU time stamp mechanism / (RD)TSC
 #[derive(Clone, Debug, Deserialize)]
@@ -638,6 +663,9 @@ pub struct CPUTimeStampCounter {
     #[serde(rename = "fastTimeFrequency")]
     pub fast_time_frequency: i64,
 }
+impl EventType for CPUTimeStampCounter {
+    const NAME: &'static str = "CPUTimeStampCounter";
+}
 ///ClassDefine
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassDefine {
@@ -647,6 +675,9 @@ pub struct ClassDefine {
     ///Defining Class Loader
     #[serde(rename = "definingClassLoader")]
     pub defining_class_loader: Option<ClassLoader>,
+}
+impl EventType for ClassDefine {
+    const NAME: &'static str = "ClassDefine";
 }
 ///ClassLoad
 #[derive(Clone, Debug, Deserialize)]
@@ -660,6 +691,9 @@ pub struct ClassLoad {
     ///Initiating Class Loader
     #[serde(rename = "initiatingClassLoader")]
     pub initiating_class_loader: Option<ClassLoader>,
+}
+impl EventType for ClassLoad {
+    const NAME: &'static str = "ClassLoad";
 }
 ///ClassLoaderStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -692,6 +726,9 @@ pub struct ClassLoaderStatistics {
     #[serde(rename = "hiddenBlockSize")]
     pub hidden_block_size: u64,
 }
+impl EventType for ClassLoaderStatistics {
+    const NAME: &'static str = "ClassLoaderStatistics";
+}
 ///ClassLoadingStatistics
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassLoadingStatistics {
@@ -701,6 +738,9 @@ pub struct ClassLoadingStatistics {
     ///Number of classes unloaded since JVM start
     #[serde(rename = "unloadedClassCount")]
     pub unloaded_class_count: i64,
+}
+impl EventType for ClassLoadingStatistics {
+    const NAME: &'static str = "ClassLoadingStatistics";
 }
 ///ClassRedefinition
 #[derive(Clone, Debug, Deserialize)]
@@ -715,6 +755,9 @@ pub struct ClassRedefinition {
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
 }
+impl EventType for ClassRedefinition {
+    const NAME: &'static str = "ClassRedefinition";
+}
 ///ClassUnload
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassUnload {
@@ -724,6 +767,9 @@ pub struct ClassUnload {
     ///Defining Class Loader
     #[serde(rename = "definingClassLoader")]
     pub defining_class_loader: Option<ClassLoader>,
+}
+impl EventType for ClassUnload {
+    const NAME: &'static str = "ClassUnload";
 }
 ///CodeCacheConfiguration
 #[derive(Clone, Debug, Deserialize)]
@@ -755,6 +801,9 @@ pub struct CodeCacheConfiguration {
     ///Reserved Top
     #[serde(rename = "reservedTopAddress")]
     pub reserved_top_address: u64,
+}
+impl EventType for CodeCacheConfiguration {
+    const NAME: &'static str = "CodeCacheConfiguration";
 }
 ///A code heap is full, this leads to disabling the compiler
 #[derive(Clone, Debug, Deserialize)]
@@ -790,6 +839,9 @@ pub struct CodeCacheFull {
     #[serde(rename = "codeCacheMaxCapacity")]
     pub code_cache_max_capacity: u64,
 }
+impl EventType for CodeCacheFull {
+    const NAME: &'static str = "CodeCacheFull";
+}
 ///CodeCacheStatistics
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeCacheStatistics {
@@ -818,6 +870,9 @@ pub struct CodeCacheStatistics {
     #[serde(rename = "fullCount")]
     pub full_count: i32,
 }
+impl EventType for CodeCacheStatistics {
+    const NAME: &'static str = "CodeCacheStatistics";
+}
 ///CodeSweeperConfiguration
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeSweeperConfiguration {
@@ -830,6 +885,9 @@ pub struct CodeSweeperConfiguration {
     ///Sweep Threshold
     #[serde(rename = "sweepThreshold")]
     pub sweep_threshold: u64,
+}
+impl EventType for CodeSweeperConfiguration {
+    const NAME: &'static str = "CodeSweeperConfiguration";
 }
 ///CodeSweeperStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -849,6 +907,9 @@ pub struct CodeSweeperStatistics {
     ///Peak Time Full Sweep
     #[serde(rename = "peakSweepTime")]
     pub peak_sweep_time: u64,
+}
+impl EventType for CodeSweeperStatistics {
+    const NAME: &'static str = "CodeSweeperStatistics";
 }
 ///Results of method compilation attempts
 #[derive(Clone, Debug, Deserialize)]
@@ -878,6 +939,9 @@ pub struct Compilation {
     #[serde(rename = "inlinedBytes")]
     pub inlined_bytes: u64,
 }
+impl EventType for Compilation {
+    const NAME: &'static str = "Compilation";
+}
 ///In case a JIT compilation failed, a compilation failure is triggered, reporting the reason
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilationFailure {
@@ -888,6 +952,9 @@ pub struct CompilationFailure {
     #[serde(rename = "compileId")]
     pub compile_id: u32,
 }
+impl EventType for CompilationFailure {
+    const NAME: &'static str = "CompilationFailure";
+}
 ///CompilerConfiguration
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerConfiguration {
@@ -897,6 +964,9 @@ pub struct CompilerConfiguration {
     ///Tiered Compilation
     #[serde(rename = "tieredCompilation")]
     pub tiered_compilation: bool,
+}
+impl EventType for CompilerConfiguration {
+    const NAME: &'static str = "CompilerConfiguration";
 }
 ///Describes the result of a method inlining attempt
 #[derive(Clone, Debug, Deserialize)]
@@ -920,6 +990,9 @@ pub struct CompilerInlining {
     #[serde(rename = "bci")]
     pub bci: i32,
 }
+impl EventType for CompilerInlining {
+    const NAME: &'static str = "CompilerInlining";
+}
 ///Describes various phases of the compilation process like inlining or string optimization related phases
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerPhase {
@@ -932,6 +1005,9 @@ pub struct CompilerPhase {
     ///Phase Level
     #[serde(rename = "phaseLevel")]
     pub phase_level: u16,
+}
+impl EventType for CompilerPhase {
+    const NAME: &'static str = "CompilerPhase";
 }
 ///CompilerStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -970,12 +1046,18 @@ pub struct CompilerStatistics {
     #[serde(rename = "totalTimeSpent")]
     pub total_time_spent: i64,
 }
+impl EventType for CompilerStatistics {
+    const NAME: &'static str = "CompilerStatistics";
+}
 ///Concurrent Mode failed
 #[derive(Clone, Debug, Deserialize)]
 pub struct ConcurrentModeFailure {
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
+}
+impl EventType for ConcurrentModeFailure {
+    const NAME: &'static str = "ConcurrentModeFailure";
 }
 ///Data could not be copied out from a buffer, typically because of contention
 #[derive(Clone, Debug, Deserialize)]
@@ -986,6 +1068,9 @@ pub struct DataLoss {
     ///Total lost amount for thread
     #[serde(rename = "total")]
     pub total: u64,
+}
+impl EventType for DataLoss {
+    const NAME: &'static str = "DataLoss";
 }
 ///Describes the detection of an uncommon situation in a compiled method which may lead to deoptimization of the method
 #[derive(Clone, Debug, Deserialize)]
@@ -1015,6 +1100,9 @@ pub struct Deoptimization {
     #[serde(rename = "action")]
     pub action: Option<DeoptimizationAction>,
 }
+impl EventType for Deoptimization {
+    const NAME: &'static str = "Deoptimization";
+}
 ///DoubleFlag
 #[derive(Clone, Debug, Deserialize)]
 pub struct DoubleFlag {
@@ -1027,6 +1115,9 @@ pub struct DoubleFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for DoubleFlag {
+    const NAME: &'static str = "DoubleFlag";
 }
 ///DoubleFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -1044,6 +1135,9 @@ pub struct DoubleFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
+impl EventType for DoubleFlagChanged {
+    const NAME: &'static str = "DoubleFlagChanged";
+}
 ///Who requested the recording and why
 #[derive(Clone, Debug, Deserialize)]
 pub struct DumpReason {
@@ -1054,6 +1148,9 @@ pub struct DumpReason {
     #[serde(rename = "recordingId")]
     pub recording_id: i32,
 }
+impl EventType for DumpReason {
+    const NAME: &'static str = "DumpReason";
+}
 ///Evacuation of an object failed
 #[derive(Clone, Debug, Deserialize)]
 pub struct EvacuationFailed {
@@ -1063,6 +1160,9 @@ pub struct EvacuationFailed {
     ///Evacuation Failed Data
     #[serde(rename = "evacuationFailed")]
     pub evacuation_failed: Option<CopyFailed>,
+}
+impl EventType for EvacuationFailed {
+    const NAME: &'static str = "EvacuationFailed";
 }
 ///EvacuationInformation
 #[derive(Clone, Debug, Deserialize)]
@@ -1095,6 +1195,9 @@ pub struct EvacuationInformation {
     #[serde(rename = "regionsFreed")]
     pub regions_freed: u32,
 }
+impl EventType for EvacuationInformation {
+    const NAME: &'static str = "EvacuationInformation";
+}
 ///Execution of a VM Operation
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExecuteVMOperation {
@@ -1114,6 +1217,9 @@ pub struct ExecuteVMOperation {
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
 }
+impl EventType for ExecuteVMOperation {
+    const NAME: &'static str = "ExecuteVMOperation";
+}
 ///Snapshot of a threads state
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExecutionSample {
@@ -1127,6 +1233,9 @@ pub struct ExecutionSample {
     #[serde(rename = "state")]
     pub state: Option<ThreadState>,
 }
+impl EventType for ExecutionSample {
+    const NAME: &'static str = "ExecutionSample";
+}
 ///Flush
 #[derive(Clone, Debug, Deserialize)]
 pub struct Flush {
@@ -1139,6 +1248,9 @@ pub struct Flush {
     ///Size Written
     #[serde(rename = "size")]
     pub size: u64,
+}
+impl EventType for Flush {
+    const NAME: &'static str = "Flush";
 }
 ///Statistics related to current adaptive IHOP calculation
 #[derive(Clone, Debug, Deserialize)]
@@ -1171,6 +1283,9 @@ pub struct G1AdaptiveIHOP {
     #[serde(rename = "predictionActive")]
     pub prediction_active: bool,
 }
+impl EventType for G1AdaptiveIHOP {
+    const NAME: &'static str = "G1AdaptiveIHOP";
+}
 ///Basic statistics related to current IHOP calculation
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1BasicIHOP {
@@ -1202,6 +1317,9 @@ pub struct G1BasicIHOP {
     #[serde(rename = "lastMarkingDuration")]
     pub last_marking_duration: i64,
 }
+impl EventType for G1BasicIHOP {
+    const NAME: &'static str = "G1BasicIHOP";
+}
 ///Memory related evacuation statistics during GC for the old generation
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1EvacuationOldStatistics {
@@ -1209,12 +1327,18 @@ pub struct G1EvacuationOldStatistics {
     #[serde(rename = "statistics")]
     pub statistics: Option<G1EvacuationStatistics>,
 }
+impl EventType for G1EvacuationOldStatistics {
+    const NAME: &'static str = "G1EvacuationOldStatistics";
+}
 ///Memory related evacuation statistics during GC for the young generation
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1EvacuationYoungStatistics {
     ///Evacuation Statistics
     #[serde(rename = "statistics")]
     pub statistics: Option<G1EvacuationStatistics>,
+}
+impl EventType for G1EvacuationYoungStatistics {
+    const NAME: &'static str = "G1EvacuationYoungStatistics";
 }
 ///Extra information specific to G1 Young Garbage Collections
 #[derive(Clone, Debug, Deserialize)]
@@ -1225,6 +1349,9 @@ pub struct G1GarbageCollection {
     ///Type
     #[serde(rename = "type")]
     pub r#type: Option<G1YCType>,
+}
+impl EventType for G1GarbageCollection {
+    const NAME: &'static str = "G1GarbageCollection";
 }
 ///Information about a specific heap region in the G1 GC
 #[derive(Clone, Debug, Deserialize)]
@@ -1241,6 +1368,9 @@ pub struct G1HeapRegionInformation {
     ///Used
     #[serde(rename = "used")]
     pub used: u64,
+}
+impl EventType for G1HeapRegionInformation {
+    const NAME: &'static str = "G1HeapRegionInformation";
 }
 ///Information about a G1 heap region type change
 #[derive(Clone, Debug, Deserialize)]
@@ -1260,6 +1390,9 @@ pub struct G1HeapRegionTypeChange {
     ///Used
     #[serde(rename = "used")]
     pub used: u64,
+}
+impl EventType for G1HeapRegionTypeChange {
+    const NAME: &'static str = "G1HeapRegionTypeChange";
 }
 ///G1HeapSummary
 #[derive(Clone, Debug, Deserialize)]
@@ -1283,6 +1416,9 @@ pub struct G1HeapSummary {
     #[serde(rename = "numberOfRegions")]
     pub number_of_regions: u32,
 }
+impl EventType for G1HeapSummary {
+    const NAME: &'static str = "G1HeapSummary";
+}
 ///G1MMU
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1MMU {
@@ -1298,6 +1434,9 @@ pub struct G1MMU {
     ///Max time allowed to be spent on GC during last time slice
     #[serde(rename = "pauseTarget")]
     pub pause_target: i64,
+}
+impl EventType for G1MMU {
+    const NAME: &'static str = "G1MMU";
 }
 ///The configuration of the garbage collector
 #[derive(Clone, Debug, Deserialize)]
@@ -1330,6 +1469,9 @@ pub struct GCConfiguration {
     #[serde(rename = "gcTimeRatio")]
     pub gc_time_ratio: u32,
 }
+impl EventType for GCConfiguration {
+    const NAME: &'static str = "GCConfiguration";
+}
 ///The configuration of the garbage collected heap
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCHeapConfiguration {
@@ -1355,6 +1497,9 @@ pub struct GCHeapConfiguration {
     #[serde(rename = "heapAddressBits")]
     pub heap_address_bits: u8,
 }
+impl EventType for GCHeapConfiguration {
+    const NAME: &'static str = "GCHeapConfiguration";
+}
 ///GCHeapSummary
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCHeapSummary {
@@ -1371,6 +1516,9 @@ pub struct GCHeapSummary {
     #[serde(rename = "heapUsed")]
     pub heap_used: u64,
 }
+impl EventType for GCHeapSummary {
+    const NAME: &'static str = "GCHeapSummary";
+}
 ///GCLocker
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCLocker {
@@ -1380,6 +1528,9 @@ pub struct GCLocker {
     ///The number of Java threads stalled by the GC locker
     #[serde(rename = "stallCount")]
     pub stall_count: u32,
+}
+impl EventType for GCLocker {
+    const NAME: &'static str = "GCLocker";
 }
 ///GCPhaseConcurrent
 #[derive(Clone, Debug, Deserialize)]
@@ -1391,6 +1542,9 @@ pub struct GCPhaseConcurrent {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for GCPhaseConcurrent {
+    const NAME: &'static str = "GCPhaseConcurrent";
+}
 ///GCPhaseConcurrentLevel1
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhaseConcurrentLevel1 {
@@ -1400,6 +1554,9 @@ pub struct GCPhaseConcurrentLevel1 {
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
+}
+impl EventType for GCPhaseConcurrentLevel1 {
+    const NAME: &'static str = "GCPhaseConcurrentLevel1";
 }
 ///GC phases for parallel workers
 #[derive(Clone, Debug, Deserialize)]
@@ -1414,6 +1571,9 @@ pub struct GCPhaseParallel {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for GCPhaseParallel {
+    const NAME: &'static str = "GCPhaseParallel";
+}
 ///GCPhasePause
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePause {
@@ -1423,6 +1583,9 @@ pub struct GCPhasePause {
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
+}
+impl EventType for GCPhasePause {
+    const NAME: &'static str = "GCPhasePause";
 }
 ///GCPhasePauseLevel1
 #[derive(Clone, Debug, Deserialize)]
@@ -1434,6 +1597,9 @@ pub struct GCPhasePauseLevel1 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for GCPhasePauseLevel1 {
+    const NAME: &'static str = "GCPhasePauseLevel1";
+}
 ///GCPhasePauseLevel2
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel2 {
@@ -1443,6 +1609,9 @@ pub struct GCPhasePauseLevel2 {
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
+}
+impl EventType for GCPhasePauseLevel2 {
+    const NAME: &'static str = "GCPhasePauseLevel2";
 }
 ///GCPhasePauseLevel3
 #[derive(Clone, Debug, Deserialize)]
@@ -1454,6 +1623,9 @@ pub struct GCPhasePauseLevel3 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for GCPhasePauseLevel3 {
+    const NAME: &'static str = "GCPhasePauseLevel3";
+}
 ///GCPhasePauseLevel4
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel4 {
@@ -1463,6 +1635,9 @@ pub struct GCPhasePauseLevel4 {
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
+}
+impl EventType for GCPhasePauseLevel4 {
+    const NAME: &'static str = "GCPhasePauseLevel4";
 }
 ///Total count of processed references during GC
 #[derive(Clone, Debug, Deserialize)]
@@ -1477,6 +1652,9 @@ pub struct GCReferenceStatistics {
     #[serde(rename = "count")]
     pub count: u64,
 }
+impl EventType for GCReferenceStatistics {
+    const NAME: &'static str = "GCReferenceStatistics";
+}
 ///The configuration of the survivors of garbage collection
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCSurvivorConfiguration {
@@ -1486,6 +1664,9 @@ pub struct GCSurvivorConfiguration {
     ///Initial age limit for how old objects to keep in survivor area
     #[serde(rename = "initialTenuringThreshold")]
     pub initial_tenuring_threshold: u8,
+}
+impl EventType for GCSurvivorConfiguration {
+    const NAME: &'static str = "GCSurvivorConfiguration";
 }
 ///The configuration of the Thread Local Allocation Buffers (TLABs)
 #[derive(Clone, Debug, Deserialize)]
@@ -1499,6 +1680,9 @@ pub struct GCTLABConfiguration {
     ///TLAB Refill Waste Limit
     #[serde(rename = "tlabRefillWasteLimit")]
     pub tlab_refill_waste_limit: u64,
+}
+impl EventType for GCTLABConfiguration {
+    const NAME: &'static str = "GCTLABConfiguration";
 }
 ///Garbage collection performed by the JVM
 #[derive(Clone, Debug, Deserialize)]
@@ -1519,6 +1703,9 @@ pub struct GarbageCollection {
     #[serde(rename = "longestPause")]
     pub longest_pause: u64,
 }
+impl EventType for GarbageCollection {
+    const NAME: &'static str = "GarbageCollection";
+}
 ///HeapDump
 #[derive(Clone, Debug, Deserialize)]
 pub struct HeapDump {
@@ -1535,6 +1722,9 @@ pub struct HeapDump {
     #[serde(rename = "onOutOfMemoryError")]
     pub on_out_of_memory_error: bool,
 }
+impl EventType for HeapDump {
+    const NAME: &'static str = "HeapDump";
+}
 ///Key-value pairs for environment variables at JVM startup
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialEnvironmentVariable {
@@ -1545,6 +1735,9 @@ pub struct InitialEnvironmentVariable {
     #[serde(rename = "value")]
     pub value: Option<String>,
 }
+impl EventType for InitialEnvironmentVariable {
+    const NAME: &'static str = "InitialEnvironmentVariable";
+}
 ///System Property at JVM start
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialSystemProperty {
@@ -1554,6 +1747,9 @@ pub struct InitialSystemProperty {
     ///Value
     #[serde(rename = "value")]
     pub value: Option<String>,
+}
+impl EventType for InitialSystemProperty {
+    const NAME: &'static str = "InitialSystemProperty";
 }
 ///IntFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -1567,6 +1763,9 @@ pub struct IntFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for IntFlag {
+    const NAME: &'static str = "IntFlag";
 }
 ///IntFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -1584,6 +1783,9 @@ pub struct IntFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
+impl EventType for IntFlagChanged {
+    const NAME: &'static str = "IntFlagChanged";
+}
 ///Restart of the JIT compilers after they were stopped
 #[derive(Clone, Debug, Deserialize)]
 pub struct JITRestart {
@@ -1593,6 +1795,9 @@ pub struct JITRestart {
     ///Code Cache Maximum Capacity
     #[serde(rename = "codeCacheMaxCapacity")]
     pub code_cache_max_capacity: u64,
+}
+impl EventType for JITRestart {
+    const NAME: &'static str = "JITRestart";
 }
 ///Description of JVM and the Java application
 #[derive(Clone, Debug, Deserialize)]
@@ -1619,6 +1824,9 @@ pub struct JVMInformation {
     #[serde(rename = "pid")]
     pub pid: i64,
 }
+impl EventType for JVMInformation {
+    const NAME: &'static str = "JVMInformation";
+}
 ///JavaMonitorEnter
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaMonitorEnter {
@@ -1632,6 +1840,9 @@ pub struct JavaMonitorEnter {
     #[serde(rename = "address")]
     pub address: u64,
 }
+impl EventType for JavaMonitorEnter {
+    const NAME: &'static str = "JavaMonitorEnter";
+}
 ///JavaMonitorInflate
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaMonitorInflate {
@@ -1644,6 +1855,9 @@ pub struct JavaMonitorInflate {
     ///Cause of inflation
     #[serde(rename = "cause")]
     pub cause: Option<InflateCause>,
+}
+impl EventType for JavaMonitorInflate {
+    const NAME: &'static str = "JavaMonitorInflate";
 }
 ///Waiting on a Java monitor
 #[derive(Clone, Debug, Deserialize)]
@@ -1664,6 +1878,9 @@ pub struct JavaMonitorWait {
     #[serde(rename = "address")]
     pub address: u64,
 }
+impl EventType for JavaMonitorWait {
+    const NAME: &'static str = "JavaMonitorWait";
+}
 ///JavaThreadStatistics
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaThreadStatistics {
@@ -1679,6 +1896,9 @@ pub struct JavaThreadStatistics {
     ///Peak live thread count since JVM start or when peak count was reset
     #[serde(rename = "peakCount")]
     pub peak_count: i64,
+}
+impl EventType for JavaThreadStatistics {
+    const NAME: &'static str = "JavaThreadStatistics";
 }
 ///LoaderConstraintsTableStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -1711,6 +1931,9 @@ pub struct LoaderConstraintsTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
+impl EventType for LoaderConstraintsTableStatistics {
+    const NAME: &'static str = "LoaderConstraintsTableStatistics";
+}
 ///LongFlag
 #[derive(Clone, Debug, Deserialize)]
 pub struct LongFlag {
@@ -1723,6 +1946,9 @@ pub struct LongFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for LongFlag {
+    const NAME: &'static str = "LongFlag";
 }
 ///LongFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -1739,6 +1965,9 @@ pub struct LongFlagChanged {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for LongFlagChanged {
+    const NAME: &'static str = "LongFlagChanged";
 }
 ///MetaspaceAllocationFailure
 #[derive(Clone, Debug, Deserialize)]
@@ -1758,6 +1987,9 @@ pub struct MetaspaceAllocationFailure {
     ///Metaspace Object Type
     #[serde(rename = "metaspaceObjectType")]
     pub metaspace_object_type: Option<MetaspaceObjectType>,
+}
+impl EventType for MetaspaceAllocationFailure {
+    const NAME: &'static str = "MetaspaceAllocationFailure";
 }
 ///MetaspaceChunkFreeListSummary
 #[derive(Clone, Debug, Deserialize)]
@@ -1796,6 +2028,9 @@ pub struct MetaspaceChunkFreeListSummary {
     #[serde(rename = "humongousChunksTotalSize")]
     pub humongous_chunks_total_size: u64,
 }
+impl EventType for MetaspaceChunkFreeListSummary {
+    const NAME: &'static str = "MetaspaceChunkFreeListSummary";
+}
 ///MetaspaceGCThreshold
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceGCThreshold {
@@ -1808,6 +2043,9 @@ pub struct MetaspaceGCThreshold {
     ///Updater
     #[serde(rename = "updater")]
     pub updater: Option<GCThresholdUpdater>,
+}
+impl EventType for MetaspaceGCThreshold {
+    const NAME: &'static str = "MetaspaceGCThreshold";
 }
 ///MetaspaceOOM
 #[derive(Clone, Debug, Deserialize)]
@@ -1827,6 +2065,9 @@ pub struct MetaspaceOOM {
     ///Metaspace Object Type
     #[serde(rename = "metaspaceObjectType")]
     pub metaspace_object_type: Option<MetaspaceObjectType>,
+}
+impl EventType for MetaspaceOOM {
+    const NAME: &'static str = "MetaspaceOOM";
 }
 ///MetaspaceSummary
 #[derive(Clone, Debug, Deserialize)]
@@ -1850,6 +2091,9 @@ pub struct MetaspaceSummary {
     #[serde(rename = "classSpace")]
     pub class_space: Option<MetaspaceSizes>,
 }
+impl EventType for MetaspaceSummary {
+    const NAME: &'static str = "MetaspaceSummary";
+}
 ///ModuleExport
 #[derive(Clone, Debug, Deserialize)]
 pub struct ModuleExport {
@@ -1860,6 +2104,9 @@ pub struct ModuleExport {
     #[serde(rename = "targetModule")]
     pub target_module: Option<Module>,
 }
+impl EventType for ModuleExport {
+    const NAME: &'static str = "ModuleExport";
+}
 ///A directed edge representing a dependency
 #[derive(Clone, Debug, Deserialize)]
 pub struct ModuleRequire {
@@ -1869,6 +2116,9 @@ pub struct ModuleRequire {
     ///Required Module
     #[serde(rename = "requiredModule")]
     pub required_module: Option<Module>,
+}
+impl EventType for ModuleRequire {
+    const NAME: &'static str = "ModuleRequire";
 }
 ///NativeLibrary
 #[derive(Clone, Debug, Deserialize)]
@@ -1883,6 +2133,9 @@ pub struct NativeLibrary {
     #[serde(rename = "topAddress")]
     pub top_address: u64,
 }
+impl EventType for NativeLibrary {
+    const NAME: &'static str = "NativeLibrary";
+}
 ///Snapshot of a threads state when in native
 #[derive(Clone, Debug, Deserialize)]
 pub struct NativeMethodSample {
@@ -1895,6 +2148,9 @@ pub struct NativeMethodSample {
     ///Thread State
     #[serde(rename = "state")]
     pub state: Option<ThreadState>,
+}
+impl EventType for NativeMethodSample {
+    const NAME: &'static str = "NativeMethodSample";
 }
 ///NetworkUtilization
 #[derive(Clone, Debug, Deserialize)]
@@ -1909,12 +2165,18 @@ pub struct NetworkUtilization {
     #[serde(rename = "writeRate")]
     pub write_rate: i64,
 }
+impl EventType for NetworkUtilization {
+    const NAME: &'static str = "NetworkUtilization";
+}
 ///Description of the OS the JVM runs on, for example, a uname-like output
 #[derive(Clone, Debug, Deserialize)]
 pub struct OSInformation {
     ///OS Version
     #[serde(rename = "osVersion")]
     pub os_version: Option<String>,
+}
+impl EventType for OSInformation {
+    const NAME: &'static str = "OSInformation";
 }
 ///Allocation in new Thread Local Allocation Buffer
 #[derive(Clone, Debug, Deserialize)]
@@ -1929,6 +2191,9 @@ pub struct ObjectAllocationInNewTLAB {
     #[serde(rename = "tlabSize")]
     pub tlab_size: u64,
 }
+impl EventType for ObjectAllocationInNewTLAB {
+    const NAME: &'static str = "ObjectAllocationInNewTLAB";
+}
 ///Allocation outside Thread Local Allocation Buffers
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectAllocationOutsideTLAB {
@@ -1939,6 +2204,9 @@ pub struct ObjectAllocationOutsideTLAB {
     #[serde(rename = "allocationSize")]
     pub allocation_size: u64,
 }
+impl EventType for ObjectAllocationOutsideTLAB {
+    const NAME: &'static str = "ObjectAllocationOutsideTLAB";
+}
 ///ObjectAllocationSample
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectAllocationSample {
@@ -1948,6 +2216,9 @@ pub struct ObjectAllocationSample {
     ///The relative weight of the sample. Aggregating the weights for a large number of samples, for a particular class, thread or stack trace, gives a statistically accurate representation of the allocation pressure
     #[serde(rename = "weight")]
     pub weight: i64,
+}
+impl EventType for ObjectAllocationSample {
+    const NAME: &'static str = "ObjectAllocationSample";
 }
 ///ObjectCount
 #[derive(Clone, Debug, Deserialize)]
@@ -1965,6 +2236,9 @@ pub struct ObjectCount {
     #[serde(rename = "totalSize")]
     pub total_size: u64,
 }
+impl EventType for ObjectCount {
+    const NAME: &'static str = "ObjectCount";
+}
 ///ObjectCountAfterGC
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectCountAfterGC {
@@ -1981,12 +2255,18 @@ pub struct ObjectCountAfterGC {
     #[serde(rename = "totalSize")]
     pub total_size: u64,
 }
+impl EventType for ObjectCountAfterGC {
+    const NAME: &'static str = "ObjectCountAfterGC";
+}
 ///Extra information specific to Old Garbage Collections
 #[derive(Clone, Debug, Deserialize)]
 pub struct OldGarbageCollection {
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
+}
+impl EventType for OldGarbageCollection {
+    const NAME: &'static str = "OldGarbageCollection";
 }
 ///A potential memory leak
 #[derive(Clone, Debug, Deserialize)]
@@ -2009,6 +2289,9 @@ pub struct OldObjectSample {
     ///GC Root
     #[serde(rename = "root")]
     pub root: Option<OldObjectGcRoot>,
+}
+impl EventType for OldObjectSample {
+    const NAME: &'static str = "OldObjectSample";
 }
 ///PSHeapSummary
 #[derive(Clone, Debug, Deserialize)]
@@ -2038,6 +2321,9 @@ pub struct PSHeapSummary {
     #[serde(rename = "toSpace")]
     pub to_space: Option<ObjectSpace>,
 }
+impl EventType for PSHeapSummary {
+    const NAME: &'static str = "PSHeapSummary";
+}
 ///Extra information specific to Parallel Old Garbage Collections
 #[derive(Clone, Debug, Deserialize)]
 pub struct ParallelOldGarbageCollection {
@@ -2048,6 +2334,9 @@ pub struct ParallelOldGarbageCollection {
     #[serde(rename = "densePrefix")]
     pub dense_prefix: u64,
 }
+impl EventType for ParallelOldGarbageCollection {
+    const NAME: &'static str = "ParallelOldGarbageCollection";
+}
 ///OS Physical Memory
 #[derive(Clone, Debug, Deserialize)]
 pub struct PhysicalMemory {
@@ -2057,6 +2346,9 @@ pub struct PhysicalMemory {
     ///Total amount of physical memory in use
     #[serde(rename = "usedSize")]
     pub used_size: u64,
+}
+impl EventType for PhysicalMemory {
+    const NAME: &'static str = "PhysicalMemory";
 }
 ///PlaceholderTableStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -2089,6 +2381,9 @@ pub struct PlaceholderTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
+impl EventType for PlaceholderTableStatistics {
+    const NAME: &'static str = "PlaceholderTableStatistics";
+}
 ///Object survived scavenge and was copied to a new Promotion Local Allocation Buffer (PLAB). Supported GCs are Parallel Scavange, G1 and CMS with Parallel New. Due to promotion being done in parallel an object might be reported multiple times as the GC threads race to copy all objects.
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromoteObjectInNewPLAB {
@@ -2111,6 +2406,9 @@ pub struct PromoteObjectInNewPLAB {
     #[serde(rename = "plabSize")]
     pub plab_size: u64,
 }
+impl EventType for PromoteObjectInNewPLAB {
+    const NAME: &'static str = "PromoteObjectInNewPLAB";
+}
 ///Object survived scavenge and was copied directly to the heap. Supported GCs are Parallel Scavange, G1 and CMS with Parallel New. Due to promotion being done in parallel an object might be reported multiple times as the GC threads race to copy all objects.
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromoteObjectOutsidePLAB {
@@ -2130,6 +2428,9 @@ pub struct PromoteObjectOutsidePLAB {
     #[serde(rename = "tenured")]
     pub tenured: bool,
 }
+impl EventType for PromoteObjectOutsidePLAB {
+    const NAME: &'static str = "PromoteObjectOutsidePLAB";
+}
 ///Promotion of an object failed
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromotionFailed {
@@ -2142,6 +2443,9 @@ pub struct PromotionFailed {
     ///Running thread
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
+}
+impl EventType for PromotionFailed {
+    const NAME: &'static str = "PromotionFailed";
 }
 ///ProtectionDomainCacheTableStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -2174,6 +2478,9 @@ pub struct ProtectionDomainCacheTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
+impl EventType for ProtectionDomainCacheTableStatistics {
+    const NAME: &'static str = "ProtectionDomainCacheTableStatistics";
+}
 ///RedefineClasses
 #[derive(Clone, Debug, Deserialize)]
 pub struct RedefineClasses {
@@ -2184,12 +2491,18 @@ pub struct RedefineClasses {
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
 }
+impl EventType for RedefineClasses {
+    const NAME: &'static str = "RedefineClasses";
+}
 ///Activation of Reserved Stack Area caused by stack overflow with ReservedStackAccess annotated method in call stack
 #[derive(Clone, Debug, Deserialize)]
 pub struct ReservedStackActivation {
     ///Java Method
     #[serde(rename = "method")]
     pub method: Option<Method>,
+}
+impl EventType for ReservedStackActivation {
+    const NAME: &'static str = "ReservedStackActivation";
 }
 ///RetransformClasses
 #[derive(Clone, Debug, Deserialize)]
@@ -2200,6 +2513,9 @@ pub struct RetransformClasses {
     ///Class Redefinition Id
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
+}
+impl EventType for RetransformClasses {
+    const NAME: &'static str = "RetransformClasses";
 }
 ///Safepointing begin
 #[derive(Clone, Debug, Deserialize)]
@@ -2214,12 +2530,18 @@ pub struct SafepointBegin {
     #[serde(rename = "jniCriticalThreadCount")]
     pub jni_critical_thread_count: i32,
 }
+impl EventType for SafepointBegin {
+    const NAME: &'static str = "SafepointBegin";
+}
 ///Safepointing begin running cleanup tasks
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointCleanup {
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
+}
+impl EventType for SafepointCleanup {
+    const NAME: &'static str = "SafepointCleanup";
 }
 ///Safepointing begin running cleanup tasks
 #[derive(Clone, Debug, Deserialize)]
@@ -2231,12 +2553,18 @@ pub struct SafepointCleanupTask {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for SafepointCleanupTask {
+    const NAME: &'static str = "SafepointCleanupTask";
+}
 ///Safepointing end
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointEnd {
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
+}
+impl EventType for SafepointEnd {
+    const NAME: &'static str = "SafepointEnd";
 }
 ///Synchronize run state of threads
 #[derive(Clone, Debug, Deserialize)]
@@ -2254,6 +2582,9 @@ pub struct SafepointStateSynchronization {
     #[serde(rename = "iterations")]
     pub iterations: i32,
 }
+impl EventType for SafepointStateSynchronization {
+    const NAME: &'static str = "SafepointStateSynchronization";
+}
 ///Information about a specific heap region in the Shenandoah GC
 #[derive(Clone, Debug, Deserialize)]
 pub struct ShenandoahHeapRegionInformation {
@@ -2269,6 +2600,9 @@ pub struct ShenandoahHeapRegionInformation {
     ///Used
     #[serde(rename = "used")]
     pub used: u64,
+}
+impl EventType for ShenandoahHeapRegionInformation {
+    const NAME: &'static str = "ShenandoahHeapRegionInformation";
 }
 ///Information about a Shenandoah heap region state change
 #[derive(Clone, Debug, Deserialize)]
@@ -2289,12 +2623,18 @@ pub struct ShenandoahHeapRegionStateChange {
     #[serde(rename = "used")]
     pub used: u64,
 }
+impl EventType for ShenandoahHeapRegionStateChange {
+    const NAME: &'static str = "ShenandoahHeapRegionStateChange";
+}
 ///JVM shutting down
 #[derive(Clone, Debug, Deserialize)]
 pub struct Shutdown {
     ///Reason for JVM shutdown
     #[serde(rename = "reason")]
     pub reason: Option<String>,
+}
+impl EventType for Shutdown {
+    const NAME: &'static str = "Shutdown";
 }
 ///StringFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -2308,6 +2648,9 @@ pub struct StringFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for StringFlag {
+    const NAME: &'static str = "StringFlag";
 }
 ///StringFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -2324,6 +2667,9 @@ pub struct StringFlagChanged {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for StringFlagChanged {
+    const NAME: &'static str = "StringFlagChanged";
 }
 ///StringTableStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -2356,6 +2702,9 @@ pub struct StringTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
+impl EventType for StringTableStatistics {
+    const NAME: &'static str = "StringTableStatistics";
+}
 ///SweepCodeCache
 #[derive(Clone, Debug, Deserialize)]
 pub struct SweepCodeCache {
@@ -2371,6 +2720,9 @@ pub struct SweepCodeCache {
     ///Methods Zombified
     #[serde(rename = "zombifiedCount")]
     pub zombified_count: u32,
+}
+impl EventType for SweepCodeCache {
+    const NAME: &'static str = "SweepCodeCache";
 }
 ///SymbolTableStatistics
 #[derive(Clone, Debug, Deserialize)]
@@ -2403,6 +2755,9 @@ pub struct SymbolTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
+impl EventType for SymbolTableStatistics {
+    const NAME: &'static str = "SymbolTableStatistics";
+}
 ///SyncOnValueBasedClass
 #[derive(Clone, Debug, Deserialize)]
 pub struct SyncOnValueBasedClass {
@@ -2410,12 +2765,18 @@ pub struct SyncOnValueBasedClass {
     #[serde(rename = "valueBasedClass")]
     pub value_based_class: Option<Class>,
 }
+impl EventType for SyncOnValueBasedClass {
+    const NAME: &'static str = "SyncOnValueBasedClass";
+}
 ///SystemGC
 #[derive(Clone, Debug, Deserialize)]
 pub struct SystemGC {
     ///Invoked Concurrent
     #[serde(rename = "invokedConcurrent")]
     pub invoked_concurrent: bool,
+}
+impl EventType for SystemGC {
+    const NAME: &'static str = "SystemGC";
 }
 ///SystemProcess
 #[derive(Clone, Debug, Deserialize)]
@@ -2426,6 +2787,9 @@ pub struct SystemProcess {
     ///Command Line
     #[serde(rename = "commandLine")]
     pub command_line: Option<String>,
+}
+impl EventType for SystemProcess {
+    const NAME: &'static str = "SystemProcess";
 }
 ///TenuringDistribution
 #[derive(Clone, Debug, Deserialize)]
@@ -2440,6 +2804,9 @@ pub struct TenuringDistribution {
     #[serde(rename = "size")]
     pub size: u64,
 }
+impl EventType for TenuringDistribution {
+    const NAME: &'static str = "TenuringDistribution";
+}
 ///ThreadAllocationStatistics
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadAllocationStatistics {
@@ -2449,6 +2816,9 @@ pub struct ThreadAllocationStatistics {
     ///Thread
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
+}
+impl EventType for ThreadAllocationStatistics {
+    const NAME: &'static str = "ThreadAllocationStatistics";
 }
 ///ThreadCPULoad
 #[derive(Clone, Debug, Deserialize)]
@@ -2460,12 +2830,18 @@ pub struct ThreadCPULoad {
     #[serde(rename = "system")]
     pub system: f32,
 }
+impl EventType for ThreadCPULoad {
+    const NAME: &'static str = "ThreadCPULoad";
+}
 ///ThreadContextSwitchRate
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadContextSwitchRate {
     ///Number of context switches per second
     #[serde(rename = "switchRate")]
     pub switch_rate: f32,
+}
+impl EventType for ThreadContextSwitchRate {
+    const NAME: &'static str = "ThreadContextSwitchRate";
 }
 ///ThreadDump
 #[derive(Clone, Debug, Deserialize)]
@@ -2474,12 +2850,18 @@ pub struct ThreadDump {
     #[serde(rename = "result")]
     pub result: Option<String>,
 }
+impl EventType for ThreadDump {
+    const NAME: &'static str = "ThreadDump";
+}
 ///ThreadEnd
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadEnd {
     ///Java Thread
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
+}
+impl EventType for ThreadEnd {
+    const NAME: &'static str = "ThreadEnd";
 }
 ///ThreadPark
 #[derive(Clone, Debug, Deserialize)]
@@ -2497,12 +2879,18 @@ pub struct ThreadPark {
     #[serde(rename = "address")]
     pub address: u64,
 }
+impl EventType for ThreadPark {
+    const NAME: &'static str = "ThreadPark";
+}
 ///ThreadSleep
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadSleep {
     ///Sleep Time
     #[serde(rename = "time")]
     pub time: i64,
+}
+impl EventType for ThreadSleep {
+    const NAME: &'static str = "ThreadSleep";
 }
 ///ThreadStart
 #[derive(Clone, Debug, Deserialize)]
@@ -2513,6 +2901,9 @@ pub struct ThreadStart {
     ///Parent Java Thread
     #[serde(rename = "parentThread")]
     pub parent_thread: Option<Thread>,
+}
+impl EventType for ThreadStart {
+    const NAME: &'static str = "ThreadStart";
 }
 ///UnsignedIntFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -2526,6 +2917,9 @@ pub struct UnsignedIntFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for UnsignedIntFlag {
+    const NAME: &'static str = "UnsignedIntFlag";
 }
 ///UnsignedIntFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -2543,6 +2937,9 @@ pub struct UnsignedIntFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
+impl EventType for UnsignedIntFlagChanged {
+    const NAME: &'static str = "UnsignedIntFlagChanged";
+}
 ///UnsignedLongFlag
 #[derive(Clone, Debug, Deserialize)]
 pub struct UnsignedLongFlag {
@@ -2555,6 +2952,9 @@ pub struct UnsignedLongFlag {
     ///Origin
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
+}
+impl EventType for UnsignedLongFlag {
+    const NAME: &'static str = "UnsignedLongFlag";
 }
 ///UnsignedLongFlagChanged
 #[derive(Clone, Debug, Deserialize)]
@@ -2572,12 +2972,18 @@ pub struct UnsignedLongFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
+impl EventType for UnsignedLongFlagChanged {
+    const NAME: &'static str = "UnsignedLongFlagChanged";
+}
 ///Description of the virtualization technology the JVM runs on
 #[derive(Clone, Debug, Deserialize)]
 pub struct VirtualizationInformation {
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
+}
+impl EventType for VirtualizationInformation {
+    const NAME: &'static str = "VirtualizationInformation";
 }
 ///Extra information specific to Young Garbage Collections
 #[derive(Clone, Debug, Deserialize)]
@@ -2588,6 +2994,9 @@ pub struct YoungGarbageCollection {
     ///Tenuring Threshold
     #[serde(rename = "tenuringThreshold")]
     pub tenuring_threshold: u32,
+}
+impl EventType for YoungGarbageCollection {
+    const NAME: &'static str = "YoungGarbageCollection";
 }
 ///The configuration of the young generation of the garbage collected heap
 #[derive(Clone, Debug, Deserialize)]
@@ -2602,6 +3011,9 @@ pub struct YoungGenerationConfiguration {
     #[serde(rename = "newRatio")]
     pub new_ratio: u32,
 }
+impl EventType for YoungGenerationConfiguration {
+    const NAME: &'static str = "YoungGenerationConfiguration";
+}
 ///Time spent waiting for memory to become available
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZAllocationStall {
@@ -2611,6 +3023,9 @@ pub struct ZAllocationStall {
     ///Size
     #[serde(rename = "size")]
     pub size: u64,
+}
+impl EventType for ZAllocationStall {
+    const NAME: &'static str = "ZAllocationStall";
 }
 ///Allocation of a ZPage
 #[derive(Clone, Debug, Deserialize)]
@@ -2634,6 +3049,9 @@ pub struct ZPageAllocation {
     #[serde(rename = "nonBlocking")]
     pub non_blocking: bool,
 }
+impl EventType for ZPageAllocation {
+    const NAME: &'static str = "ZPageAllocation";
+}
 ///ZRelocationSet
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZRelocationSet {
@@ -2646,6 +3064,9 @@ pub struct ZRelocationSet {
     ///Relocate
     #[serde(rename = "relocate")]
     pub relocate: u64,
+}
+impl EventType for ZRelocationSet {
+    const NAME: &'static str = "ZRelocationSet";
 }
 ///ZRelocationSetGroup
 #[derive(Clone, Debug, Deserialize)]
@@ -2666,6 +3087,9 @@ pub struct ZRelocationSetGroup {
     #[serde(rename = "relocate")]
     pub relocate: u64,
 }
+impl EventType for ZRelocationSetGroup {
+    const NAME: &'static str = "ZRelocationSetGroup";
+}
 ///ZStatisticsCounter
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZStatisticsCounter {
@@ -2679,6 +3103,9 @@ pub struct ZStatisticsCounter {
     #[serde(rename = "value")]
     pub value: u64,
 }
+impl EventType for ZStatisticsCounter {
+    const NAME: &'static str = "ZStatisticsCounter";
+}
 ///ZStatisticsSampler
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZStatisticsSampler {
@@ -2688,6 +3115,9 @@ pub struct ZStatisticsSampler {
     ///Value
     #[serde(rename = "value")]
     pub value: u64,
+}
+impl EventType for ZStatisticsSampler {
+    const NAME: &'static str = "ZStatisticsSampler";
 }
 ///ZThreadPhase
 #[derive(Clone, Debug, Deserialize)]
@@ -2699,6 +3129,9 @@ pub struct ZThreadPhase {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
+impl EventType for ZThreadPhase {
+    const NAME: &'static str = "ZThreadPhase";
+}
 ///Uncommitting of memory
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZUncommit {
@@ -2706,10 +3139,16 @@ pub struct ZUncommit {
     #[serde(rename = "uncommitted")]
     pub uncommitted: u64,
 }
+impl EventType for ZUncommit {
+    const NAME: &'static str = "ZUncommit";
+}
 ///Unmapping of memory
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZUnmap {
     ///Unmapped
     #[serde(rename = "unmapped")]
     pub unmapped: u64,
+}
+impl EventType for ZUnmap {
+    const NAME: &'static str = "ZUnmap";
 }

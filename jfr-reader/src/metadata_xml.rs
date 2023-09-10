@@ -172,9 +172,24 @@ pub fn event_struct(m: &Metadata, event: &Event) -> Result<TokenStream> {
     })
 }
 
+/// Resolve tokens for the Event implemnentation for an event struct.
+pub fn event_event_impl(event: &Event) -> Result<TokenStream> {
+    let raw_name = event.name.as_str();
+    let name = format_ident!("{}", event.name);
+
+    Ok(quote! {
+        impl EventType for #name {
+            const NAME: &'static str = #raw_name;
+        }
+    })
+}
+
 /// Obtain .rs source code derived from a [Metadata] instance.
 pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
-    let mut items = vec![parse_quote! { use serde::Deserialize; }];
+    let mut items = vec![
+        parse_quote! { use crate::event::EventType; },
+        parse_quote! { use serde::Deserialize; },
+    ];
 
     // Emit non-event types/structs first.
     for typ in m.types_sorted() {
@@ -184,6 +199,7 @@ pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
     // Now all the events.
     for e in m.events_sorted() {
         items.push(syn::parse2(event_struct(m, e)?)?);
+        items.push(syn::parse2(event_event_impl(e)?)?);
     }
 
     let f = syn::File {
