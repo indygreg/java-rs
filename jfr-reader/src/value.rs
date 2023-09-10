@@ -14,7 +14,8 @@ use crate::{
 };
 use serde::{
     de::{
-        value::StrDeserializer, DeserializeSeed, IntoDeserializer, MapAccess, SeqAccess, Visitor,
+        value::StrDeserializer, DeserializeSeed, EnumAccess, IntoDeserializer, MapAccess,
+        SeqAccess, Unexpected, VariantAccess, Visitor,
     },
     forward_to_deserialize_any, Deserialize, Deserializer,
 };
@@ -224,6 +225,28 @@ impl<'a> Value<'a> {
     {
         Ok(T::deserialize(ValueDeserializer::new(self, constants))?)
     }
+
+    /// Deserialize into an enum.
+    ///
+    /// The target enum must have variant names matching the leaf class
+    /// name. And the variant must be a newtype variant. e.g. a
+    /// `jdk.ThreadPark` JFR event will require an enum with
+    /// a `ThreadPark(ThreadPark)` variant, where `ThreadPark` is a
+    /// struct.
+    ///
+    /// If the target enum does not have a variant matching the class
+    /// name, an error occurs.
+    pub fn deserialize_enum<'de, 'slf: 'de, 'cr: 'de, T>(
+        &'slf self,
+        constants: &'cr impl ConstantResolver<'a>,
+    ) -> Result<T>
+    where
+        T: Deserialize<'de>,
+    {
+        Ok(T::deserialize(EventsEnumDeserializer::new(
+            self, constants,
+        ))?)
+    }
 }
 
 /// A deserializer for an array of values.
@@ -376,5 +399,141 @@ where
         bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
         bytes byte_buf unit unit_struct newtype_struct seq tuple
         tuple_struct map struct enum identifier ignored_any
+    }
+}
+
+/// A specialized deserializer for enums representing event types.
+///
+/// The enum being deserialized should have variant names matching the
+/// leaf class name of JFR events. The deserializer will automatically
+/// attempt to deserialize the variant whose name matches the Value's
+/// class name.
+///
+/// Currently only works on [Value::Object] variants.
+pub struct EventsEnumDeserializer<'de, 'a: 'de, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    value: &'de Value<'a>,
+    constants: &'de CR,
+}
+
+impl<'de, 'a: 'de, CR> EventsEnumDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    /// Construct a new instance from a [Value] and [ConstantResolver].
+    pub fn new(value: &'de Value<'a>, constants: &'de CR) -> Self {
+        Self { value, constants }
+    }
+}
+
+impl<'de, 'a: 'de, CR> EnumAccess<'de> for EventsEnumDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+    type Variant = Self;
+
+    fn variant_seed<V>(self, seed: V) -> std::result::Result<(V::Value, Self::Variant), Self::Error>
+    where
+        V: DeserializeSeed<'de>,
+    {
+        let o = self
+            .value
+            .as_object()
+            .ok_or_else(|| Error::Deserialize("expected Object variant of Value".to_string()))?;
+
+        let name = o.class.name.as_ref();
+
+        let variant = if let Some((_, leaf)) = name.rsplit_once('.') {
+            leaf
+        } else {
+            name
+        };
+
+        let variant: StrDeserializer<Self::Error> = variant.into_deserializer();
+        let variant: V::Value = seed.deserialize(variant)?;
+
+        Ok((variant, self))
+    }
+}
+
+impl<'de, 'a: 'de, CR> VariantAccess<'de> for EventsEnumDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+
+    fn unit_variant(self) -> std::result::Result<(), Self::Error> {
+        Err(serde::de::Error::invalid_type(
+            Unexpected::UnitVariant,
+            &"newtype variant",
+        ))
+    }
+
+    fn newtype_variant_seed<T>(self, seed: T) -> std::result::Result<T::Value, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        seed.deserialize(ValueDeserializer::new(self.value, self.constants))
+    }
+
+    fn tuple_variant<V>(self, _: usize, _: V) -> std::result::Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        Err(serde::de::Error::invalid_type(
+            Unexpected::TupleVariant,
+            &"newtype variant",
+        ))
+    }
+
+    fn struct_variant<V>(
+        self,
+        _: &'static [&'static str],
+        _: V,
+    ) -> std::result::Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        Err(serde::de::Error::invalid_type(
+            Unexpected::StructVariant,
+            &"newtype variant",
+        ))
+    }
+}
+
+impl<'de, 'a: 'de, CR> Deserializer<'de> for EventsEnumDeserializer<'de, 'a, CR>
+where
+    CR: ConstantResolver<'a>,
+{
+    type Error = Error;
+
+    fn deserialize_any<V>(self, _: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        Err(Error::Deserialize(
+            "deserialize_any not supported".to_string(),
+        ))
+    }
+
+    fn deserialize_enum<V>(
+        self,
+        _: &'static str,
+        _: &'static [&'static str],
+        visitor: V,
+    ) -> std::result::Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_enum(self)
+    }
+
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf unit unit_struct newtype_struct seq tuple
+        tuple_struct map struct identifier ignored_any option
     }
 }
