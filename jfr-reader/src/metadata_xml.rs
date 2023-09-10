@@ -184,6 +184,29 @@ pub fn event_event_impl(event: &Event) -> Result<TokenStream> {
     })
 }
 
+/// Resolve tokens for an enum defining all events.
+pub fn events_enum(m: &Metadata) -> Result<TokenStream> {
+    let variants = m
+        .events_sorted()
+        .into_iter()
+        .map(|e| {
+            let name = format_ident!("{}", e.name);
+
+            quote! { #name(#name) }
+        })
+        .collect::<Vec<_>>();
+
+    let doc = "All events";
+
+    Ok(quote! {
+        #[doc = #doc]
+        #[derive(Clone, Debug)]
+        pub enum Events {
+            #(#variants),*
+        }
+    })
+}
+
 /// Obtain .rs source code derived from a [Metadata] instance.
 pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
     let mut items = vec![
@@ -201,6 +224,9 @@ pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
         items.push(syn::parse2(event_struct(m, e)?)?);
         items.push(syn::parse2(event_event_impl(e)?)?);
     }
+
+    // An enum for all events.
+    items.push(syn::parse2(events_enum(m)?)?);
 
     let f = syn::File {
         shebang: None,
