@@ -51,6 +51,8 @@ pub mod constant_pool;
 pub mod error;
 pub mod event;
 pub mod metadata;
+#[cfg(feature = "metadata-xml-derive")]
+pub mod metadata_xml;
 pub mod primitive;
 pub mod recording;
 pub mod resolver;
