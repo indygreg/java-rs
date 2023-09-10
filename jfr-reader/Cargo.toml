@@ -37,7 +37,12 @@ hex = "0.4.3"
 indoc = "2.0.3"
 
 [features]
-default = ["metadata-xml-derive"]
+default = [
+    "metadata-xml-derive",
+    "openjdk17"
+]
+# Event types for OpenJDK 17.
+openjdk17 = []
 
 #Support for converting metadata.xml into Rust types.
 metadata-xml-derive = [
