@@ -38,11 +38,19 @@ pub trait ConstantResolver<'a>: Sized {
             }
         }
     }
+
+    /// Get the value of a string constant.
+    fn get_string(&self, index: i64) -> ConstantValue<'a, '_>;
 }
 
 /// Holds resolved values in the constants pool.
 pub struct ConstantPoolValues<'a> {
     inner: FxHashMap<i64, FxHashMap<i64, Value<'a>>>,
+    /// The class ID for java.lang.String.
+    ///
+    /// Stored to facilitate efficient lookups of constant pool references
+    /// to strings.
+    string_class_id: Option<i64>,
 }
 
 impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
@@ -55,6 +63,14 @@ impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
             },
             None if index == 0 => ConstantValue::Null,
             None => ConstantValue::Missing,
+        }
+    }
+
+    fn get_string(&self, index: i64) -> ConstantValue<'a, '_> {
+        if let Some(class_id) = self.string_class_id {
+            self.get(class_id, index)
+        } else {
+            ConstantValue::Missing
         }
     }
 }
@@ -118,6 +134,13 @@ impl<'a> EventResolver<'a> {
         self.classes.get(&id).map(|c| c.name.as_ref())
     }
 
+    /// Resolve the class ID for the class having the specified name.
+    pub fn class_id(&self, name: &str) -> Option<i64> {
+        self.classes
+            .iter()
+            .find_map(|(k, v)| if v.name == name { Some(*k) } else { None })
+    }
+
     /// Obtain class IDs and their names.
     pub fn class_ids_and_names(&self) -> impl Iterator<Item = (i64, &str)> + '_ {
         self.classes.iter().map(|(k, v)| (*k, v.name.as_ref()))
@@ -137,7 +160,12 @@ impl<'a> EventResolver<'a> {
             }
         }
 
-        Ok(ConstantPoolValues { inner })
+        let string_class_id = self.class_id("java.lang.String");
+
+        Ok(ConstantPoolValues {
+            inner,
+            string_class_id,
+        })
     }
 
     /// Parse event fields data into a [GenericEvent].

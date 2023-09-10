@@ -329,13 +329,20 @@ where
                 Primitive::Character(v) => visitor.visit_char(*v),
                 Primitive::NullString => visitor.visit_none(),
                 Primitive::String(v) => visitor.visit_borrowed_str(v.as_ref()),
-                Primitive::StringConstantPool(index) => {
-                    // TODO implement this. Requires feeding the class id of java.lang.String
-                    // into the instance somehow.
-                    Err(Error::Deserialize(
-                        "resolving string constant pool references not yet implemented".to_string(),
-                    ))
-                }
+                Primitive::StringConstantPool(index) => match self.constants.get_string(*index) {
+                    ConstantValue::Null => visitor.visit_none(),
+                    ConstantValue::Value(v) => {
+                        let de = ValueDeserializer {
+                            value: v,
+                            constants: self.constants,
+                        };
+                        Self::deserialize_any(de, visitor)
+                    }
+                    ConstantValue::Missing => Err(Error::Deserialize(format!(
+                        "string constant {} not found",
+                        index
+                    ))),
+                },
             },
             Value::Object(o) => visitor.visit_map(ObjectDeserializer {
                 object: o,
