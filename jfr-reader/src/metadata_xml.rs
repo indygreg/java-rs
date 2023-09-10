@@ -200,7 +200,7 @@ pub fn events_enum(m: &Metadata) -> Result<TokenStream> {
 
     Ok(quote! {
         #[doc = #doc]
-        #[derive(Clone, Debug)]
+        #[derive(Clone, Debug, Deserialize)]
         pub enum Events {
             #(#variants),*
         }

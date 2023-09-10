@@ -3153,7 +3153,7 @@ impl EventType for ZUnmap {
     const NAME: &'static str = "ZUnmap";
 }
 ///All events
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub enum Events {
     AllocationRequiringGC(AllocationRequiringGC),
     BiasedLockClassRevocation(BiasedLockClassRevocation),
