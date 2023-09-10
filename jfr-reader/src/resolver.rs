@@ -53,6 +53,7 @@ impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
                 None if index == 0 => ConstantValue::Null,
                 None => ConstantValue::Missing,
             },
+            None if index == 0 => ConstantValue::Null,
             None => ConstantValue::Missing,
         }
     }
