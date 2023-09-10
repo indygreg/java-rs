@@ -519,6 +519,53 @@ pub struct ZStatisticsSamplerType {
     #[serde(rename = "sampler")]
     pub sampler: Option<String>,
 }
+///ActiveRecording
+#[derive(Clone, Debug, Deserialize)]
+pub struct ActiveRecording {
+    ///Id
+    #[serde(rename = "id")]
+    pub id: i64,
+    ///Name
+    #[serde(rename = "name")]
+    pub name: Option<String>,
+    ///Destination
+    #[serde(rename = "destination")]
+    pub destination: Option<String>,
+    ///Max Age
+    #[serde(rename = "maxAge")]
+    pub max_age: i64,
+    ///Flush Interval
+    #[serde(rename = "flushInterval")]
+    pub flush_interval: i64,
+    ///Max Size
+    #[serde(rename = "maxSize")]
+    pub max_size: i64,
+    ///Start Time
+    #[serde(rename = "recordingStart")]
+    pub recording_start: i64,
+    ///Recording Duration
+    #[serde(rename = "recordingDuration")]
+    pub recording_duration: i64,
+}
+impl EventType for ActiveRecording {
+    const NAME: &'static str = "ActiveRecording";
+}
+///JFR active setting
+#[derive(Clone, Debug, Deserialize)]
+pub struct ActiveSetting {
+    ///Event Id
+    #[serde(rename = "id")]
+    pub id: i64,
+    ///Setting Name
+    #[serde(rename = "name")]
+    pub name: Option<String>,
+    ///Setting Value
+    #[serde(rename = "value")]
+    pub value: Option<String>,
+}
+impl EventType for ActiveSetting {
+    const NAME: &'static str = "ActiveSetting";
+}
 ///AllocationRequiringGC
 #[derive(Clone, Debug, Deserialize)]
 pub struct AllocationRequiringGC {
@@ -1059,6 +1106,98 @@ pub struct ConcurrentModeFailure {
 impl EventType for ConcurrentModeFailure {
     const NAME: &'static str = "ConcurrentModeFailure";
 }
+///Container CPU throttling related information
+#[derive(Clone, Debug, Deserialize)]
+pub struct ContainerCPUThrottling {
+    ///Number of time-slice periods that have elapsed if a CPU quota has been setup for the container
+    #[serde(rename = "cpuElapsedSlices")]
+    pub cpu_elapsed_slices: i64,
+    ///Number of time-slice periods that the CPU has been throttled or limited due to exceeding CPU quota
+    #[serde(rename = "cpuThrottledSlices")]
+    pub cpu_throttled_slices: i64,
+    ///Total time duration, in nanoseconds, that the CPU has been throttled or limited due to exceeding CPU quota
+    #[serde(rename = "cpuThrottledTime")]
+    pub cpu_throttled_time: i64,
+}
+impl EventType for ContainerCPUThrottling {
+    const NAME: &'static str = "ContainerCPUThrottling";
+}
+///Container CPU usage related information
+#[derive(Clone, Debug, Deserialize)]
+pub struct ContainerCPUUsage {
+    ///Aggregate time consumed by all tasks in the container
+    #[serde(rename = "cpuTime")]
+    pub cpu_time: i64,
+    ///Aggregate user time consumed by all tasks in the container
+    #[serde(rename = "cpuUserTime")]
+    pub cpu_user_time: i64,
+    ///Aggregate system time consumed by all tasks in the container
+    #[serde(rename = "cpuSystemTime")]
+    pub cpu_system_time: i64,
+}
+impl EventType for ContainerCPUUsage {
+    const NAME: &'static str = "ContainerCPUUsage";
+}
+///A set of container specific attributes
+#[derive(Clone, Debug, Deserialize)]
+pub struct ContainerConfiguration {
+    ///Container type information
+    #[serde(rename = "containerType")]
+    pub container_type: Option<String>,
+    ///Length of the scheduling period for processes within the container
+    #[serde(rename = "cpuSlicePeriod")]
+    pub cpu_slice_period: i64,
+    ///Total available run-time allowed during each scheduling period for all tasks in the container
+    #[serde(rename = "cpuQuota")]
+    pub cpu_quota: i64,
+    ///Relative weighting of processes with the container used for prioritizing the scheduling of processes across all containers running on a host
+    #[serde(rename = "cpuShares")]
+    pub cpu_shares: i64,
+    ///Number of effective processors that this container has available to it
+    #[serde(rename = "effectiveCpuCount")]
+    pub effective_cpu_count: i64,
+    ///Hint to the operating system that allows groups to specify the minimum required amount of physical memory
+    #[serde(rename = "memorySoftLimit")]
+    pub memory_soft_limit: i64,
+    ///Maximum amount of physical memory that can be allocated in the container
+    #[serde(rename = "memoryLimit")]
+    pub memory_limit: i64,
+    ///Maximum amount of physical memory and swap space, in bytes, that can be allocated in the container
+    #[serde(rename = "swapMemoryLimit")]
+    pub swap_memory_limit: i64,
+}
+impl EventType for ContainerConfiguration {
+    const NAME: &'static str = "ContainerConfiguration";
+}
+///Container IO usage related information
+#[derive(Clone, Debug, Deserialize)]
+pub struct ContainerIOUsage {
+    ///Number of block IO requests to the disk that have been issued by the container
+    #[serde(rename = "serviceRequests")]
+    pub service_requests: i64,
+    ///Number of block IO bytes that have been transferred to/from the disk by the container
+    #[serde(rename = "dataTransferred")]
+    pub data_transferred: i64,
+}
+impl EventType for ContainerIOUsage {
+    const NAME: &'static str = "ContainerIOUsage";
+}
+///Container memory usage related information
+#[derive(Clone, Debug, Deserialize)]
+pub struct ContainerMemoryUsage {
+    ///Number of times that user memory requests in the container have exceeded the memory limit
+    #[serde(rename = "memoryFailCount")]
+    pub memory_fail_count: i64,
+    ///Amount of physical memory, in bytes, that is currently allocated in the current container
+    #[serde(rename = "memoryUsage")]
+    pub memory_usage: i64,
+    ///Amount of physical memory and swap space, in bytes, that is currently allocated in the current container
+    #[serde(rename = "swapMemoryUsage")]
+    pub swap_memory_usage: i64,
+}
+impl EventType for ContainerMemoryUsage {
+    const NAME: &'static str = "ContainerMemoryUsage";
+}
 ///Data could not be copied out from a buffer, typically because of contention
 #[derive(Clone, Debug, Deserialize)]
 pub struct DataLoss {
@@ -1102,6 +1241,16 @@ pub struct Deoptimization {
 }
 impl EventType for Deoptimization {
     const NAME: &'static str = "Deoptimization";
+}
+///Statistics of direct buffer
+#[derive(Clone, Debug, Deserialize)]
+pub struct DirectBufferStatistics {
+    ///Maximum direct buffer capacity the process can use
+    #[serde(rename = "maxCapacity")]
+    pub max_capacity: i64,
+}
+impl EventType for DirectBufferStatistics {
+    const NAME: &'static str = "DirectBufferStatistics";
 }
 ///DoubleFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -1198,6 +1347,16 @@ pub struct EvacuationInformation {
 impl EventType for EvacuationInformation {
     const NAME: &'static str = "EvacuationInformation";
 }
+///Number of objects derived from java.lang.Throwable that have been created
+#[derive(Clone, Debug, Deserialize)]
+pub struct ExceptionStatistics {
+    ///Exceptions Created
+    #[serde(rename = "throwables")]
+    pub throwables: i64,
+}
+impl EventType for ExceptionStatistics {
+    const NAME: &'static str = "ExceptionStatistics";
+}
 ///Execution of a VM Operation
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExecuteVMOperation {
@@ -1235,6 +1394,48 @@ pub struct ExecutionSample {
 }
 impl EventType for ExecutionSample {
     const NAME: &'static str = "ExecutionSample";
+}
+///Force updates to be written to file
+#[derive(Clone, Debug, Deserialize)]
+pub struct FileForce {
+    ///Full path of the file
+    #[serde(rename = "path")]
+    pub path: Option<String>,
+    ///Whether the file metadata is updated
+    #[serde(rename = "metaData")]
+    pub meta_data: bool,
+}
+impl EventType for FileForce {
+    const NAME: &'static str = "FileForce";
+}
+///Reading data from a file
+#[derive(Clone, Debug, Deserialize)]
+pub struct FileRead {
+    ///Full path of the file
+    #[serde(rename = "path")]
+    pub path: Option<String>,
+    ///Number of bytes read from the file (possibly 0)
+    #[serde(rename = "bytesRead")]
+    pub bytes_read: i64,
+    ///If end of file was reached
+    #[serde(rename = "endOfFile")]
+    pub end_of_file: bool,
+}
+impl EventType for FileRead {
+    const NAME: &'static str = "FileRead";
+}
+///Writing data to a file
+#[derive(Clone, Debug, Deserialize)]
+pub struct FileWrite {
+    ///Full path of the file
+    #[serde(rename = "path")]
+    pub path: Option<String>,
+    ///Number of bytes written to the file
+    #[serde(rename = "bytesWritten")]
+    pub bytes_written: i64,
+}
+impl EventType for FileWrite {
+    const NAME: &'static str = "FileWrite";
 }
 ///Flush
 #[derive(Clone, Debug, Deserialize)]
@@ -1738,6 +1939,19 @@ pub struct InitialEnvironmentVariable {
 impl EventType for InitialEnvironmentVariable {
     const NAME: &'static str = "InitialEnvironmentVariable";
 }
+///Initial Security Properties
+#[derive(Clone, Debug, Deserialize)]
+pub struct InitialSecurityProperty {
+    ///Key
+    #[serde(rename = "key")]
+    pub key: Option<String>,
+    ///Value
+    #[serde(rename = "value")]
+    pub value: Option<String>,
+}
+impl EventType for InitialSecurityProperty {
+    const NAME: &'static str = "InitialSecurityProperty";
+}
 ///System Property at JVM start
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialSystemProperty {
@@ -1826,6 +2040,19 @@ pub struct JVMInformation {
 }
 impl EventType for JVMInformation {
     const NAME: &'static str = "JVMInformation";
+}
+///An object derived from java.lang.Error has been created. OutOfMemoryErrors are ignored
+#[derive(Clone, Debug, Deserialize)]
+pub struct JavaErrorThrow {
+    ///Message
+    #[serde(rename = "message")]
+    pub message: Option<String>,
+    ///Class
+    #[serde(rename = "thrownClass")]
+    pub thrown_class: Option<Class>,
+}
+impl EventType for JavaErrorThrow {
+    const NAME: &'static str = "JavaErrorThrow";
 }
 ///JavaMonitorEnter
 #[derive(Clone, Debug, Deserialize)]
@@ -2384,6 +2611,22 @@ pub struct PlaceholderTableStatistics {
 impl EventType for PlaceholderTableStatistics {
     const NAME: &'static str = "PlaceholderTableStatistics";
 }
+///Operating system process started
+#[derive(Clone, Debug, Deserialize)]
+pub struct ProcessStart {
+    ///Process Id
+    #[serde(rename = "pid")]
+    pub pid: i64,
+    ///Directory
+    #[serde(rename = "directory")]
+    pub directory: Option<String>,
+    ///Command
+    #[serde(rename = "command")]
+    pub command: Option<String>,
+}
+impl EventType for ProcessStart {
+    const NAME: &'static str = "ProcessStart";
+}
 ///Object survived scavenge and was copied to a new Promotion Local Allocation Buffer (PLAB). Supported GCs are Parallel Scavange, G1 and CMS with Parallel New. Due to promotion being done in parallel an object might be reported multiple times as the GC threads race to copy all objects.
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromoteObjectInNewPLAB {
@@ -2635,6 +2878,50 @@ pub struct Shutdown {
 }
 impl EventType for Shutdown {
     const NAME: &'static str = "Shutdown";
+}
+///Reading data from a socket
+#[derive(Clone, Debug, Deserialize)]
+pub struct SocketRead {
+    ///Remote Host
+    #[serde(rename = "host")]
+    pub host: Option<String>,
+    ///Remote Address
+    #[serde(rename = "address")]
+    pub address: Option<String>,
+    ///Remote Port
+    #[serde(rename = "port")]
+    pub port: i32,
+    ///Timeout Value
+    #[serde(rename = "timeout")]
+    pub timeout: i64,
+    ///Number of bytes read from the socket
+    #[serde(rename = "bytesRead")]
+    pub bytes_read: i64,
+    ///If end of stream was reached
+    #[serde(rename = "endOfStream")]
+    pub end_of_stream: bool,
+}
+impl EventType for SocketRead {
+    const NAME: &'static str = "SocketRead";
+}
+///Writing data to a socket
+#[derive(Clone, Debug, Deserialize)]
+pub struct SocketWrite {
+    ///Remote Host
+    #[serde(rename = "host")]
+    pub host: Option<String>,
+    ///Remote Address
+    #[serde(rename = "address")]
+    pub address: Option<String>,
+    ///Remote Port
+    #[serde(rename = "port")]
+    pub port: i32,
+    ///Number of bytes written to the socket
+    #[serde(rename = "bytesWritten")]
+    pub bytes_written: i64,
+}
+impl EventType for SocketWrite {
+    const NAME: &'static str = "SocketWrite";
 }
 ///StringFlag
 #[derive(Clone, Debug, Deserialize)]
@@ -3155,6 +3442,8 @@ impl EventType for ZUnmap {
 ///All events
 #[derive(Clone, Debug, Deserialize)]
 pub enum Events {
+    ActiveRecording(ActiveRecording),
+    ActiveSetting(ActiveSetting),
     AllocationRequiringGC(AllocationRequiringGC),
     BiasedLockClassRevocation(BiasedLockClassRevocation),
     BiasedLockRevocation(BiasedLockRevocation),
@@ -3182,15 +3471,25 @@ pub enum Events {
     CompilerPhase(CompilerPhase),
     CompilerStatistics(CompilerStatistics),
     ConcurrentModeFailure(ConcurrentModeFailure),
+    ContainerCPUThrottling(ContainerCPUThrottling),
+    ContainerCPUUsage(ContainerCPUUsage),
+    ContainerConfiguration(ContainerConfiguration),
+    ContainerIOUsage(ContainerIOUsage),
+    ContainerMemoryUsage(ContainerMemoryUsage),
     DataLoss(DataLoss),
     Deoptimization(Deoptimization),
+    DirectBufferStatistics(DirectBufferStatistics),
     DoubleFlag(DoubleFlag),
     DoubleFlagChanged(DoubleFlagChanged),
     DumpReason(DumpReason),
     EvacuationFailed(EvacuationFailed),
     EvacuationInformation(EvacuationInformation),
+    ExceptionStatistics(ExceptionStatistics),
     ExecuteVMOperation(ExecuteVMOperation),
     ExecutionSample(ExecutionSample),
+    FileForce(FileForce),
+    FileRead(FileRead),
+    FileWrite(FileWrite),
     Flush(Flush),
     G1AdaptiveIHOP(G1AdaptiveIHOP),
     G1BasicIHOP(G1BasicIHOP),
@@ -3219,11 +3518,13 @@ pub enum Events {
     GarbageCollection(GarbageCollection),
     HeapDump(HeapDump),
     InitialEnvironmentVariable(InitialEnvironmentVariable),
+    InitialSecurityProperty(InitialSecurityProperty),
     InitialSystemProperty(InitialSystemProperty),
     IntFlag(IntFlag),
     IntFlagChanged(IntFlagChanged),
     JITRestart(JITRestart),
     JVMInformation(JVMInformation),
+    JavaErrorThrow(JavaErrorThrow),
     JavaMonitorEnter(JavaMonitorEnter),
     JavaMonitorInflate(JavaMonitorInflate),
     JavaMonitorWait(JavaMonitorWait),
@@ -3253,6 +3554,7 @@ pub enum Events {
     ParallelOldGarbageCollection(ParallelOldGarbageCollection),
     PhysicalMemory(PhysicalMemory),
     PlaceholderTableStatistics(PlaceholderTableStatistics),
+    ProcessStart(ProcessStart),
     PromoteObjectInNewPLAB(PromoteObjectInNewPLAB),
     PromoteObjectOutsidePLAB(PromoteObjectOutsidePLAB),
     PromotionFailed(PromotionFailed),
@@ -3268,6 +3570,8 @@ pub enum Events {
     ShenandoahHeapRegionInformation(ShenandoahHeapRegionInformation),
     ShenandoahHeapRegionStateChange(ShenandoahHeapRegionStateChange),
     Shutdown(Shutdown),
+    SocketRead(SocketRead),
+    SocketWrite(SocketWrite),
     StringFlag(StringFlag),
     StringFlagChanged(StringFlagChanged),
     StringTableStatistics(StringTableStatistics),
