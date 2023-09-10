@@ -157,11 +157,19 @@ pub fn event_struct(m: &Metadata, event: &Event) -> Result<TokenStream> {
     // stackTrace because they are, well, common. We handle them at a
     // different layer.
 
-    let fields = event
-        .fields
-        .iter()
-        .map(|field| struct_field(m, &event.name, field))
-        .collect::<Result<Vec<_>>>()?;
+    let mut fields = vec![quote! {
+        #[serde(flatten)]
+        common: crate::event::CommonFields
+    }];
+
+    fields.extend(
+        event
+            .fields
+            .iter()
+            .map(|field| struct_field(m, &event.name, field))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter(),
+    );
 
     Ok(quote! {
         #[doc = #description]
@@ -180,6 +188,10 @@ pub fn event_event_impl(event: &Event) -> Result<TokenStream> {
     Ok(quote! {
         impl EventType for #name {
             const NAME: &'static str = #raw_name;
+
+            fn common_fields(&self) -> &crate::event::CommonFields {
+                &self.common
+            }
         }
     })
 }

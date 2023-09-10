@@ -14,6 +14,25 @@ use crate::{
     resolver::ConstantResolver,
     value::{Object, Value},
 };
+use serde::Deserialize;
+
+/// Common event fields.
+///
+/// This struct represents event fields that are present in all or nearly
+/// all JFR event types.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CommonFields {
+    /// The `startTime` field value.
+    ///
+    /// This value needs to be combined with metadata in the chunk header to
+    /// resolve it to a walk clock time.
+    pub start_time: i64,
+
+    /// The `duration` field value.
+    pub duration: Option<i64>,
+    // TODO eventThread and stackTrace
+}
 
 /// Common interface for event types.
 ///
@@ -21,6 +40,9 @@ use crate::{
 pub trait EventType {
     /// The Java class / event name without any dots.
     const NAME: &'static str;
+
+    /// Obtain a reference to the [CommonFields] instance for this event.
+    fn common_fields(&self) -> &CommonFields;
 }
 
 pub struct GenericEvent<'a, 'cr, CR>
