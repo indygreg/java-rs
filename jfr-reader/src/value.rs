@@ -313,6 +313,9 @@ where
 {
     type Error = Error;
 
+    // TODO implement deserialize_* methods instead of falling back to any().
+    // We know what we're expecting to deserialize so we shouldn't fall back
+    // to any mode.
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
