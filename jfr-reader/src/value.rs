@@ -289,6 +289,25 @@ where
 }
 
 /// A deserializer for a [Value].
+///
+/// # Note on Missing Constant Pool Entries
+///
+/// Sometimes JFR events have references to constant pool entries
+/// that don't exist. The CP index 0 is reserved to express null
+/// and it generally doesn't exist. But sometimes we see missing
+/// non-0 indices. We're not sure why. (Commonly missing constants
+/// are java.lang.Thread classes.)
+///
+/// It appears that official JFR readers treat a missing CP index
+/// as null. Although they overload null to mean both the intentional
+/// null value and a missing value. So it isn't clear if they actually
+/// intended to allow missing constant pool references.
+///
+/// We mimic the behavior of official JFR readers by interpreting
+/// missing constant pool values as null / None. This is arguably
+/// not correct. But it is the most user-friendly behavior. If we
+/// wanted to be more strict, we could potentially have a flag to
+/// control behavior.
 pub struct ValueDeserializer<'de, 'a: 'de, CR>
 where
     CR: ConstantResolver<'a>,
@@ -341,10 +360,7 @@ where
                         };
                         Self::deserialize_any(de, visitor)
                     }
-                    ConstantValue::Missing => Err(Error::Deserialize(format!(
-                        "string constant {} not found",
-                        index
-                    ))),
+                    ConstantValue::Missing => visitor.visit_none(),
                 },
             },
             Value::Object(o) => visitor.visit_map(ObjectDeserializer {
@@ -361,7 +377,7 @@ where
                 class_id,
                 constant_index,
             } => match self.constants.get(*class_id, *constant_index) {
-                ConstantValue::Null => visitor.visit_none(),
+                ConstantValue::Null | ConstantValue::Missing => visitor.visit_none(),
                 ConstantValue::Value(v) => {
                     let de = ValueDeserializer {
                         value: v,
@@ -369,10 +385,6 @@ where
                     };
                     Self::deserialize_any(de, visitor)
                 }
-                ConstantValue::Missing => Err(Error::Deserialize(format!(
-                    "constant pool {}:{} not found",
-                    class_id, constant_index
-                ))),
             },
             Value::ConstantPoolNull => visitor.visit_none(),
         }
@@ -388,7 +400,7 @@ where
                 class_id,
                 constant_index,
             } => match self.constants.get(*class_id, *constant_index) {
-                ConstantValue::Null => visitor.visit_none(),
+                ConstantValue::Null | ConstantValue::Missing => visitor.visit_none(),
                 ConstantValue::Value(v) => {
                     let de = ValueDeserializer {
                         value: v,
@@ -396,10 +408,6 @@ where
                     };
                     visitor.visit_some(de)
                 }
-                ConstantValue::Missing => Err(Error::Deserialize(format!(
-                    "constant pool {}:{} not found",
-                    class_id, constant_index
-                ))),
             },
             _ => visitor.visit_some(self),
         }
