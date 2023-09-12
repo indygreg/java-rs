@@ -23,11 +23,12 @@ use serde::Deserialize;
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommonFields {
-    /// The `startTime` field value.
+    /// The start time of the event, in ticks.
     ///
     /// This value needs to be combined with metadata in the chunk header to
     /// resolve it to a walk clock time.
-    pub start_time: i64,
+    #[serde(rename = "startTime")]
+    pub start_time_ticks: i64,
 
     /// The `duration` field value.
     pub duration: Option<i64>,
