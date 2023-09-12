@@ -54,6 +54,21 @@ pub trait ChunkEvent<'a> {
     /// Effectively event_data() without the event header.
     fn fields_data(&self) -> Result<&'a [u8]>;
 
+    /// Attempt to resolve the startTime field for this event.
+    ///
+    /// All events should have a startTime field as their first field.
+    ///
+    /// The field value is expressed in ticks. This value needs to be
+    /// combined with metadata in the chunk header to resolve a wall clock
+    /// time and to convert into time units.
+    fn start_ticks(&self) -> Result<i64> {
+        let fields_data = self.fields_data()?;
+
+        let (_, v) = context("reading assumed start time field", leb128_i64)(fields_data)?;
+
+        Ok(v)
+    }
+
     /// Attempt to resolve the start and duration fields for this event.
     ///
     /// Most (all?) events have the start time and duration as their first two fields.

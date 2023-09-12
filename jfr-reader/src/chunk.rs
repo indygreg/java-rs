@@ -21,7 +21,7 @@
 //! are special events denoting metadata and constant pools.
 
 use crate::{
-    chunk_event::EventRecord,
+    chunk_event::{ChunkEvent, EventRecord},
     constant_pool::ConstantPoolEvent,
     error::{ParseResult, Result},
     metadata::{Metadata, MetadataHeader},
@@ -139,9 +139,33 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     /// size + type header and hold a reference to the event's full data. This
     /// allows callers to quickly filter on event types without having to pay a
     /// cost to fully decode each event.
+    ///
+    /// Event records may not be in chronological order. This is a side-effect
+    /// of how JFR writing works, where events are buffered before being
+    /// delivered to the chunk writer. So events can arrive out-of-order.
     fn iter_event_records(
         &'reader self,
     ) -> Box<dyn Iterator<Item = Result<EventRecord<'a>>> + 'reader>;
+
+    /// Obtain event records sorted in start time order.
+    ///
+    /// This is a convenience method for iterating over event records,
+    /// reading their event time, and returning a sorted vector of the
+    /// event records.
+    ///
+    /// Reading the start time field is relatively quick assuming the field
+    /// data I/O is fast. However, sorting is proportional to the number of
+    /// events in the chunk.
+    ///
+    /// Returns Err if there is a failure to read any [EventRecord] in the
+    /// chunk.
+    fn event_records_sorted(&'reader self) -> Result<Vec<EventRecord<'a>>> {
+        let mut events = self.iter_event_records().collect::<Result<Vec<_>>>()?;
+
+        events.sort_by_cached_key(|e| e.start_ticks().unwrap_or(0));
+
+        Ok(events)
+    }
 
     /// Resolve lightly parsed constant pool events in this chunk.
     ///
@@ -168,7 +192,7 @@ pub trait ChunkReader<'a, 'reader: 'a> {
             .iter_constant_pool_events()
             .collect::<Result<Vec<_>>>()?;
 
-        EventResolver::new(metadata, constant_pools.into_iter())
+        EventResolver::new(self.header(), metadata, constant_pools.into_iter())
     }
 }
 

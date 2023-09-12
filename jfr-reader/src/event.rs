@@ -11,9 +11,10 @@
 use crate::{
     error::{Error, Result},
     metadata::{ClassElement, FieldElement},
-    resolver::ConstantResolver,
+    resolver::{ConstantResolver, TimeResolver},
     value::{Object, Value},
 };
+use chrono::{DateTime, Duration, FixedOffset, Utc};
 use serde::Deserialize;
 
 /// Common event fields.
@@ -35,6 +36,55 @@ pub struct CommonFields {
     // TODO eventThread and stackTrace
 }
 
+impl CommonFields {
+    /// The end time of the event in ticks.
+    ///
+    /// This is the start ticks plus a duration value, if present.
+    pub fn end_time_ticks(&self) -> i64 {
+        self.start_time_ticks + self.duration.unwrap_or(0)
+    }
+
+    /// Obtain the length of time that this event represents.
+    ///
+    /// Can evaluate to 0 if the event did not record a duration or if
+    /// the recorded duration was 0.
+    pub fn duration(&self, tr: &TimeResolver) -> Duration {
+        tr.delta_duration(self.start_time_ticks, self.end_time_ticks())
+    }
+
+    /// The start time of this event in the timezone it was stored in.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    pub fn start_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+        tr.date_time(self.start_time_ticks)
+    }
+
+    /// The start time of this event in UTC.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    pub fn start_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+        tr.date_time_utc(self.start_time_ticks)
+    }
+
+    /// The start time of this event in the timezone it was stored in.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    pub fn end_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+        tr.date_time(self.end_time_ticks())
+    }
+
+    /// The end time of this event in UTC.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    pub fn end_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+        tr.date_time_utc(self.end_time_ticks())
+    }
+}
+
 /// Common interface for event types.
 ///
 /// Structs mimicking Java classes defining JFR events implement this trait.
@@ -44,6 +94,47 @@ pub trait EventType {
 
     /// Obtain a reference to the [CommonFields] instance for this event.
     fn common_fields(&self) -> &CommonFields;
+
+    // Add some default implementations of convenience functions.
+
+    /// The length of time this event represents.
+    ///
+    /// Can evaluate to 0.
+    fn duration(&self, tr: &TimeResolver) -> Duration {
+        self.common_fields().duration(tr)
+    }
+
+    /// The start time of this event in the timezone it was stored in.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    fn start_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+        self.common_fields().start_time(tr)
+    }
+
+    /// The start time of this event in UTC.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    fn start_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+        self.common_fields().start_time_utc(tr)
+    }
+
+    /// The start time of this event in the timezone it was stored in.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    fn end_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+        self.common_fields().end_time(tr)
+    }
+
+    /// The end time of this event in UTC.
+    ///
+    /// The [TimeResolver] should be derived from the chunk from which
+    /// this event was defined.
+    fn end_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+        self.common_fields().end_time_utc(tr)
+    }
 }
 
 pub struct GenericEvent<'a, 'cr, CR>

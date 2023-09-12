@@ -13,6 +13,7 @@
 //! contains the logic for doing this.
 
 use crate::{
+    chunk::ChunkHeader,
     common::{leb128_i32, leb128_i64},
     constant_pool::ConstantPoolEvent,
     error::{Error, ParseResult, Result},
@@ -21,6 +22,7 @@ use crate::{
     primitive::Primitive,
     value::{ConstantValue, Object, ResolvedConstantValue, Value},
 };
+use chrono::{DateTime, Duration, FixedOffset, TimeZone, Utc};
 use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
@@ -75,6 +77,79 @@ impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
     }
 }
 
+/// Entity for resolving time from chunk header metadata.
+///
+/// Events within a chunk express time in terms of *ticks*. These ticks
+/// need to be combined with metadata from the chunk header to resolve
+/// into wall time and units of time.
+///
+/// This type exists to facilitate those conversions.
+#[derive(Clone, Debug)]
+pub struct TimeResolver {
+    start_epoch_nanoseconds: i64,
+    start_ticks: u64,
+    ticks_per_second: u64,
+    start_date_time: DateTime<FixedOffset>,
+}
+
+impl TimeResolver {
+    /// Construct an instance from a [ChunkHeader] and [Metadata] instance.
+    pub fn new(header: &ChunkHeader, metadata: &Metadata) -> Result<Self> {
+        let start_date_time = metadata
+            .root
+            .region
+            .fixed_offset()?
+            .timestamp_nanos(header.nanoseconds_since_epoch as _);
+
+        Ok(Self {
+            start_epoch_nanoseconds: header.nanoseconds_since_epoch as i64,
+            start_ticks: header.start_ticks,
+            ticks_per_second: header.ticks_per_second,
+            start_date_time,
+        })
+    }
+
+    /// Number of nanoseconds between the specified ticks value and the chunk start.
+    #[inline]
+    pub fn chunk_start_delta_nanoseconds(&self, ticks: i64) -> i64 {
+        let delta_ticks = ticks - self.start_ticks as i64;
+
+        delta_ticks / (self.ticks_per_second / 1_000_000_000) as i64
+    }
+
+    /// The time between ticks and chunk start expressed as a [Duration].
+    pub fn chunk_start_delta_duration(&self, ticks: i64) -> Duration {
+        Duration::nanoseconds(self.chunk_start_delta_nanoseconds(ticks))
+    }
+
+    /// The nanoseconds since UNIX epoch given a ticks count.
+    pub fn epoch_nanoseconds(&self, ticks: i64) -> i64 {
+        self.start_epoch_nanoseconds + self.chunk_start_delta_nanoseconds(ticks)
+    }
+
+    /// Obtain a [DateTime] for a ticks value preserving the timezone from the metadata.
+    pub fn date_time(&self, ticks: i64) -> DateTime<FixedOffset> {
+        self.start_date_time + self.chunk_start_delta_duration(ticks)
+    }
+
+    /// Obtain a [DateTime] for a ticks value having the UTC timezone.
+    pub fn date_time_utc(&self, ticks: i64) -> DateTime<Utc> {
+        self.date_time(ticks).with_timezone(&Utc)
+    }
+
+    /// Obtain the time between 2 ticks in nanoseconds.
+    #[inline]
+    pub fn delta_nanoseconds(&self, start_ticks: i64, end_ticks: i64) -> i64 {
+        let delta_ticks = end_ticks - start_ticks;
+        delta_ticks / (self.ticks_per_second / 1_000_000_000) as i64
+    }
+
+    /// Obtain the amount of time between 2 tick values as a [Duration].
+    pub fn delta_duration(&self, start_ticks: i64, end_ticks: i64) -> Duration {
+        Duration::nanoseconds(self.delta_nanoseconds(start_ticks, end_ticks))
+    }
+}
+
 /// Entity for resolving values from event records.
 ///
 /// This struct contains the logic for turning bag-of-bytes events into higher
@@ -91,14 +166,18 @@ pub struct EventResolver<'a> {
     classes: FxHashMap<i64, ClassElement<'a>>,
     constant_pools: Vec<ConstantPoolEvent<'a>>,
     primitive_parsers: FxHashMap<i64, fn(&'a [u8]) -> ParseResult<'a, Primitive<'a>>>,
+    time_resolver: TimeResolver,
 }
 
 impl<'a> EventResolver<'a> {
     /// Construct an instance from metadata and lightly parsed constants pools.
     pub fn new(
+        chunk_header: &ChunkHeader,
         metadata: Metadata<'a>,
         constant_pools: impl Iterator<Item = ConstantPoolEvent<'a>>,
     ) -> Result<Self> {
+        let time_resolver = TimeResolver::new(chunk_header, &metadata)?;
+
         let classes = FxHashMap::from_iter(
             metadata
                 .root
@@ -122,6 +201,7 @@ impl<'a> EventResolver<'a> {
             classes,
             constant_pools,
             primitive_parsers,
+            time_resolver,
         })
     }
 
@@ -166,6 +246,11 @@ impl<'a> EventResolver<'a> {
             inner,
             string_class_id,
         })
+    }
+
+    /// Obtain the [TimeResolver] for this instance.
+    pub fn time_resolver(&self) -> &TimeResolver {
+        &self.time_resolver
     }
 
     /// Parse event fields data into a [GenericEvent].

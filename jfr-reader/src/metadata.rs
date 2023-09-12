@@ -495,7 +495,10 @@ pub struct RawRegionElement {
 #[derive(Clone, Debug)]
 pub struct RegionElement<'a> {
     pub locale: Cow<'a, str>,
-    pub gmt_offset: Cow<'a, str>,
+    /// The timezone offset, in milliseconds.
+    ///
+    /// Why this is milliseconds we have no clue.
+    pub gmt_offset: i32,
 }
 
 impl<'a> RegionElement<'a> {
@@ -529,8 +532,21 @@ impl<'a> RegionElement<'a> {
         let gmt_offset = gmt_offset.ok_or_else(|| {
             Error::ElementConstructLogic("region lacks gmtOffset attribute".to_string())
         })?;
+        let gmt_offset = i32::from_str(gmt_offset.as_ref()).map_err(|e| {
+            Error::ElementConstructLogic(format!(
+                "region element failed to parse GMT offset to integer: {}",
+                e
+            ))
+        })?;
 
         Ok(Self { locale, gmt_offset })
+    }
+
+    /// Obtain the parsed timezone offset.
+    pub fn fixed_offset(&self) -> Result<chrono::FixedOffset> {
+        chrono::FixedOffset::east_opt(self.gmt_offset / 1_000).ok_or_else(|| {
+            Error::ElementConstructLogic(format!("invalid timezone offset: {}", self.gmt_offset))
+        })
     }
 }
 
