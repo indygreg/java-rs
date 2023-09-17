@@ -21,9 +21,29 @@ use serde::Deserialize;
 ///
 /// This struct represents event fields that are present in all or nearly
 /// all JFR event types.
+///
+/// The `startTime` field is the only universal field. All the rest are
+/// optional.
+///
+/// Presence of the `duration` field is usually dependent on the event type.
+/// Same for `eventThread`. However, some events that should be producing
+/// `eventThread` annotations don't due to things like missing constant pool
+/// references.
+///
+/// `stackTrace` is also event dependent. But it is also dependent on the
+/// recording settings, as it is possible to toggle whether stack traces are
+/// recorded.
+///
+/// The type is generic over the event thread and stack trace types to allow
+/// different classes to represent these types. These types are probably
+/// consistent across OpenJDK versions but we allow different representation
+/// in case they aren't. Having them generic also leaves the door open to
+/// alternative deserializers. (Deserializing event threads and stacks can add
+/// significant overhead and some readers may want to ignore these fields
+/// completely or make their deserialization lazy.)
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CommonFields {
+pub struct CommonFields<EventThread, StackTrace> {
     /// The start time of the event, in ticks.
     ///
     /// This value needs to be combined with metadata in the chunk header to
@@ -33,10 +53,15 @@ pub struct CommonFields {
 
     /// The `duration` field value.
     pub duration: Option<i64>,
-    // TODO eventThread and stackTrace
+
+    /// The thread that this event was produced on.
+    pub event_thread: Option<EventThread>,
+
+    /// The stack trace responsible for creating this event.
+    pub stack_trace: Option<StackTrace>,
 }
 
-impl CommonFields {
+impl<EventThread, StackTrace> CommonFields<EventThread, StackTrace> {
     /// The end time of the event in ticks.
     ///
     /// This is the start ticks plus a duration value, if present.
@@ -88,19 +113,19 @@ impl CommonFields {
 /// Common interface for event types.
 ///
 /// Structs mimicking Java classes defining JFR events implement this trait.
-pub trait EventType {
+pub trait EventType<'slf, EventThread: 'slf, StackTrace: 'slf> {
     /// The Java class / event name without any dots.
     const NAME: &'static str;
 
     /// Obtain a reference to the [CommonFields] instance for this event.
-    fn common_fields(&self) -> &CommonFields;
+    fn common_fields(&'slf self) -> &'slf CommonFields<EventThread, StackTrace>;
 
     // Add some default implementations of convenience functions.
 
     /// The length of time this event represents.
     ///
     /// Can evaluate to 0.
-    fn duration(&self, tr: &TimeResolver) -> Duration {
+    fn duration(&'slf self, tr: &TimeResolver) -> Duration {
         self.common_fields().duration(tr)
     }
 
@@ -108,7 +133,7 @@ pub trait EventType {
     ///
     /// The [TimeResolver] should be derived from the chunk from which
     /// this event was defined.
-    fn start_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+    fn start_time(&'slf self, tr: &TimeResolver) -> DateTime<FixedOffset> {
         self.common_fields().start_time(tr)
     }
 
@@ -116,7 +141,7 @@ pub trait EventType {
     ///
     /// The [TimeResolver] should be derived from the chunk from which
     /// this event was defined.
-    fn start_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+    fn start_time_utc(&'slf self, tr: &TimeResolver) -> DateTime<Utc> {
         self.common_fields().start_time_utc(tr)
     }
 
@@ -124,7 +149,7 @@ pub trait EventType {
     ///
     /// The [TimeResolver] should be derived from the chunk from which
     /// this event was defined.
-    fn end_time(&self, tr: &TimeResolver) -> DateTime<FixedOffset> {
+    fn end_time(&'slf self, tr: &TimeResolver) -> DateTime<FixedOffset> {
         self.common_fields().end_time(tr)
     }
 
@@ -132,8 +157,18 @@ pub trait EventType {
     ///
     /// The [TimeResolver] should be derived from the chunk from which
     /// this event was defined.
-    fn end_time_utc(&self, tr: &TimeResolver) -> DateTime<Utc> {
+    fn end_time_utc(&'slf self, tr: &TimeResolver) -> DateTime<Utc> {
         self.common_fields().end_time_utc(tr)
+    }
+
+    /// Obtain the thread that was responsible for writing this event.
+    fn event_thread(&'slf self) -> Option<&'slf EventThread> {
+        self.common_fields().event_thread.as_ref()
+    }
+
+    /// Obtain the stack trace responsible for creating this event.
+    fn stack_trace(&'slf self) -> Option<&'slf StackTrace> {
+        self.common_fields().stack_trace.as_ref()
     }
 }
 

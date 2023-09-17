@@ -23,6 +23,9 @@ pub enum Error {
     #[error("field type not found: {0}")]
     FieldTypeNotFound(String),
 
+    #[error("type not found: {0}")]
+    TypeNotFound(String),
+
     #[error("syntax error: {0}")]
     Syn(#[from] syn::Error),
 }
@@ -146,20 +149,25 @@ pub fn type_struct(m: &Metadata, typ: &Type) -> Result<TokenStream> {
 }
 
 /// Resolve tokens for an [Event] struct.
-pub fn event_struct(m: &Metadata, event: &Event) -> Result<TokenStream> {
+pub fn event_struct(
+    m: &Metadata,
+    event: &Event,
+    thread_type: &str,
+    stack_trace_type: &str,
+) -> Result<TokenStream> {
     let name = format_ident!("{}", event.name);
     let description = event
         .description
         .clone()
         .unwrap_or_else(|| event.name.clone());
+    let thread_type_ident = format_ident!("{}", thread_type);
+    let stack_trace_type_ident = format_ident!("{}", stack_trace_type);
 
-    // We don't emit the common fields like startTime, duration, and
-    // stackTrace because they are, well, common. We handle them at a
-    // different layer.
-
+    // Common fields are handled by the CommonFields struct, which is
+    // descended into during deserialization.
     let mut fields = vec![quote! {
         #[serde(flatten)]
-        common: crate::event::CommonFields
+        common: crate::event::CommonFields<#thread_type_ident, #stack_trace_type_ident>
     }];
 
     fields.extend(
@@ -181,15 +189,21 @@ pub fn event_struct(m: &Metadata, event: &Event) -> Result<TokenStream> {
 }
 
 /// Resolve tokens for the Event implemnentation for an event struct.
-pub fn event_event_impl(event: &Event) -> Result<TokenStream> {
+pub fn event_event_impl(
+    event: &Event,
+    thread_type: &str,
+    stack_trace_type: &str,
+) -> Result<TokenStream> {
     let raw_name = event.name.as_str();
     let name = format_ident!("{}", event.name);
+    let thread_type_ident = format_ident!("{}", thread_type);
+    let stack_trace_type_ident = format_ident!("{}", stack_trace_type);
 
     Ok(quote! {
-        impl EventType for #name {
+        impl<'slf> EventType<'slf, #thread_type_ident, #stack_trace_type_ident> for #name {
             const NAME: &'static str = #raw_name;
 
-            fn common_fields(&self) -> &crate::event::CommonFields {
+            fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<#thread_type_ident, #stack_trace_type_ident> {
                 &self.common
             }
         }
@@ -226,6 +240,29 @@ pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
         parse_quote! { use serde::Deserialize; },
     ];
 
+    // Make sure we thread and stack trace types.
+    let thread_type = m
+        .types()
+        .find_map(|t| {
+            if t.name == "Thread" {
+                Some(t.name.clone())
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| Error::TypeNotFound("Thread".to_string()))?;
+
+    let stack_trace_type = m
+        .types()
+        .find_map(|t| {
+            if t.name == "StackTrace" {
+                Some(t.name.clone())
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| Error::TypeNotFound("StackTrace".to_string()))?;
+
     // Emit non-event types/structs first.
     for typ in m.types_sorted() {
         items.push(syn::parse2(type_struct(m, typ)?)?);
@@ -233,8 +270,17 @@ pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
 
     // Now all the events.
     for e in m.events_sorted() {
-        items.push(syn::parse2(event_struct(m, e)?)?);
-        items.push(syn::parse2(event_event_impl(e)?)?);
+        items.push(syn::parse2(event_struct(
+            m,
+            e,
+            &thread_type,
+            &stack_trace_type,
+        )?)?);
+        items.push(syn::parse2(event_event_impl(
+            e,
+            &thread_type,
+            &stack_trace_type,
+        )?)?);
     }
 
     // An enum for all events.

@@ -523,7 +523,7 @@ pub struct ZStatisticsSamplerType {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ActiveRecording {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Id
     #[serde(rename = "id")]
     pub id: i64,
@@ -549,9 +549,9 @@ pub struct ActiveRecording {
     #[serde(rename = "recordingDuration")]
     pub recording_duration: i64,
 }
-impl EventType for ActiveRecording {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ActiveRecording {
     const NAME: &'static str = "ActiveRecording";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -559,7 +559,7 @@ impl EventType for ActiveRecording {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ActiveSetting {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Event Id
     #[serde(rename = "id")]
     pub id: i64,
@@ -570,9 +570,9 @@ pub struct ActiveSetting {
     #[serde(rename = "value")]
     pub value: Option<String>,
 }
-impl EventType for ActiveSetting {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ActiveSetting {
     const NAME: &'static str = "ActiveSetting";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -580,7 +580,7 @@ impl EventType for ActiveSetting {
 #[derive(Clone, Debug, Deserialize)]
 pub struct AllocationRequiringGC {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Pending GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -588,9 +588,9 @@ pub struct AllocationRequiringGC {
     #[serde(rename = "size")]
     pub size: u64,
 }
-impl EventType for AllocationRequiringGC {
+impl<'slf> EventType<'slf, Thread, StackTrace> for AllocationRequiringGC {
     const NAME: &'static str = "AllocationRequiringGC";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -598,7 +598,7 @@ impl EventType for AllocationRequiringGC {
 #[derive(Clone, Debug, Deserialize)]
 pub struct BiasedLockClassRevocation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class whose biased locks were revoked
     #[serde(rename = "revokedClass")]
     pub revoked_class: Option<Class>,
@@ -609,9 +609,9 @@ pub struct BiasedLockClassRevocation {
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
 }
-impl EventType for BiasedLockClassRevocation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for BiasedLockClassRevocation {
     const NAME: &'static str = "BiasedLockClassRevocation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -619,7 +619,7 @@ impl EventType for BiasedLockClassRevocation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct BiasedLockRevocation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of object whose biased lock was revoked
     #[serde(rename = "lockClass")]
     pub lock_class: Option<Class>,
@@ -630,9 +630,9 @@ pub struct BiasedLockRevocation {
     #[serde(rename = "previousOwner")]
     pub previous_owner: Option<Thread>,
 }
-impl EventType for BiasedLockRevocation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for BiasedLockRevocation {
     const NAME: &'static str = "BiasedLockRevocation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -640,14 +640,14 @@ impl EventType for BiasedLockRevocation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct BiasedLockSelfRevocation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of object whose biased lock was revoked
     #[serde(rename = "lockClass")]
     pub lock_class: Option<Class>,
 }
-impl EventType for BiasedLockSelfRevocation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for BiasedLockSelfRevocation {
     const NAME: &'static str = "BiasedLockSelfRevocation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -655,7 +655,7 @@ impl EventType for BiasedLockSelfRevocation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct BooleanFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -666,9 +666,9 @@ pub struct BooleanFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for BooleanFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for BooleanFlag {
     const NAME: &'static str = "BooleanFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -676,7 +676,7 @@ impl EventType for BooleanFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct BooleanFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -690,9 +690,9 @@ pub struct BooleanFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for BooleanFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for BooleanFlagChanged {
     const NAME: &'static str = "BooleanFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -700,7 +700,7 @@ impl EventType for BooleanFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CPUInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Type
     #[serde(rename = "cpu")]
     pub cpu: Option<String>,
@@ -717,9 +717,9 @@ pub struct CPUInformation {
     #[serde(rename = "hwThreads")]
     pub hw_threads: u32,
 }
-impl EventType for CPUInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CPUInformation {
     const NAME: &'static str = "CPUInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -727,7 +727,7 @@ impl EventType for CPUInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CPULoad {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///JVM User
     #[serde(rename = "jvmUser")]
     pub jvm_user: f32,
@@ -738,9 +738,9 @@ pub struct CPULoad {
     #[serde(rename = "machineTotal")]
     pub machine_total: f32,
 }
-impl EventType for CPULoad {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CPULoad {
     const NAME: &'static str = "CPULoad";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -748,7 +748,7 @@ impl EventType for CPULoad {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CPUTimeStampCounter {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Fast Time
     #[serde(rename = "fastTimeEnabled")]
     pub fast_time_enabled: bool,
@@ -762,9 +762,9 @@ pub struct CPUTimeStampCounter {
     #[serde(rename = "fastTimeFrequency")]
     pub fast_time_frequency: i64,
 }
-impl EventType for CPUTimeStampCounter {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CPUTimeStampCounter {
     const NAME: &'static str = "CPUTimeStampCounter";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -772,7 +772,7 @@ impl EventType for CPUTimeStampCounter {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassDefine {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Defined Class
     #[serde(rename = "definedClass")]
     pub defined_class: Option<Class>,
@@ -780,9 +780,9 @@ pub struct ClassDefine {
     #[serde(rename = "definingClassLoader")]
     pub defining_class_loader: Option<ClassLoader>,
 }
-impl EventType for ClassDefine {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassDefine {
     const NAME: &'static str = "ClassDefine";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -790,7 +790,7 @@ impl EventType for ClassDefine {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassLoad {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Loaded Class
     #[serde(rename = "loadedClass")]
     pub loaded_class: Option<Class>,
@@ -801,9 +801,9 @@ pub struct ClassLoad {
     #[serde(rename = "initiatingClassLoader")]
     pub initiating_class_loader: Option<ClassLoader>,
 }
-impl EventType for ClassLoad {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassLoad {
     const NAME: &'static str = "ClassLoad";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -811,7 +811,7 @@ impl EventType for ClassLoad {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassLoaderStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Loader
     #[serde(rename = "classLoader")]
     pub class_loader: Option<ClassLoader>,
@@ -840,9 +840,9 @@ pub struct ClassLoaderStatistics {
     #[serde(rename = "hiddenBlockSize")]
     pub hidden_block_size: u64,
 }
-impl EventType for ClassLoaderStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassLoaderStatistics {
     const NAME: &'static str = "ClassLoaderStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -850,7 +850,7 @@ impl EventType for ClassLoaderStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassLoadingStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of classes loaded since JVM start
     #[serde(rename = "loadedClassCount")]
     pub loaded_class_count: i64,
@@ -858,9 +858,9 @@ pub struct ClassLoadingStatistics {
     #[serde(rename = "unloadedClassCount")]
     pub unloaded_class_count: i64,
 }
-impl EventType for ClassLoadingStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassLoadingStatistics {
     const NAME: &'static str = "ClassLoadingStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -868,7 +868,7 @@ impl EventType for ClassLoadingStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassRedefinition {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Redefined Class
     #[serde(rename = "redefinedClass")]
     pub redefined_class: Option<Class>,
@@ -879,9 +879,9 @@ pub struct ClassRedefinition {
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
 }
-impl EventType for ClassRedefinition {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassRedefinition {
     const NAME: &'static str = "ClassRedefinition";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -889,7 +889,7 @@ impl EventType for ClassRedefinition {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ClassUnload {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Unloaded Class
     #[serde(rename = "unloadedClass")]
     pub unloaded_class: Option<Class>,
@@ -897,9 +897,9 @@ pub struct ClassUnload {
     #[serde(rename = "definingClassLoader")]
     pub defining_class_loader: Option<ClassLoader>,
 }
-impl EventType for ClassUnload {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ClassUnload {
     const NAME: &'static str = "ClassUnload";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -907,7 +907,7 @@ impl EventType for ClassUnload {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeCacheConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Initial Size
     #[serde(rename = "initialSize")]
     pub initial_size: u64,
@@ -936,9 +936,9 @@ pub struct CodeCacheConfiguration {
     #[serde(rename = "reservedTopAddress")]
     pub reserved_top_address: u64,
 }
-impl EventType for CodeCacheConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CodeCacheConfiguration {
     const NAME: &'static str = "CodeCacheConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -946,7 +946,7 @@ impl EventType for CodeCacheConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeCacheFull {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Code Heap
     #[serde(rename = "codeBlobType")]
     pub code_blob_type: Option<CodeBlobType>,
@@ -978,9 +978,9 @@ pub struct CodeCacheFull {
     #[serde(rename = "codeCacheMaxCapacity")]
     pub code_cache_max_capacity: u64,
 }
-impl EventType for CodeCacheFull {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CodeCacheFull {
     const NAME: &'static str = "CodeCacheFull";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -988,7 +988,7 @@ impl EventType for CodeCacheFull {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeCacheStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Code Heap
     #[serde(rename = "codeBlobType")]
     pub code_blob_type: Option<CodeBlobType>,
@@ -1014,9 +1014,9 @@ pub struct CodeCacheStatistics {
     #[serde(rename = "fullCount")]
     pub full_count: i32,
 }
-impl EventType for CodeCacheStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CodeCacheStatistics {
     const NAME: &'static str = "CodeCacheStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1024,7 +1024,7 @@ impl EventType for CodeCacheStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeSweeperConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Code Sweeper Enabled
     #[serde(rename = "sweeperEnabled")]
     pub sweeper_enabled: bool,
@@ -1035,9 +1035,9 @@ pub struct CodeSweeperConfiguration {
     #[serde(rename = "sweepThreshold")]
     pub sweep_threshold: u64,
 }
-impl EventType for CodeSweeperConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CodeSweeperConfiguration {
     const NAME: &'static str = "CodeSweeperConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1045,7 +1045,7 @@ impl EventType for CodeSweeperConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CodeSweeperStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Sweeps
     #[serde(rename = "sweepCount")]
     pub sweep_count: i32,
@@ -1062,9 +1062,9 @@ pub struct CodeSweeperStatistics {
     #[serde(rename = "peakSweepTime")]
     pub peak_sweep_time: u64,
 }
-impl EventType for CodeSweeperStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CodeSweeperStatistics {
     const NAME: &'static str = "CodeSweeperStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1072,7 +1072,7 @@ impl EventType for CodeSweeperStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Compilation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Compilation Identifier
     #[serde(rename = "compileId")]
     pub compile_id: u32,
@@ -1098,9 +1098,9 @@ pub struct Compilation {
     #[serde(rename = "inlinedBytes")]
     pub inlined_bytes: u64,
 }
-impl EventType for Compilation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for Compilation {
     const NAME: &'static str = "Compilation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1108,7 +1108,7 @@ impl EventType for Compilation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilationFailure {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Failure Message
     #[serde(rename = "failureMessage")]
     pub failure_message: Option<String>,
@@ -1116,9 +1116,9 @@ pub struct CompilationFailure {
     #[serde(rename = "compileId")]
     pub compile_id: u32,
 }
-impl EventType for CompilationFailure {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CompilationFailure {
     const NAME: &'static str = "CompilationFailure";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1126,7 +1126,7 @@ impl EventType for CompilationFailure {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Thread Count
     #[serde(rename = "threadCount")]
     pub thread_count: i32,
@@ -1134,9 +1134,9 @@ pub struct CompilerConfiguration {
     #[serde(rename = "tieredCompilation")]
     pub tiered_compilation: bool,
 }
-impl EventType for CompilerConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CompilerConfiguration {
     const NAME: &'static str = "CompilerConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1144,7 +1144,7 @@ impl EventType for CompilerConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerInlining {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Compilation Identifier
     #[serde(rename = "compileId")]
     pub compile_id: u32,
@@ -1164,9 +1164,9 @@ pub struct CompilerInlining {
     #[serde(rename = "bci")]
     pub bci: i32,
 }
-impl EventType for CompilerInlining {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CompilerInlining {
     const NAME: &'static str = "CompilerInlining";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1174,7 +1174,7 @@ impl EventType for CompilerInlining {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerPhase {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Compile Phase
     #[serde(rename = "phase")]
     pub phase: Option<CompilerPhaseType>,
@@ -1185,9 +1185,9 @@ pub struct CompilerPhase {
     #[serde(rename = "phaseLevel")]
     pub phase_level: u16,
 }
-impl EventType for CompilerPhase {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CompilerPhase {
     const NAME: &'static str = "CompilerPhase";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1195,7 +1195,7 @@ impl EventType for CompilerPhase {
 #[derive(Clone, Debug, Deserialize)]
 pub struct CompilerStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Compiled Methods
     #[serde(rename = "compileCount")]
     pub compile_count: i32,
@@ -1230,9 +1230,9 @@ pub struct CompilerStatistics {
     #[serde(rename = "totalTimeSpent")]
     pub total_time_spent: i64,
 }
-impl EventType for CompilerStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for CompilerStatistics {
     const NAME: &'static str = "CompilerStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1240,14 +1240,14 @@ impl EventType for CompilerStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ConcurrentModeFailure {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
 }
-impl EventType for ConcurrentModeFailure {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ConcurrentModeFailure {
     const NAME: &'static str = "ConcurrentModeFailure";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1255,7 +1255,7 @@ impl EventType for ConcurrentModeFailure {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ContainerCPUThrottling {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of time-slice periods that have elapsed if a CPU quota has been setup for the container
     #[serde(rename = "cpuElapsedSlices")]
     pub cpu_elapsed_slices: i64,
@@ -1266,9 +1266,9 @@ pub struct ContainerCPUThrottling {
     #[serde(rename = "cpuThrottledTime")]
     pub cpu_throttled_time: i64,
 }
-impl EventType for ContainerCPUThrottling {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ContainerCPUThrottling {
     const NAME: &'static str = "ContainerCPUThrottling";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1276,7 +1276,7 @@ impl EventType for ContainerCPUThrottling {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ContainerCPUUsage {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Aggregate time consumed by all tasks in the container
     #[serde(rename = "cpuTime")]
     pub cpu_time: i64,
@@ -1287,9 +1287,9 @@ pub struct ContainerCPUUsage {
     #[serde(rename = "cpuSystemTime")]
     pub cpu_system_time: i64,
 }
-impl EventType for ContainerCPUUsage {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ContainerCPUUsage {
     const NAME: &'static str = "ContainerCPUUsage";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1297,7 +1297,7 @@ impl EventType for ContainerCPUUsage {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ContainerConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Container type information
     #[serde(rename = "containerType")]
     pub container_type: Option<String>,
@@ -1323,9 +1323,9 @@ pub struct ContainerConfiguration {
     #[serde(rename = "swapMemoryLimit")]
     pub swap_memory_limit: i64,
 }
-impl EventType for ContainerConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ContainerConfiguration {
     const NAME: &'static str = "ContainerConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1333,7 +1333,7 @@ impl EventType for ContainerConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ContainerIOUsage {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of block IO requests to the disk that have been issued by the container
     #[serde(rename = "serviceRequests")]
     pub service_requests: i64,
@@ -1341,9 +1341,9 @@ pub struct ContainerIOUsage {
     #[serde(rename = "dataTransferred")]
     pub data_transferred: i64,
 }
-impl EventType for ContainerIOUsage {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ContainerIOUsage {
     const NAME: &'static str = "ContainerIOUsage";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1351,7 +1351,7 @@ impl EventType for ContainerIOUsage {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ContainerMemoryUsage {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of times that user memory requests in the container have exceeded the memory limit
     #[serde(rename = "memoryFailCount")]
     pub memory_fail_count: i64,
@@ -1362,9 +1362,9 @@ pub struct ContainerMemoryUsage {
     #[serde(rename = "swapMemoryUsage")]
     pub swap_memory_usage: i64,
 }
-impl EventType for ContainerMemoryUsage {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ContainerMemoryUsage {
     const NAME: &'static str = "ContainerMemoryUsage";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1372,7 +1372,7 @@ impl EventType for ContainerMemoryUsage {
 #[derive(Clone, Debug, Deserialize)]
 pub struct DataLoss {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Amount lost data
     #[serde(rename = "amount")]
     pub amount: u64,
@@ -1380,9 +1380,9 @@ pub struct DataLoss {
     #[serde(rename = "total")]
     pub total: u64,
 }
-impl EventType for DataLoss {
+impl<'slf> EventType<'slf, Thread, StackTrace> for DataLoss {
     const NAME: &'static str = "DataLoss";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1390,7 +1390,7 @@ impl EventType for DataLoss {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Deoptimization {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Compilation Identifier
     #[serde(rename = "compileId")]
     pub compile_id: u32,
@@ -1416,9 +1416,9 @@ pub struct Deoptimization {
     #[serde(rename = "action")]
     pub action: Option<DeoptimizationAction>,
 }
-impl EventType for Deoptimization {
+impl<'slf> EventType<'slf, Thread, StackTrace> for Deoptimization {
     const NAME: &'static str = "Deoptimization";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1426,14 +1426,14 @@ impl EventType for Deoptimization {
 #[derive(Clone, Debug, Deserialize)]
 pub struct DirectBufferStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Maximum direct buffer capacity the process can use
     #[serde(rename = "maxCapacity")]
     pub max_capacity: i64,
 }
-impl EventType for DirectBufferStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for DirectBufferStatistics {
     const NAME: &'static str = "DirectBufferStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1441,7 +1441,7 @@ impl EventType for DirectBufferStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct DoubleFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -1452,9 +1452,9 @@ pub struct DoubleFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for DoubleFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for DoubleFlag {
     const NAME: &'static str = "DoubleFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1462,7 +1462,7 @@ impl EventType for DoubleFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct DoubleFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -1476,9 +1476,9 @@ pub struct DoubleFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for DoubleFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for DoubleFlagChanged {
     const NAME: &'static str = "DoubleFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1486,7 +1486,7 @@ impl EventType for DoubleFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct DumpReason {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Reason for writing recording data to disk
     #[serde(rename = "reason")]
     pub reason: Option<String>,
@@ -1494,9 +1494,9 @@ pub struct DumpReason {
     #[serde(rename = "recordingId")]
     pub recording_id: i32,
 }
-impl EventType for DumpReason {
+impl<'slf> EventType<'slf, Thread, StackTrace> for DumpReason {
     const NAME: &'static str = "DumpReason";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1504,7 +1504,7 @@ impl EventType for DumpReason {
 #[derive(Clone, Debug, Deserialize)]
 pub struct EvacuationFailed {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1512,9 +1512,9 @@ pub struct EvacuationFailed {
     #[serde(rename = "evacuationFailed")]
     pub evacuation_failed: Option<CopyFailed>,
 }
-impl EventType for EvacuationFailed {
+impl<'slf> EventType<'slf, Thread, StackTrace> for EvacuationFailed {
     const NAME: &'static str = "EvacuationFailed";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1522,7 +1522,7 @@ impl EventType for EvacuationFailed {
 #[derive(Clone, Debug, Deserialize)]
 pub struct EvacuationInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1551,9 +1551,9 @@ pub struct EvacuationInformation {
     #[serde(rename = "regionsFreed")]
     pub regions_freed: u32,
 }
-impl EventType for EvacuationInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for EvacuationInformation {
     const NAME: &'static str = "EvacuationInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1561,14 +1561,14 @@ impl EventType for EvacuationInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExceptionStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Exceptions Created
     #[serde(rename = "throwables")]
     pub throwables: i64,
 }
-impl EventType for ExceptionStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ExceptionStatistics {
     const NAME: &'static str = "ExceptionStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1576,7 +1576,7 @@ impl EventType for ExceptionStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExecuteVMOperation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Operation
     #[serde(rename = "operation")]
     pub operation: Option<VMOperationType>,
@@ -1593,9 +1593,9 @@ pub struct ExecuteVMOperation {
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
 }
-impl EventType for ExecuteVMOperation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ExecuteVMOperation {
     const NAME: &'static str = "ExecuteVMOperation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1603,7 +1603,7 @@ impl EventType for ExecuteVMOperation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ExecutionSample {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Thread
     #[serde(rename = "sampledThread")]
     pub sampled_thread: Option<Thread>,
@@ -1614,9 +1614,9 @@ pub struct ExecutionSample {
     #[serde(rename = "state")]
     pub state: Option<ThreadState>,
 }
-impl EventType for ExecutionSample {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ExecutionSample {
     const NAME: &'static str = "ExecutionSample";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1624,7 +1624,7 @@ impl EventType for ExecutionSample {
 #[derive(Clone, Debug, Deserialize)]
 pub struct FileForce {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Full path of the file
     #[serde(rename = "path")]
     pub path: Option<String>,
@@ -1632,9 +1632,9 @@ pub struct FileForce {
     #[serde(rename = "metaData")]
     pub meta_data: bool,
 }
-impl EventType for FileForce {
+impl<'slf> EventType<'slf, Thread, StackTrace> for FileForce {
     const NAME: &'static str = "FileForce";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1642,7 +1642,7 @@ impl EventType for FileForce {
 #[derive(Clone, Debug, Deserialize)]
 pub struct FileRead {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Full path of the file
     #[serde(rename = "path")]
     pub path: Option<String>,
@@ -1653,9 +1653,9 @@ pub struct FileRead {
     #[serde(rename = "endOfFile")]
     pub end_of_file: bool,
 }
-impl EventType for FileRead {
+impl<'slf> EventType<'slf, Thread, StackTrace> for FileRead {
     const NAME: &'static str = "FileRead";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1663,7 +1663,7 @@ impl EventType for FileRead {
 #[derive(Clone, Debug, Deserialize)]
 pub struct FileWrite {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Full path of the file
     #[serde(rename = "path")]
     pub path: Option<String>,
@@ -1671,9 +1671,9 @@ pub struct FileWrite {
     #[serde(rename = "bytesWritten")]
     pub bytes_written: i64,
 }
-impl EventType for FileWrite {
+impl<'slf> EventType<'slf, Thread, StackTrace> for FileWrite {
     const NAME: &'static str = "FileWrite";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1681,7 +1681,7 @@ impl EventType for FileWrite {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Flush {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Flush Identifier
     #[serde(rename = "flushId")]
     pub flush_id: u64,
@@ -1692,9 +1692,9 @@ pub struct Flush {
     #[serde(rename = "size")]
     pub size: u64,
 }
-impl EventType for Flush {
+impl<'slf> EventType<'slf, Thread, StackTrace> for Flush {
     const NAME: &'static str = "Flush";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1702,7 +1702,7 @@ impl EventType for Flush {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1AdaptiveIHOP {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1731,9 +1731,9 @@ pub struct G1AdaptiveIHOP {
     #[serde(rename = "predictionActive")]
     pub prediction_active: bool,
 }
-impl EventType for G1AdaptiveIHOP {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1AdaptiveIHOP {
     const NAME: &'static str = "G1AdaptiveIHOP";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1741,7 +1741,7 @@ impl EventType for G1AdaptiveIHOP {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1BasicIHOP {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1770,9 +1770,9 @@ pub struct G1BasicIHOP {
     #[serde(rename = "lastMarkingDuration")]
     pub last_marking_duration: i64,
 }
-impl EventType for G1BasicIHOP {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1BasicIHOP {
     const NAME: &'static str = "G1BasicIHOP";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1780,14 +1780,14 @@ impl EventType for G1BasicIHOP {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1EvacuationOldStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Evacuation Statistics
     #[serde(rename = "statistics")]
     pub statistics: Option<G1EvacuationStatistics>,
 }
-impl EventType for G1EvacuationOldStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1EvacuationOldStatistics {
     const NAME: &'static str = "G1EvacuationOldStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1795,14 +1795,14 @@ impl EventType for G1EvacuationOldStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1EvacuationYoungStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Evacuation Statistics
     #[serde(rename = "statistics")]
     pub statistics: Option<G1EvacuationStatistics>,
 }
-impl EventType for G1EvacuationYoungStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1EvacuationYoungStatistics {
     const NAME: &'static str = "G1EvacuationYoungStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1810,7 +1810,7 @@ impl EventType for G1EvacuationYoungStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1GarbageCollection {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1818,9 +1818,9 @@ pub struct G1GarbageCollection {
     #[serde(rename = "type")]
     pub r#type: Option<G1YCType>,
 }
-impl EventType for G1GarbageCollection {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1GarbageCollection {
     const NAME: &'static str = "G1GarbageCollection";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1828,7 +1828,7 @@ impl EventType for G1GarbageCollection {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1HeapRegionInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Index
     #[serde(rename = "index")]
     pub index: u32,
@@ -1842,9 +1842,9 @@ pub struct G1HeapRegionInformation {
     #[serde(rename = "used")]
     pub used: u64,
 }
-impl EventType for G1HeapRegionInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1HeapRegionInformation {
     const NAME: &'static str = "G1HeapRegionInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1852,7 +1852,7 @@ impl EventType for G1HeapRegionInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1HeapRegionTypeChange {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Index
     #[serde(rename = "index")]
     pub index: u32,
@@ -1869,9 +1869,9 @@ pub struct G1HeapRegionTypeChange {
     #[serde(rename = "used")]
     pub used: u64,
 }
-impl EventType for G1HeapRegionTypeChange {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1HeapRegionTypeChange {
     const NAME: &'static str = "G1HeapRegionTypeChange";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1879,7 +1879,7 @@ impl EventType for G1HeapRegionTypeChange {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1HeapSummary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1899,9 +1899,9 @@ pub struct G1HeapSummary {
     #[serde(rename = "numberOfRegions")]
     pub number_of_regions: u32,
 }
-impl EventType for G1HeapSummary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1HeapSummary {
     const NAME: &'static str = "G1HeapSummary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1909,7 +1909,7 @@ impl EventType for G1HeapSummary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct G1MMU {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -1923,9 +1923,9 @@ pub struct G1MMU {
     #[serde(rename = "pauseTarget")]
     pub pause_target: i64,
 }
-impl EventType for G1MMU {
+impl<'slf> EventType<'slf, Thread, StackTrace> for G1MMU {
     const NAME: &'static str = "G1MMU";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1933,7 +1933,7 @@ impl EventType for G1MMU {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///The garbage collector used for the young generation
     #[serde(rename = "youngCollector")]
     pub young_collector: Option<GCName>,
@@ -1962,9 +1962,9 @@ pub struct GCConfiguration {
     #[serde(rename = "gcTimeRatio")]
     pub gc_time_ratio: u32,
 }
-impl EventType for GCConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCConfiguration {
     const NAME: &'static str = "GCConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -1972,7 +1972,7 @@ impl EventType for GCConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCHeapConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Minimum Heap Size
     #[serde(rename = "minSize")]
     pub min_size: u64,
@@ -1995,9 +1995,9 @@ pub struct GCHeapConfiguration {
     #[serde(rename = "heapAddressBits")]
     pub heap_address_bits: u8,
 }
-impl EventType for GCHeapConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCHeapConfiguration {
     const NAME: &'static str = "GCHeapConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2005,7 +2005,7 @@ impl EventType for GCHeapConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCHeapSummary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2019,9 +2019,9 @@ pub struct GCHeapSummary {
     #[serde(rename = "heapUsed")]
     pub heap_used: u64,
 }
-impl EventType for GCHeapSummary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCHeapSummary {
     const NAME: &'static str = "GCHeapSummary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2029,7 +2029,7 @@ impl EventType for GCHeapSummary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCLocker {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///The number of Java threads in a critical section when the GC locker is started
     #[serde(rename = "lockCount")]
     pub lock_count: u32,
@@ -2037,9 +2037,9 @@ pub struct GCLocker {
     #[serde(rename = "stallCount")]
     pub stall_count: u32,
 }
-impl EventType for GCLocker {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCLocker {
     const NAME: &'static str = "GCLocker";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2047,7 +2047,7 @@ impl EventType for GCLocker {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhaseConcurrent {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2055,9 +2055,9 @@ pub struct GCPhaseConcurrent {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhaseConcurrent {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhaseConcurrent {
     const NAME: &'static str = "GCPhaseConcurrent";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2065,7 +2065,7 @@ impl EventType for GCPhaseConcurrent {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhaseConcurrentLevel1 {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2073,9 +2073,9 @@ pub struct GCPhaseConcurrentLevel1 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhaseConcurrentLevel1 {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhaseConcurrentLevel1 {
     const NAME: &'static str = "GCPhaseConcurrentLevel1";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2083,7 +2083,7 @@ impl EventType for GCPhaseConcurrentLevel1 {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhaseParallel {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2094,9 +2094,9 @@ pub struct GCPhaseParallel {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhaseParallel {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhaseParallel {
     const NAME: &'static str = "GCPhaseParallel";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2104,7 +2104,7 @@ impl EventType for GCPhaseParallel {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePause {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2112,9 +2112,9 @@ pub struct GCPhasePause {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhasePause {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhasePause {
     const NAME: &'static str = "GCPhasePause";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2122,7 +2122,7 @@ impl EventType for GCPhasePause {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel1 {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2130,9 +2130,9 @@ pub struct GCPhasePauseLevel1 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhasePauseLevel1 {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhasePauseLevel1 {
     const NAME: &'static str = "GCPhasePauseLevel1";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2140,7 +2140,7 @@ impl EventType for GCPhasePauseLevel1 {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel2 {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2148,9 +2148,9 @@ pub struct GCPhasePauseLevel2 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhasePauseLevel2 {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhasePauseLevel2 {
     const NAME: &'static str = "GCPhasePauseLevel2";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2158,7 +2158,7 @@ impl EventType for GCPhasePauseLevel2 {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel3 {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2166,9 +2166,9 @@ pub struct GCPhasePauseLevel3 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhasePauseLevel3 {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhasePauseLevel3 {
     const NAME: &'static str = "GCPhasePauseLevel3";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2176,7 +2176,7 @@ impl EventType for GCPhasePauseLevel3 {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCPhasePauseLevel4 {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2184,9 +2184,9 @@ pub struct GCPhasePauseLevel4 {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for GCPhasePauseLevel4 {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCPhasePauseLevel4 {
     const NAME: &'static str = "GCPhasePauseLevel4";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2194,7 +2194,7 @@ impl EventType for GCPhasePauseLevel4 {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCReferenceStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2205,9 +2205,9 @@ pub struct GCReferenceStatistics {
     #[serde(rename = "count")]
     pub count: u64,
 }
-impl EventType for GCReferenceStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCReferenceStatistics {
     const NAME: &'static str = "GCReferenceStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2215,7 +2215,7 @@ impl EventType for GCReferenceStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCSurvivorConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Upper limit for the age of how old objects to keep in the survivor area
     #[serde(rename = "maxTenuringThreshold")]
     pub max_tenuring_threshold: u8,
@@ -2223,9 +2223,9 @@ pub struct GCSurvivorConfiguration {
     #[serde(rename = "initialTenuringThreshold")]
     pub initial_tenuring_threshold: u8,
 }
-impl EventType for GCSurvivorConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCSurvivorConfiguration {
     const NAME: &'static str = "GCSurvivorConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2233,7 +2233,7 @@ impl EventType for GCSurvivorConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GCTLABConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///If Thread Local Allocation Buffers (TLABs) are in use
     #[serde(rename = "usesTLABs")]
     pub uses_tla_bs: bool,
@@ -2244,9 +2244,9 @@ pub struct GCTLABConfiguration {
     #[serde(rename = "tlabRefillWasteLimit")]
     pub tlab_refill_waste_limit: u64,
 }
-impl EventType for GCTLABConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GCTLABConfiguration {
     const NAME: &'static str = "GCTLABConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2254,7 +2254,7 @@ impl EventType for GCTLABConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct GarbageCollection {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2271,9 +2271,9 @@ pub struct GarbageCollection {
     #[serde(rename = "longestPause")]
     pub longest_pause: u64,
 }
-impl EventType for GarbageCollection {
+impl<'slf> EventType<'slf, Thread, StackTrace> for GarbageCollection {
     const NAME: &'static str = "GarbageCollection";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2281,7 +2281,7 @@ impl EventType for GarbageCollection {
 #[derive(Clone, Debug, Deserialize)]
 pub struct HeapDump {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Destination
     #[serde(rename = "destination")]
     pub destination: Option<String>,
@@ -2295,9 +2295,9 @@ pub struct HeapDump {
     #[serde(rename = "onOutOfMemoryError")]
     pub on_out_of_memory_error: bool,
 }
-impl EventType for HeapDump {
+impl<'slf> EventType<'slf, Thread, StackTrace> for HeapDump {
     const NAME: &'static str = "HeapDump";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2305,7 +2305,7 @@ impl EventType for HeapDump {
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialEnvironmentVariable {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Key
     #[serde(rename = "key")]
     pub key: Option<String>,
@@ -2313,9 +2313,9 @@ pub struct InitialEnvironmentVariable {
     #[serde(rename = "value")]
     pub value: Option<String>,
 }
-impl EventType for InitialEnvironmentVariable {
+impl<'slf> EventType<'slf, Thread, StackTrace> for InitialEnvironmentVariable {
     const NAME: &'static str = "InitialEnvironmentVariable";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2323,7 +2323,7 @@ impl EventType for InitialEnvironmentVariable {
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialSecurityProperty {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Key
     #[serde(rename = "key")]
     pub key: Option<String>,
@@ -2331,9 +2331,9 @@ pub struct InitialSecurityProperty {
     #[serde(rename = "value")]
     pub value: Option<String>,
 }
-impl EventType for InitialSecurityProperty {
+impl<'slf> EventType<'slf, Thread, StackTrace> for InitialSecurityProperty {
     const NAME: &'static str = "InitialSecurityProperty";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2341,7 +2341,7 @@ impl EventType for InitialSecurityProperty {
 #[derive(Clone, Debug, Deserialize)]
 pub struct InitialSystemProperty {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Key
     #[serde(rename = "key")]
     pub key: Option<String>,
@@ -2349,9 +2349,9 @@ pub struct InitialSystemProperty {
     #[serde(rename = "value")]
     pub value: Option<String>,
 }
-impl EventType for InitialSystemProperty {
+impl<'slf> EventType<'slf, Thread, StackTrace> for InitialSystemProperty {
     const NAME: &'static str = "InitialSystemProperty";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2359,7 +2359,7 @@ impl EventType for InitialSystemProperty {
 #[derive(Clone, Debug, Deserialize)]
 pub struct IntFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -2370,9 +2370,9 @@ pub struct IntFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for IntFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for IntFlag {
     const NAME: &'static str = "IntFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2380,7 +2380,7 @@ impl EventType for IntFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct IntFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -2394,9 +2394,9 @@ pub struct IntFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for IntFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for IntFlagChanged {
     const NAME: &'static str = "IntFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2404,7 +2404,7 @@ impl EventType for IntFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JITRestart {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Freed Memory
     #[serde(rename = "freedMemory")]
     pub freed_memory: i32,
@@ -2412,9 +2412,9 @@ pub struct JITRestart {
     #[serde(rename = "codeCacheMaxCapacity")]
     pub code_cache_max_capacity: u64,
 }
-impl EventType for JITRestart {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JITRestart {
     const NAME: &'static str = "JITRestart";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2422,7 +2422,7 @@ impl EventType for JITRestart {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JVMInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///JVM Name
     #[serde(rename = "jvmName")]
     pub jvm_name: Option<String>,
@@ -2445,9 +2445,9 @@ pub struct JVMInformation {
     #[serde(rename = "pid")]
     pub pid: i64,
 }
-impl EventType for JVMInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JVMInformation {
     const NAME: &'static str = "JVMInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2455,7 +2455,7 @@ impl EventType for JVMInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaErrorThrow {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Message
     #[serde(rename = "message")]
     pub message: Option<String>,
@@ -2463,9 +2463,9 @@ pub struct JavaErrorThrow {
     #[serde(rename = "thrownClass")]
     pub thrown_class: Option<Class>,
 }
-impl EventType for JavaErrorThrow {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JavaErrorThrow {
     const NAME: &'static str = "JavaErrorThrow";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2473,7 +2473,7 @@ impl EventType for JavaErrorThrow {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaMonitorEnter {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Monitor Class
     #[serde(rename = "monitorClass")]
     pub monitor_class: Option<Class>,
@@ -2484,9 +2484,9 @@ pub struct JavaMonitorEnter {
     #[serde(rename = "address")]
     pub address: u64,
 }
-impl EventType for JavaMonitorEnter {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JavaMonitorEnter {
     const NAME: &'static str = "JavaMonitorEnter";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2494,7 +2494,7 @@ impl EventType for JavaMonitorEnter {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaMonitorInflate {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Monitor Class
     #[serde(rename = "monitorClass")]
     pub monitor_class: Option<Class>,
@@ -2505,9 +2505,9 @@ pub struct JavaMonitorInflate {
     #[serde(rename = "cause")]
     pub cause: Option<InflateCause>,
 }
-impl EventType for JavaMonitorInflate {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JavaMonitorInflate {
     const NAME: &'static str = "JavaMonitorInflate";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2515,7 +2515,7 @@ impl EventType for JavaMonitorInflate {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaMonitorWait {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of object waited on
     #[serde(rename = "monitorClass")]
     pub monitor_class: Option<Class>,
@@ -2532,9 +2532,9 @@ pub struct JavaMonitorWait {
     #[serde(rename = "address")]
     pub address: u64,
 }
-impl EventType for JavaMonitorWait {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JavaMonitorWait {
     const NAME: &'static str = "JavaMonitorWait";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2542,7 +2542,7 @@ impl EventType for JavaMonitorWait {
 #[derive(Clone, Debug, Deserialize)]
 pub struct JavaThreadStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of live active threads including both daemon and non-daemon threads
     #[serde(rename = "activeCount")]
     pub active_count: i64,
@@ -2556,9 +2556,9 @@ pub struct JavaThreadStatistics {
     #[serde(rename = "peakCount")]
     pub peak_count: i64,
 }
-impl EventType for JavaThreadStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for JavaThreadStatistics {
     const NAME: &'static str = "JavaThreadStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2566,7 +2566,7 @@ impl EventType for JavaThreadStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct LoaderConstraintsTableStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Bucket Count
     #[serde(rename = "bucketCount")]
     pub bucket_count: u64,
@@ -2595,9 +2595,9 @@ pub struct LoaderConstraintsTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
-impl EventType for LoaderConstraintsTableStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for LoaderConstraintsTableStatistics {
     const NAME: &'static str = "LoaderConstraintsTableStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2605,7 +2605,7 @@ impl EventType for LoaderConstraintsTableStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct LongFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -2616,9 +2616,9 @@ pub struct LongFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for LongFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for LongFlag {
     const NAME: &'static str = "LongFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2626,7 +2626,7 @@ impl EventType for LongFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct LongFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -2640,9 +2640,9 @@ pub struct LongFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for LongFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for LongFlagChanged {
     const NAME: &'static str = "LongFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2650,7 +2650,7 @@ impl EventType for LongFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceAllocationFailure {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Loader
     #[serde(rename = "classLoader")]
     pub class_loader: Option<ClassLoader>,
@@ -2667,9 +2667,9 @@ pub struct MetaspaceAllocationFailure {
     #[serde(rename = "metaspaceObjectType")]
     pub metaspace_object_type: Option<MetaspaceObjectType>,
 }
-impl EventType for MetaspaceAllocationFailure {
+impl<'slf> EventType<'slf, Thread, StackTrace> for MetaspaceAllocationFailure {
     const NAME: &'static str = "MetaspaceAllocationFailure";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2677,7 +2677,7 @@ impl EventType for MetaspaceAllocationFailure {
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceChunkFreeListSummary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2712,9 +2712,9 @@ pub struct MetaspaceChunkFreeListSummary {
     #[serde(rename = "humongousChunksTotalSize")]
     pub humongous_chunks_total_size: u64,
 }
-impl EventType for MetaspaceChunkFreeListSummary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for MetaspaceChunkFreeListSummary {
     const NAME: &'static str = "MetaspaceChunkFreeListSummary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2722,7 +2722,7 @@ impl EventType for MetaspaceChunkFreeListSummary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceGCThreshold {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Old Value
     #[serde(rename = "oldValue")]
     pub old_value: u64,
@@ -2733,9 +2733,9 @@ pub struct MetaspaceGCThreshold {
     #[serde(rename = "updater")]
     pub updater: Option<GCThresholdUpdater>,
 }
-impl EventType for MetaspaceGCThreshold {
+impl<'slf> EventType<'slf, Thread, StackTrace> for MetaspaceGCThreshold {
     const NAME: &'static str = "MetaspaceGCThreshold";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2743,7 +2743,7 @@ impl EventType for MetaspaceGCThreshold {
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceOOM {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Loader
     #[serde(rename = "classLoader")]
     pub class_loader: Option<ClassLoader>,
@@ -2760,9 +2760,9 @@ pub struct MetaspaceOOM {
     #[serde(rename = "metaspaceObjectType")]
     pub metaspace_object_type: Option<MetaspaceObjectType>,
 }
-impl EventType for MetaspaceOOM {
+impl<'slf> EventType<'slf, Thread, StackTrace> for MetaspaceOOM {
     const NAME: &'static str = "MetaspaceOOM";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2770,7 +2770,7 @@ impl EventType for MetaspaceOOM {
 #[derive(Clone, Debug, Deserialize)]
 pub struct MetaspaceSummary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2790,9 +2790,9 @@ pub struct MetaspaceSummary {
     #[serde(rename = "classSpace")]
     pub class_space: Option<MetaspaceSizes>,
 }
-impl EventType for MetaspaceSummary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for MetaspaceSummary {
     const NAME: &'static str = "MetaspaceSummary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2800,7 +2800,7 @@ impl EventType for MetaspaceSummary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ModuleExport {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Exported Package
     #[serde(rename = "exportedPackage")]
     pub exported_package: Option<Package>,
@@ -2808,9 +2808,9 @@ pub struct ModuleExport {
     #[serde(rename = "targetModule")]
     pub target_module: Option<Module>,
 }
-impl EventType for ModuleExport {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ModuleExport {
     const NAME: &'static str = "ModuleExport";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2818,7 +2818,7 @@ impl EventType for ModuleExport {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ModuleRequire {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Source Module
     #[serde(rename = "source")]
     pub source: Option<Module>,
@@ -2826,9 +2826,9 @@ pub struct ModuleRequire {
     #[serde(rename = "requiredModule")]
     pub required_module: Option<Module>,
 }
-impl EventType for ModuleRequire {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ModuleRequire {
     const NAME: &'static str = "ModuleRequire";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2836,7 +2836,7 @@ impl EventType for ModuleRequire {
 #[derive(Clone, Debug, Deserialize)]
 pub struct NativeLibrary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -2847,9 +2847,9 @@ pub struct NativeLibrary {
     #[serde(rename = "topAddress")]
     pub top_address: u64,
 }
-impl EventType for NativeLibrary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for NativeLibrary {
     const NAME: &'static str = "NativeLibrary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2857,7 +2857,7 @@ impl EventType for NativeLibrary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct NativeMethodSample {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Thread
     #[serde(rename = "sampledThread")]
     pub sampled_thread: Option<Thread>,
@@ -2868,9 +2868,9 @@ pub struct NativeMethodSample {
     #[serde(rename = "state")]
     pub state: Option<ThreadState>,
 }
-impl EventType for NativeMethodSample {
+impl<'slf> EventType<'slf, Thread, StackTrace> for NativeMethodSample {
     const NAME: &'static str = "NativeMethodSample";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2878,7 +2878,7 @@ impl EventType for NativeMethodSample {
 #[derive(Clone, Debug, Deserialize)]
 pub struct NetworkUtilization {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Network Interface Name
     #[serde(rename = "networkInterface")]
     pub network_interface: Option<NetworkInterfaceName>,
@@ -2889,9 +2889,9 @@ pub struct NetworkUtilization {
     #[serde(rename = "writeRate")]
     pub write_rate: i64,
 }
-impl EventType for NetworkUtilization {
+impl<'slf> EventType<'slf, Thread, StackTrace> for NetworkUtilization {
     const NAME: &'static str = "NetworkUtilization";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2899,14 +2899,14 @@ impl EventType for NetworkUtilization {
 #[derive(Clone, Debug, Deserialize)]
 pub struct OSInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///OS Version
     #[serde(rename = "osVersion")]
     pub os_version: Option<String>,
 }
-impl EventType for OSInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for OSInformation {
     const NAME: &'static str = "OSInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2914,7 +2914,7 @@ impl EventType for OSInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectAllocationInNewTLAB {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of allocated object
     #[serde(rename = "objectClass")]
     pub object_class: Option<Class>,
@@ -2925,9 +2925,9 @@ pub struct ObjectAllocationInNewTLAB {
     #[serde(rename = "tlabSize")]
     pub tlab_size: u64,
 }
-impl EventType for ObjectAllocationInNewTLAB {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ObjectAllocationInNewTLAB {
     const NAME: &'static str = "ObjectAllocationInNewTLAB";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2935,7 +2935,7 @@ impl EventType for ObjectAllocationInNewTLAB {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectAllocationOutsideTLAB {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of allocated object
     #[serde(rename = "objectClass")]
     pub object_class: Option<Class>,
@@ -2943,9 +2943,9 @@ pub struct ObjectAllocationOutsideTLAB {
     #[serde(rename = "allocationSize")]
     pub allocation_size: u64,
 }
-impl EventType for ObjectAllocationOutsideTLAB {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ObjectAllocationOutsideTLAB {
     const NAME: &'static str = "ObjectAllocationOutsideTLAB";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2953,7 +2953,7 @@ impl EventType for ObjectAllocationOutsideTLAB {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectAllocationSample {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class of allocated object
     #[serde(rename = "objectClass")]
     pub object_class: Option<Class>,
@@ -2961,9 +2961,9 @@ pub struct ObjectAllocationSample {
     #[serde(rename = "weight")]
     pub weight: i64,
 }
-impl EventType for ObjectAllocationSample {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ObjectAllocationSample {
     const NAME: &'static str = "ObjectAllocationSample";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2971,7 +2971,7 @@ impl EventType for ObjectAllocationSample {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectCount {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -2985,9 +2985,9 @@ pub struct ObjectCount {
     #[serde(rename = "totalSize")]
     pub total_size: u64,
 }
-impl EventType for ObjectCount {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ObjectCount {
     const NAME: &'static str = "ObjectCount";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -2995,7 +2995,7 @@ impl EventType for ObjectCount {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ObjectCountAfterGC {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3009,9 +3009,9 @@ pub struct ObjectCountAfterGC {
     #[serde(rename = "totalSize")]
     pub total_size: u64,
 }
-impl EventType for ObjectCountAfterGC {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ObjectCountAfterGC {
     const NAME: &'static str = "ObjectCountAfterGC";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3019,14 +3019,14 @@ impl EventType for ObjectCountAfterGC {
 #[derive(Clone, Debug, Deserialize)]
 pub struct OldGarbageCollection {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
 }
-impl EventType for OldGarbageCollection {
+impl<'slf> EventType<'slf, Thread, StackTrace> for OldGarbageCollection {
     const NAME: &'static str = "OldGarbageCollection";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3034,7 +3034,7 @@ impl EventType for OldGarbageCollection {
 #[derive(Clone, Debug, Deserialize)]
 pub struct OldObjectSample {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Allocation Time
     #[serde(rename = "allocationTime")]
     pub allocation_time: u64,
@@ -3054,9 +3054,9 @@ pub struct OldObjectSample {
     #[serde(rename = "root")]
     pub root: Option<OldObjectGcRoot>,
 }
-impl EventType for OldObjectSample {
+impl<'slf> EventType<'slf, Thread, StackTrace> for OldObjectSample {
     const NAME: &'static str = "OldObjectSample";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3064,7 +3064,7 @@ impl EventType for OldObjectSample {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PSHeapSummary {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3090,9 +3090,9 @@ pub struct PSHeapSummary {
     #[serde(rename = "toSpace")]
     pub to_space: Option<ObjectSpace>,
 }
-impl EventType for PSHeapSummary {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PSHeapSummary {
     const NAME: &'static str = "PSHeapSummary";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3100,7 +3100,7 @@ impl EventType for PSHeapSummary {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ParallelOldGarbageCollection {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3108,9 +3108,9 @@ pub struct ParallelOldGarbageCollection {
     #[serde(rename = "densePrefix")]
     pub dense_prefix: u64,
 }
-impl EventType for ParallelOldGarbageCollection {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ParallelOldGarbageCollection {
     const NAME: &'static str = "ParallelOldGarbageCollection";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3118,7 +3118,7 @@ impl EventType for ParallelOldGarbageCollection {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PhysicalMemory {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Total amount of physical memory available to OS
     #[serde(rename = "totalSize")]
     pub total_size: u64,
@@ -3126,9 +3126,9 @@ pub struct PhysicalMemory {
     #[serde(rename = "usedSize")]
     pub used_size: u64,
 }
-impl EventType for PhysicalMemory {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PhysicalMemory {
     const NAME: &'static str = "PhysicalMemory";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3136,7 +3136,7 @@ impl EventType for PhysicalMemory {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PlaceholderTableStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of buckets
     #[serde(rename = "bucketCount")]
     pub bucket_count: u64,
@@ -3165,9 +3165,9 @@ pub struct PlaceholderTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
-impl EventType for PlaceholderTableStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PlaceholderTableStatistics {
     const NAME: &'static str = "PlaceholderTableStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3175,7 +3175,7 @@ impl EventType for PlaceholderTableStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ProcessStart {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Process Id
     #[serde(rename = "pid")]
     pub pid: i64,
@@ -3186,9 +3186,9 @@ pub struct ProcessStart {
     #[serde(rename = "command")]
     pub command: Option<String>,
 }
-impl EventType for ProcessStart {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ProcessStart {
     const NAME: &'static str = "ProcessStart";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3196,7 +3196,7 @@ impl EventType for ProcessStart {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromoteObjectInNewPLAB {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Identifier signifying GC during which the object was promoted
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3216,9 +3216,9 @@ pub struct PromoteObjectInNewPLAB {
     #[serde(rename = "plabSize")]
     pub plab_size: u64,
 }
-impl EventType for PromoteObjectInNewPLAB {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PromoteObjectInNewPLAB {
     const NAME: &'static str = "PromoteObjectInNewPLAB";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3226,7 +3226,7 @@ impl EventType for PromoteObjectInNewPLAB {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromoteObjectOutsidePLAB {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Identifier signifying GC during which the object was promoted
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3243,9 +3243,9 @@ pub struct PromoteObjectOutsidePLAB {
     #[serde(rename = "tenured")]
     pub tenured: bool,
 }
-impl EventType for PromoteObjectOutsidePLAB {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PromoteObjectOutsidePLAB {
     const NAME: &'static str = "PromoteObjectOutsidePLAB";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3253,7 +3253,7 @@ impl EventType for PromoteObjectOutsidePLAB {
 #[derive(Clone, Debug, Deserialize)]
 pub struct PromotionFailed {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3264,9 +3264,9 @@ pub struct PromotionFailed {
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
 }
-impl EventType for PromotionFailed {
+impl<'slf> EventType<'slf, Thread, StackTrace> for PromotionFailed {
     const NAME: &'static str = "PromotionFailed";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3274,7 +3274,7 @@ impl EventType for PromotionFailed {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ProtectionDomainCacheTableStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of buckets
     #[serde(rename = "bucketCount")]
     pub bucket_count: u64,
@@ -3303,9 +3303,9 @@ pub struct ProtectionDomainCacheTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
-impl EventType for ProtectionDomainCacheTableStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ProtectionDomainCacheTableStatistics {
     const NAME: &'static str = "ProtectionDomainCacheTableStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3313,7 +3313,7 @@ impl EventType for ProtectionDomainCacheTableStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct RedefineClasses {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Count
     #[serde(rename = "classCount")]
     pub class_count: i32,
@@ -3321,9 +3321,9 @@ pub struct RedefineClasses {
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
 }
-impl EventType for RedefineClasses {
+impl<'slf> EventType<'slf, Thread, StackTrace> for RedefineClasses {
     const NAME: &'static str = "RedefineClasses";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3331,14 +3331,14 @@ impl EventType for RedefineClasses {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ReservedStackActivation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Java Method
     #[serde(rename = "method")]
     pub method: Option<Method>,
 }
-impl EventType for ReservedStackActivation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ReservedStackActivation {
     const NAME: &'static str = "ReservedStackActivation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3346,7 +3346,7 @@ impl EventType for ReservedStackActivation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct RetransformClasses {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Count
     #[serde(rename = "classCount")]
     pub class_count: i32,
@@ -3354,9 +3354,9 @@ pub struct RetransformClasses {
     #[serde(rename = "redefinitionId")]
     pub redefinition_id: u64,
 }
-impl EventType for RetransformClasses {
+impl<'slf> EventType<'slf, Thread, StackTrace> for RetransformClasses {
     const NAME: &'static str = "RetransformClasses";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3364,7 +3364,7 @@ impl EventType for RetransformClasses {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointBegin {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
@@ -3375,9 +3375,9 @@ pub struct SafepointBegin {
     #[serde(rename = "jniCriticalThreadCount")]
     pub jni_critical_thread_count: i32,
 }
-impl EventType for SafepointBegin {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SafepointBegin {
     const NAME: &'static str = "SafepointBegin";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3385,14 +3385,14 @@ impl EventType for SafepointBegin {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointCleanup {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
 }
-impl EventType for SafepointCleanup {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SafepointCleanup {
     const NAME: &'static str = "SafepointCleanup";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3400,7 +3400,7 @@ impl EventType for SafepointCleanup {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointCleanupTask {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
@@ -3408,9 +3408,9 @@ pub struct SafepointCleanupTask {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for SafepointCleanupTask {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SafepointCleanupTask {
     const NAME: &'static str = "SafepointCleanupTask";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3418,14 +3418,14 @@ impl EventType for SafepointCleanupTask {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointEnd {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
 }
-impl EventType for SafepointEnd {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SafepointEnd {
     const NAME: &'static str = "SafepointEnd";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3433,7 +3433,7 @@ impl EventType for SafepointEnd {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SafepointStateSynchronization {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Safepoint Identifier
     #[serde(rename = "safepointId")]
     pub safepoint_id: u64,
@@ -3447,9 +3447,9 @@ pub struct SafepointStateSynchronization {
     #[serde(rename = "iterations")]
     pub iterations: i32,
 }
-impl EventType for SafepointStateSynchronization {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SafepointStateSynchronization {
     const NAME: &'static str = "SafepointStateSynchronization";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3457,7 +3457,7 @@ impl EventType for SafepointStateSynchronization {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ShenandoahHeapRegionInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Index
     #[serde(rename = "index")]
     pub index: u32,
@@ -3471,9 +3471,9 @@ pub struct ShenandoahHeapRegionInformation {
     #[serde(rename = "used")]
     pub used: u64,
 }
-impl EventType for ShenandoahHeapRegionInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ShenandoahHeapRegionInformation {
     const NAME: &'static str = "ShenandoahHeapRegionInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3481,7 +3481,7 @@ impl EventType for ShenandoahHeapRegionInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ShenandoahHeapRegionStateChange {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Index
     #[serde(rename = "index")]
     pub index: u32,
@@ -3498,9 +3498,9 @@ pub struct ShenandoahHeapRegionStateChange {
     #[serde(rename = "used")]
     pub used: u64,
 }
-impl EventType for ShenandoahHeapRegionStateChange {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ShenandoahHeapRegionStateChange {
     const NAME: &'static str = "ShenandoahHeapRegionStateChange";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3508,14 +3508,14 @@ impl EventType for ShenandoahHeapRegionStateChange {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Shutdown {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Reason for JVM shutdown
     #[serde(rename = "reason")]
     pub reason: Option<String>,
 }
-impl EventType for Shutdown {
+impl<'slf> EventType<'slf, Thread, StackTrace> for Shutdown {
     const NAME: &'static str = "Shutdown";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3523,7 +3523,7 @@ impl EventType for Shutdown {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SocketRead {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Remote Host
     #[serde(rename = "host")]
     pub host: Option<String>,
@@ -3543,9 +3543,9 @@ pub struct SocketRead {
     #[serde(rename = "endOfStream")]
     pub end_of_stream: bool,
 }
-impl EventType for SocketRead {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SocketRead {
     const NAME: &'static str = "SocketRead";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3553,7 +3553,7 @@ impl EventType for SocketRead {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SocketWrite {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Remote Host
     #[serde(rename = "host")]
     pub host: Option<String>,
@@ -3567,9 +3567,9 @@ pub struct SocketWrite {
     #[serde(rename = "bytesWritten")]
     pub bytes_written: i64,
 }
-impl EventType for SocketWrite {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SocketWrite {
     const NAME: &'static str = "SocketWrite";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3577,7 +3577,7 @@ impl EventType for SocketWrite {
 #[derive(Clone, Debug, Deserialize)]
 pub struct StringFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -3588,9 +3588,9 @@ pub struct StringFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for StringFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for StringFlag {
     const NAME: &'static str = "StringFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3598,7 +3598,7 @@ impl EventType for StringFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct StringFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -3612,9 +3612,9 @@ pub struct StringFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for StringFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for StringFlagChanged {
     const NAME: &'static str = "StringFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3622,7 +3622,7 @@ impl EventType for StringFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct StringTableStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of buckets
     #[serde(rename = "bucketCount")]
     pub bucket_count: u64,
@@ -3651,9 +3651,9 @@ pub struct StringTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
-impl EventType for StringTableStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for StringTableStatistics {
     const NAME: &'static str = "StringTableStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3661,7 +3661,7 @@ impl EventType for StringTableStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SweepCodeCache {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Sweep Identifier
     #[serde(rename = "sweepId")]
     pub sweep_id: i32,
@@ -3675,9 +3675,9 @@ pub struct SweepCodeCache {
     #[serde(rename = "zombifiedCount")]
     pub zombified_count: u32,
 }
-impl EventType for SweepCodeCache {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SweepCodeCache {
     const NAME: &'static str = "SweepCodeCache";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3685,7 +3685,7 @@ impl EventType for SweepCodeCache {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SymbolTableStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of buckets
     #[serde(rename = "bucketCount")]
     pub bucket_count: u64,
@@ -3714,9 +3714,9 @@ pub struct SymbolTableStatistics {
     #[serde(rename = "removalRate")]
     pub removal_rate: f32,
 }
-impl EventType for SymbolTableStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SymbolTableStatistics {
     const NAME: &'static str = "SymbolTableStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3724,14 +3724,14 @@ impl EventType for SymbolTableStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SyncOnValueBasedClass {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Value Based Class
     #[serde(rename = "valueBasedClass")]
     pub value_based_class: Option<Class>,
 }
-impl EventType for SyncOnValueBasedClass {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SyncOnValueBasedClass {
     const NAME: &'static str = "SyncOnValueBasedClass";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3739,14 +3739,14 @@ impl EventType for SyncOnValueBasedClass {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SystemGC {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Invoked Concurrent
     #[serde(rename = "invokedConcurrent")]
     pub invoked_concurrent: bool,
 }
-impl EventType for SystemGC {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SystemGC {
     const NAME: &'static str = "SystemGC";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3754,7 +3754,7 @@ impl EventType for SystemGC {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SystemProcess {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Process Identifier
     #[serde(rename = "pid")]
     pub pid: Option<String>,
@@ -3762,9 +3762,9 @@ pub struct SystemProcess {
     #[serde(rename = "commandLine")]
     pub command_line: Option<String>,
 }
-impl EventType for SystemProcess {
+impl<'slf> EventType<'slf, Thread, StackTrace> for SystemProcess {
     const NAME: &'static str = "SystemProcess";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3772,7 +3772,7 @@ impl EventType for SystemProcess {
 #[derive(Clone, Debug, Deserialize)]
 pub struct TenuringDistribution {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -3783,9 +3783,9 @@ pub struct TenuringDistribution {
     #[serde(rename = "size")]
     pub size: u64,
 }
-impl EventType for TenuringDistribution {
+impl<'slf> EventType<'slf, Thread, StackTrace> for TenuringDistribution {
     const NAME: &'static str = "TenuringDistribution";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3793,7 +3793,7 @@ impl EventType for TenuringDistribution {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadAllocationStatistics {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Approximate number of bytes allocated since thread start
     #[serde(rename = "allocated")]
     pub allocated: u64,
@@ -3801,9 +3801,9 @@ pub struct ThreadAllocationStatistics {
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
 }
-impl EventType for ThreadAllocationStatistics {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadAllocationStatistics {
     const NAME: &'static str = "ThreadAllocationStatistics";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3811,7 +3811,7 @@ impl EventType for ThreadAllocationStatistics {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadCPULoad {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///User mode thread CPU load
     #[serde(rename = "user")]
     pub user: f32,
@@ -3819,9 +3819,9 @@ pub struct ThreadCPULoad {
     #[serde(rename = "system")]
     pub system: f32,
 }
-impl EventType for ThreadCPULoad {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadCPULoad {
     const NAME: &'static str = "ThreadCPULoad";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3829,14 +3829,14 @@ impl EventType for ThreadCPULoad {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadContextSwitchRate {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Number of context switches per second
     #[serde(rename = "switchRate")]
     pub switch_rate: f32,
 }
-impl EventType for ThreadContextSwitchRate {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadContextSwitchRate {
     const NAME: &'static str = "ThreadContextSwitchRate";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3844,14 +3844,14 @@ impl EventType for ThreadContextSwitchRate {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadDump {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Thread Dump
     #[serde(rename = "result")]
     pub result: Option<String>,
 }
-impl EventType for ThreadDump {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadDump {
     const NAME: &'static str = "ThreadDump";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3859,14 +3859,14 @@ impl EventType for ThreadDump {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadEnd {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Java Thread
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
 }
-impl EventType for ThreadEnd {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadEnd {
     const NAME: &'static str = "ThreadEnd";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3874,7 +3874,7 @@ impl EventType for ThreadEnd {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadPark {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Class Parked On
     #[serde(rename = "parkedClass")]
     pub parked_class: Option<Class>,
@@ -3888,9 +3888,9 @@ pub struct ThreadPark {
     #[serde(rename = "address")]
     pub address: u64,
 }
-impl EventType for ThreadPark {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadPark {
     const NAME: &'static str = "ThreadPark";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3898,14 +3898,14 @@ impl EventType for ThreadPark {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadSleep {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Sleep Time
     #[serde(rename = "time")]
     pub time: i64,
 }
-impl EventType for ThreadSleep {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadSleep {
     const NAME: &'static str = "ThreadSleep";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3913,7 +3913,7 @@ impl EventType for ThreadSleep {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ThreadStart {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///New Java Thread
     #[serde(rename = "thread")]
     pub thread: Option<Thread>,
@@ -3921,9 +3921,9 @@ pub struct ThreadStart {
     #[serde(rename = "parentThread")]
     pub parent_thread: Option<Thread>,
 }
-impl EventType for ThreadStart {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ThreadStart {
     const NAME: &'static str = "ThreadStart";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3931,7 +3931,7 @@ impl EventType for ThreadStart {
 #[derive(Clone, Debug, Deserialize)]
 pub struct UnsignedIntFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -3942,9 +3942,9 @@ pub struct UnsignedIntFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for UnsignedIntFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for UnsignedIntFlag {
     const NAME: &'static str = "UnsignedIntFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3952,7 +3952,7 @@ impl EventType for UnsignedIntFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct UnsignedIntFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -3966,9 +3966,9 @@ pub struct UnsignedIntFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for UnsignedIntFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for UnsignedIntFlagChanged {
     const NAME: &'static str = "UnsignedIntFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3976,7 +3976,7 @@ impl EventType for UnsignedIntFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct UnsignedLongFlag {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -3987,9 +3987,9 @@ pub struct UnsignedLongFlag {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for UnsignedLongFlag {
+impl<'slf> EventType<'slf, Thread, StackTrace> for UnsignedLongFlag {
     const NAME: &'static str = "UnsignedLongFlag";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -3997,7 +3997,7 @@ impl EventType for UnsignedLongFlag {
 #[derive(Clone, Debug, Deserialize)]
 pub struct UnsignedLongFlagChanged {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
@@ -4011,9 +4011,9 @@ pub struct UnsignedLongFlagChanged {
     #[serde(rename = "origin")]
     pub origin: Option<FlagValueOrigin>,
 }
-impl EventType for UnsignedLongFlagChanged {
+impl<'slf> EventType<'slf, Thread, StackTrace> for UnsignedLongFlagChanged {
     const NAME: &'static str = "UnsignedLongFlagChanged";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4021,14 +4021,14 @@ impl EventType for UnsignedLongFlagChanged {
 #[derive(Clone, Debug, Deserialize)]
 pub struct VirtualizationInformation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Name
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for VirtualizationInformation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for VirtualizationInformation {
     const NAME: &'static str = "VirtualizationInformation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4036,7 +4036,7 @@ impl EventType for VirtualizationInformation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct YoungGarbageCollection {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -4044,9 +4044,9 @@ pub struct YoungGarbageCollection {
     #[serde(rename = "tenuringThreshold")]
     pub tenuring_threshold: u32,
 }
-impl EventType for YoungGarbageCollection {
+impl<'slf> EventType<'slf, Thread, StackTrace> for YoungGarbageCollection {
     const NAME: &'static str = "YoungGarbageCollection";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4054,7 +4054,7 @@ impl EventType for YoungGarbageCollection {
 #[derive(Clone, Debug, Deserialize)]
 pub struct YoungGenerationConfiguration {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Minimum Young Generation Size
     #[serde(rename = "minSize")]
     pub min_size: u64,
@@ -4065,9 +4065,9 @@ pub struct YoungGenerationConfiguration {
     #[serde(rename = "newRatio")]
     pub new_ratio: u32,
 }
-impl EventType for YoungGenerationConfiguration {
+impl<'slf> EventType<'slf, Thread, StackTrace> for YoungGenerationConfiguration {
     const NAME: &'static str = "YoungGenerationConfiguration";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4075,7 +4075,7 @@ impl EventType for YoungGenerationConfiguration {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZAllocationStall {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Type
     #[serde(rename = "type")]
     pub r#type: Option<ZPageTypeType>,
@@ -4083,9 +4083,9 @@ pub struct ZAllocationStall {
     #[serde(rename = "size")]
     pub size: u64,
 }
-impl EventType for ZAllocationStall {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZAllocationStall {
     const NAME: &'static str = "ZAllocationStall";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4093,7 +4093,7 @@ impl EventType for ZAllocationStall {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZPageAllocation {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Type
     #[serde(rename = "type")]
     pub r#type: Option<ZPageTypeType>,
@@ -4113,9 +4113,9 @@ pub struct ZPageAllocation {
     #[serde(rename = "nonBlocking")]
     pub non_blocking: bool,
 }
-impl EventType for ZPageAllocation {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZPageAllocation {
     const NAME: &'static str = "ZPageAllocation";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4123,7 +4123,7 @@ impl EventType for ZPageAllocation {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZRelocationSet {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Total
     #[serde(rename = "total")]
     pub total: u64,
@@ -4134,9 +4134,9 @@ pub struct ZRelocationSet {
     #[serde(rename = "relocate")]
     pub relocate: u64,
 }
-impl EventType for ZRelocationSet {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZRelocationSet {
     const NAME: &'static str = "ZRelocationSet";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4144,7 +4144,7 @@ impl EventType for ZRelocationSet {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZRelocationSetGroup {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Type
     #[serde(rename = "type")]
     pub r#type: Option<ZPageTypeType>,
@@ -4161,9 +4161,9 @@ pub struct ZRelocationSetGroup {
     #[serde(rename = "relocate")]
     pub relocate: u64,
 }
-impl EventType for ZRelocationSetGroup {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZRelocationSetGroup {
     const NAME: &'static str = "ZRelocationSetGroup";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4171,7 +4171,7 @@ impl EventType for ZRelocationSetGroup {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZStatisticsCounter {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Id
     #[serde(rename = "id")]
     pub id: Option<ZStatisticsCounterType>,
@@ -4182,9 +4182,9 @@ pub struct ZStatisticsCounter {
     #[serde(rename = "value")]
     pub value: u64,
 }
-impl EventType for ZStatisticsCounter {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZStatisticsCounter {
     const NAME: &'static str = "ZStatisticsCounter";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4192,7 +4192,7 @@ impl EventType for ZStatisticsCounter {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZStatisticsSampler {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Id
     #[serde(rename = "id")]
     pub id: Option<ZStatisticsSamplerType>,
@@ -4200,9 +4200,9 @@ pub struct ZStatisticsSampler {
     #[serde(rename = "value")]
     pub value: u64,
 }
-impl EventType for ZStatisticsSampler {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZStatisticsSampler {
     const NAME: &'static str = "ZStatisticsSampler";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4210,7 +4210,7 @@ impl EventType for ZStatisticsSampler {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZThreadPhase {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///GC Identifier
     #[serde(rename = "gcId")]
     pub gc_id: u32,
@@ -4218,9 +4218,9 @@ pub struct ZThreadPhase {
     #[serde(rename = "name")]
     pub name: Option<String>,
 }
-impl EventType for ZThreadPhase {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZThreadPhase {
     const NAME: &'static str = "ZThreadPhase";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4228,14 +4228,14 @@ impl EventType for ZThreadPhase {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZUncommit {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Uncommitted
     #[serde(rename = "uncommitted")]
     pub uncommitted: u64,
 }
-impl EventType for ZUncommit {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZUncommit {
     const NAME: &'static str = "ZUncommit";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
@@ -4243,14 +4243,14 @@ impl EventType for ZUncommit {
 #[derive(Clone, Debug, Deserialize)]
 pub struct ZUnmap {
     #[serde(flatten)]
-    common: crate::event::CommonFields,
+    common: crate::event::CommonFields<Thread, StackTrace>,
     ///Unmapped
     #[serde(rename = "unmapped")]
     pub unmapped: u64,
 }
-impl EventType for ZUnmap {
+impl<'slf> EventType<'slf, Thread, StackTrace> for ZUnmap {
     const NAME: &'static str = "ZUnmap";
-    fn common_fields(&self) -> &crate::event::CommonFields {
+    fn common_fields(&'slf self) -> &'slf crate::event::CommonFields<Thread, StackTrace> {
         &self.common
     }
 }
