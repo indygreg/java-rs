@@ -28,6 +28,8 @@ pub struct ConstantPoolHeader {
     pub timestamp: i64,
     pub duration: i64,
     pub delta: i64,
+    /// Checkpoint type.
+    /// Flush, chunk header, statics, thread, etc.
     pub mask: i8,
     pub pool_count: i32,
 }
