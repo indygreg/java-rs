@@ -8,7 +8,7 @@
 
 use crate::{
     error::{Error, Result},
-    metadata::ClassElement,
+    metadata::{ClassElement, FieldElement},
     primitive::Primitive,
     resolver::ConstantResolver,
 };
@@ -55,6 +55,13 @@ impl<'a> Object<'a> {
     /// Obtain the class being described.
     pub fn class(&self) -> &ClassElement {
         self.class
+    }
+
+    /// Iterate fields and their respective values.
+    pub fn iter_fields_and_values(
+        &self,
+    ) -> impl Iterator<Item = (&FieldElement<'a>, &Value<'a>)> + '_ {
+        self.class.fields.iter().zip(self.fields.iter())
     }
 
     /// Iterate over field values in this instance.
