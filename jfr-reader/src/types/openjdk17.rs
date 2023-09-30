@@ -5,7 +5,6 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
-
 use crate::event::EventType;
 use serde::Deserialize;
 ///Bytecode Instruction
@@ -518,6 +517,60 @@ pub struct ZStatisticsSamplerType {
     ///Sampler
     #[serde(rename = "sampler")]
     pub sampler: Option<String>,
+}
+///All non-event types
+#[derive(Clone, Debug, Deserialize)]
+pub enum Types {
+    Bytecode(Bytecode),
+    CalleeMethod(CalleeMethod),
+    ChunkHeader(ChunkHeader),
+    Class(Class),
+    ClassLoader(ClassLoader),
+    CodeBlobType(CodeBlobType),
+    CompilerPhaseType(CompilerPhaseType),
+    CompilerType(CompilerType),
+    CopyFailed(CopyFailed),
+    DeoptimizationAction(DeoptimizationAction),
+    DeoptimizationReason(DeoptimizationReason),
+    FlagValueOrigin(FlagValueOrigin),
+    FrameType(FrameType),
+    G1EvacuationStatistics(G1EvacuationStatistics),
+    G1HeapRegionType(G1HeapRegionType),
+    G1YCType(G1YCType),
+    GCCause(GCCause),
+    GCName(GCName),
+    GCThresholdUpdater(GCThresholdUpdater),
+    GCWhen(GCWhen),
+    InflateCause(InflateCause),
+    MetadataType(MetadataType),
+    MetaspaceObjectType(MetaspaceObjectType),
+    MetaspaceSizes(MetaspaceSizes),
+    Method(Method),
+    Module(Module),
+    NarrowOopMode(NarrowOopMode),
+    NetworkInterfaceName(NetworkInterfaceName),
+    ObjectSpace(ObjectSpace),
+    OldObject(OldObject),
+    OldObjectArray(OldObjectArray),
+    OldObjectField(OldObjectField),
+    OldObjectGcRoot(OldObjectGcRoot),
+    OldObjectRootSystem(OldObjectRootSystem),
+    OldObjectRootType(OldObjectRootType),
+    Package(Package),
+    Reference(Reference),
+    ReferenceType(ReferenceType),
+    ShenandoahHeapRegionState(ShenandoahHeapRegionState),
+    StackFrame(StackFrame),
+    StackTrace(StackTrace),
+    Symbol(Symbol),
+    Thread(Thread),
+    ThreadGroup(ThreadGroup),
+    ThreadState(ThreadState),
+    VMOperationType(VMOperationType),
+    VirtualSpace(VirtualSpace),
+    ZPageTypeType(ZPageTypeType),
+    ZStatisticsCounterType(ZStatisticsCounterType),
+    ZStatisticsSamplerType(ZStatisticsSamplerType),
 }
 ///ActiveRecording
 #[derive(Clone, Debug, Deserialize)]

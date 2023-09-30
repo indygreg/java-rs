@@ -148,6 +148,29 @@ pub fn type_struct(m: &Metadata, typ: &Type) -> Result<TokenStream> {
     })
 }
 
+/// Resolve tokens for an enum defining non-event types.
+pub fn types_enum(m: &Metadata) -> Result<TokenStream> {
+    let variants = m
+        .types_sorted()
+        .into_iter()
+        .map(|t| {
+            let name = format_ident!("{}", t.name);
+
+            quote! { #name(#name) }
+        })
+        .collect::<Vec<_>>();
+
+    let doc = "All non-event types";
+
+    Ok(quote! {
+        #[doc = #doc]
+        #[derive(Clone, Debug, Deserialize)]
+        pub enum Types {
+            #(#variants),*
+        }
+    })
+}
+
 /// Resolve tokens for an [Event] struct.
 pub fn event_struct(
     m: &Metadata,
@@ -267,6 +290,9 @@ pub fn metadata_to_rs(m: &Metadata) -> Result<String> {
     for typ in m.types_sorted() {
         items.push(syn::parse2(type_struct(m, typ)?)?);
     }
+
+    // An enum for non-event types.
+    items.push(syn::parse2(types_enum(m)?)?);
 
     // Now all the events.
     for e in m.events_sorted() {
