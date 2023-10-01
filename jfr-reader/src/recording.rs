@@ -80,4 +80,19 @@ impl<T: Read + Seek> FileReader<T> {
 
         Ok(Some(buf))
     }
+
+    /// Resolve all chunks in this reader.
+    ///
+    /// This method is not as efficient as [Self::next_chunk_data()] because
+    /// it requires holding every chunk's data in memory. It is mostly provided
+    /// as a convenience.
+    pub fn all_chunks(&mut self) -> Result<Vec<Vec<u8>>> {
+        let mut res = vec![];
+
+        while let Some(chunk) = self.next_chunk_data()? {
+            res.push(chunk);
+        }
+
+        Ok(res)
+    }
 }
