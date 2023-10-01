@@ -32,6 +32,8 @@ use nom::{
     error::context,
     number::streaming::{be_u16, be_u32, be_u64},
 };
+use rustc_hash::FxHashMap;
+use std::borrow::Cow;
 
 pub const MAGIC: [u8; 4] = *b"FLR\0";
 
@@ -118,6 +120,18 @@ impl ChunkHeader {
     }
 }
 
+/// Describes occurrences of an event type within a chunk.
+pub struct ChunkEventSummary<'a> {
+    /// Class ID.
+    pub class_id: i64,
+    /// Class name.
+    pub name: Option<Cow<'a, str>>,
+    /// The number of events of this type.
+    pub count: u64,
+    /// The total size of events of this type.
+    pub size_bytes: u64,
+}
+
 /// Describes common properties of entities that can read JFR chunks.
 pub trait ChunkReader<'a, 'reader: 'a> {
     /// Obtains the parsed header for this chunk.
@@ -193,6 +207,40 @@ pub trait ChunkReader<'a, 'reader: 'a> {
             .collect::<Result<Vec<_>>>()?;
 
         EventResolver::new(self.header(), metadata, constant_pools.into_iter())
+    }
+
+    /// Obtain a summary of event counts and sizes grouped by class ID.
+    fn event_counts(&'reader self, names: bool) -> Result<Vec<ChunkEventSummary<'a>>> {
+        let metadata = self.metadata()?;
+
+        let mut classes = FxHashMap::with_capacity_and_hasher(
+            metadata.class_map.len(),
+            std::hash::BuildHasherDefault::<rustc_hash::FxHasher>::default(),
+        );
+
+        for e in self.iter_event_records() {
+            let e = e?;
+
+            let entry = classes
+                .entry(e.class_id())
+                .or_insert_with(|| ChunkEventSummary {
+                    class_id: e.class_id(),
+                    name: if names {
+                        metadata
+                            .class_map
+                            .get(&e.class_id())
+                            .and_then(|ce| Some(ce.name.clone()))
+                    } else {
+                        None
+                    },
+                    count: 0,
+                    size_bytes: 0,
+                });
+            entry.count += 1;
+            entry.size_bytes += e.size_bytes() as u64;
+        }
+
+        Ok(classes.into_values().collect::<Vec<_>>())
     }
 }
 

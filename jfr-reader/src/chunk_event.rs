@@ -127,6 +127,20 @@ impl<'a> EventRecord<'a> {
         ))
     }
 
+    /// The numeric class ID (chunk-local) of the event.
+    #[inline]
+    pub fn class_id(&self) -> i64 {
+        self.header.event_type
+    }
+
+    /// Size of the event record in bytes.
+    ///
+    /// Inclusive of header.
+    #[inline]
+    pub fn size_bytes(&self) -> i32 {
+        self.header.size
+    }
+
     /// Whether this is a special event.
     ///
     /// Special events are typically not parsed by regular consumers.
