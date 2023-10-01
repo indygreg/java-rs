@@ -15,8 +15,25 @@ use {
         resolver::EventResolver,
         value::Value,
     },
+    bitflags::bitflags,
     nom::{bytes::streaming::take, error::context, number::streaming::be_i8, sequence::pair},
 };
+
+bitflags! {
+    /// Represents checkpoint / constant pool header mask values.
+    pub struct CheckpointType: i8 {
+        /// Finishes a flush segment.
+        const Flush = 1;
+        /// Contains chunk header information in the first pool.
+        const ChunkHeader = 2;
+        /// Static values that don't change between chunks.
+        const Statics = 4;
+        /// Thread related metadata.
+        const Thread = 8;
+        const _ = !0;
+    }
+
+}
 
 /// The full header of a constants pool event record.
 ///
@@ -29,7 +46,6 @@ pub struct ConstantPoolHeader {
     pub duration: i64,
     pub delta: i64,
     /// Checkpoint type.
-    /// Flush, chunk header, statics, thread, etc.
     pub mask: i8,
     pub pool_count: i32,
 }
@@ -58,6 +74,31 @@ impl ConstantPoolHeader {
                 pool_count,
             },
         ))
+    }
+
+    /// Obtain the mask flags as a parsed bit mask.
+    pub fn mask_flags(&self) -> CheckpointType {
+        CheckpointType::from_bits_retain(self.mask)
+    }
+
+    /// Whether the mask flags indicate this finishes a flush segment.
+    pub fn is_flush(&self) -> bool {
+        self.mask_flags().contains(CheckpointType::Flush)
+    }
+
+    /// Whether the mask flags indicate this contains chunk header information.
+    pub fn is_chunk_header(&self) -> bool {
+        self.mask_flags().contains(CheckpointType::ChunkHeader)
+    }
+
+    /// Whether the mask flags indicate this contains statics across multiple chunks.
+    pub fn is_statics(&self) -> bool {
+        self.mask_flags().contains(CheckpointType::Statics)
+    }
+
+    /// Whether the mask flags indicates this contains thread metadata.
+    pub fn is_thread(&self) -> bool {
+        self.mask_flags().contains(CheckpointType::Thread)
     }
 }
 
