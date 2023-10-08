@@ -27,6 +27,12 @@ use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
 pub trait ConstantResolver<'a>: Sized {
+    /// Iterate over class IDs known to this resolver.
+    fn iter_class_ids(&self) -> Box<dyn Iterator<Item = i64> + '_>;
+
+    /// Iterate over indices for a given class ID.
+    fn iter_class_indices(&self, class_id: i64) -> Box<dyn Iterator<Item = i64> + '_>;
+
     /// Get the value of a constant.
     fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_>;
 
@@ -60,6 +66,10 @@ pub trait ConstantResolver<'a>: Sized {
         }
     }
 
+    /// Resolve the [String] value of a `java.lang.String` constant.
+    ///
+    /// This is a convenience implementation for calling [get_mapped()] for a function
+    /// that is able to map the [Value] to a [String].
     fn get_string(&self, index: i64) -> ConstantValueMapped<String> {
         if let Some(class_id) = self.string_class_id() {
             self.get_mapped(class_id, index, move |v| {
@@ -92,6 +102,18 @@ pub struct ConstantPoolValues<'a> {
 }
 
 impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
+    fn iter_class_ids(&self) -> Box<dyn Iterator<Item = i64> + '_> {
+        Box::new(self.inner.keys().copied())
+    }
+
+    fn iter_class_indices(&self, class_id: i64) -> Box<dyn Iterator<Item = i64> + '_> {
+        if let Some(v) = self.inner.get(&class_id) {
+            Box::new(v.keys().copied())
+        } else {
+            Box::new(std::iter::empty())
+        }
+    }
+
     fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_> {
         match self.inner.get(&class_id) {
             Some(x) => match x.get(&index) {
