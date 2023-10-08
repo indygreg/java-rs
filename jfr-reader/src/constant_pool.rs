@@ -21,6 +21,7 @@ use {
 
 bitflags! {
     /// Represents checkpoint / constant pool header mask values.
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     pub struct CheckpointType: i8 {
         /// Finishes a flush segment.
         const Flush = 1;
