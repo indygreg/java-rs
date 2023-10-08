@@ -39,6 +39,13 @@ pub enum ResolvedConstantValue<'a> {
     Missing,
 }
 
+/// Holds a constant's value mapped to an arbitrary different type.
+pub enum ConstantValueMapped<T> {
+    Null,
+    Value(Result<T>),
+    Missing,
+}
+
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
 pub struct Object<'a> {
@@ -359,15 +366,9 @@ where
                 Primitive::NullString => visitor.visit_none(),
                 Primitive::String(v) => visitor.visit_borrowed_str(v.as_ref()),
                 Primitive::StringConstantPool(index) => match self.constants.get_string(*index) {
-                    ConstantValue::Null => visitor.visit_none(),
-                    ConstantValue::Value(v) => {
-                        let de = ValueDeserializer {
-                            value: v,
-                            constants: self.constants,
-                        };
-                        Self::deserialize_any(de, visitor)
-                    }
-                    ConstantValue::Missing => visitor.visit_none(),
+                    ConstantValueMapped::Null => visitor.visit_none(),
+                    ConstantValueMapped::Value(s) => visitor.visit_string(s?),
+                    ConstantValueMapped::Missing => visitor.visit_none(),
                 },
             },
             Value::Object(o) => visitor.visit_map(ObjectDeserializer {

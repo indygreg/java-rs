@@ -20,7 +20,7 @@ use crate::{
     event::GenericEvent,
     metadata::{ClassElement, FieldElement, Metadata},
     primitive::Primitive,
-    value::{ConstantValue, Object, ResolvedConstantValue, Value},
+    value::{ConstantValue, ConstantValueMapped, Object, ResolvedConstantValue, Value},
 };
 use chrono::{DateTime, Duration, FixedOffset, TimeZone, Utc};
 use rustc_hash::FxHashMap;
@@ -41,8 +41,44 @@ pub trait ConstantResolver<'a>: Sized {
         }
     }
 
-    /// Get the value of a string constant.
-    fn get_string(&self, index: i64) -> ConstantValue<'a, '_>;
+    /// Obtain the class ID for `java.lang.String`.
+    fn string_class_id(&self) -> Option<i64>;
+
+    /// Obtain the generic [Value] of a constant and map it through a provided function.
+    ///
+    /// This method can be used as a basis for caching typed constant lookups.
+    fn get_mapped<T>(
+        &self,
+        class_id: i64,
+        index: i64,
+        map_fn: fn(&'_ Value<'a>) -> Result<T>,
+    ) -> ConstantValueMapped<T> {
+        match self.get(class_id, index) {
+            ConstantValue::Null => ConstantValueMapped::Null,
+            ConstantValue::Missing => ConstantValueMapped::Missing,
+            ConstantValue::Value(v) => ConstantValueMapped::Value(map_fn(v)),
+        }
+    }
+
+    fn get_string(&self, index: i64) -> ConstantValueMapped<String> {
+        if let Some(class_id) = self.string_class_id() {
+            self.get_mapped(class_id, index, move |v| {
+                let p = v.as_primitive().ok_or_else(|| {
+                    Error::Deserialize("purported string value not a primitive".to_string())
+                })?;
+
+                if let Primitive::String(s) = p {
+                    Ok(s.to_string())
+                } else {
+                    Err(Error::Deserialize(
+                        "purported string value not a string primitive".to_string(),
+                    ))
+                }
+            })
+        } else {
+            ConstantValueMapped::Missing
+        }
+    }
 }
 
 /// Holds resolved values in the constants pool.
@@ -68,12 +104,8 @@ impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
         }
     }
 
-    fn get_string(&self, index: i64) -> ConstantValue<'a, '_> {
-        if let Some(class_id) = self.string_class_id {
-            self.get(class_id, index)
-        } else {
-            ConstantValue::Missing
-        }
+    fn string_class_id(&self) -> Option<i64> {
+        self.string_class_id
     }
 }
 
