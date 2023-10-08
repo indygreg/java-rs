@@ -61,3 +61,51 @@ pub mod specification;
 pub mod string_table;
 pub mod types;
 pub mod value;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::chunk::ChunkReader;
+
+    #[test]
+    fn read_intellij() -> error::Result<()> {
+        let input = include_bytes!("../testdata/intellij.jfr.zst");
+        let input = zstd::decode_all(input.as_slice()).unwrap();
+
+        let mut fr = recording::FileReader::from_stream(std::io::Cursor::new(input.as_slice()))?;
+
+        // A couple events fail to deserialize due to use of u64 in type definition
+        // but presence of -1 as stored value.
+        let known_bad = vec![(0, 2584), (0, 2615)];
+
+        for (chunk_index, chunk) in fr.all_chunks()?.into_iter().enumerate() {
+            let reader = chunk::SliceReader::new(&chunk)?.1;
+
+            let resolver = reader.resolver()?;
+            let cpv = resolver.constant_pool_values()?;
+
+            for (event_index, er) in reader.iter_event_records().enumerate() {
+                let er = er?;
+
+                if er.is_special_event() {
+                    continue;
+                }
+
+                let v = er.resolve_value(&resolver)?;
+
+                if v.deserialize_enum::<types::openjdk17::Events>(&cpv)
+                    .is_err()
+                {
+                    assert!(
+                        known_bad.contains(&(chunk_index, event_index)),
+                        "event {}:{} is known bad",
+                        chunk_index,
+                        event_index
+                    );
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
