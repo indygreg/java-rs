@@ -92,3 +92,19 @@
 //! parsing the metadata it is impossible to interpret the field data in an
 //! event record because the typing of each field is not known and values are
 //! not self describing.
+//!
+//! # Observations on Constant Pool References
+//!
+//! The metadata's class element definition (specifically its field elements
+//! definitions) encodes whether a field's value is stored in the constant pool.
+//! So within a chunk either all or none of a specific class-field's values are
+//! in the constant pool.
+//!
+//! Values inside the constant pool can themselves have references to fields /
+//! values in the constant pool. For example, events commonly hold a reference
+//! to the `java.lang.Thread` from which the event was emitted. The `Thread`
+//! value - being commonly emitted - is stored in the constants pool. And the
+//! `java.lang.Thread` itself may store fields like `group` (a
+//! `jdk.types.ThreadGroup`) in the constants pool. Making this example even
+//! more complex is that `jdk.types.ThreadGroup` has a `parent` field that is
+//! itself a `jdk.types.ThreadGroup` and can be stored in the constants pool.
