@@ -58,10 +58,23 @@
 //! event types. Which thread produced the event, why the event is being recorded,
 //! etc. Like settings they are additional metadata added by JFR collection.
 //!
-//! # Constant Pools
+//! # Checkpoint Events
 //!
-//! Constants pools are special events defining commonly used/referenced data
-//! values and complex data structures.
+//! There are special *checkpoint events* interspersed within the event stream.
+//! From a high level, they have the same common header as regular events,
+//! identifying the payload length and class ID. They even have the common
+//! timestamp and duration fields like many events. However, the class ID is
+//! always the special value 1.
+//!
+//! The chunk header stores the offset to the last checkpoint event. And each
+//! checkpoint event stores the offset to the prior checkpoint event. This
+//! facilitates quickly walking all checkpoint events without having to scan
+//! all events in the chunk.
+//!
+//! Checkpoint events store a bit mask denoting special flavors of checkpoint
+//! events.
+//!
+//! Within checkpoint events are *constant pools* holding inline value data.
 //!
 //! An event type's value can be stored inline in the event or it can reference
 //! a value in a constant pool. This allows commonly used values to be stored
@@ -72,11 +85,7 @@
 //!
 //! The constants pool is logically a mapping of class IDs to a mapping of
 //! unique values for that type. The constants pool is logically spread across
-//! N discrete events. The chunk header refers to the final constants pool
-//! event. The constants pool / event header defines a negative integer offset
-//! to the prior constants pool event. Chunk readers typically walk the events
-//! backwards to populate the constants pool until they get to the initial
-//! event.
+//! N discrete events.
 //!
 //! Storing the constants pool this way allows JFR writers to eagerly append new
 //! constants pool entries to a file without having to buffer/preallocate space

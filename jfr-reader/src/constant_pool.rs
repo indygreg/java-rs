@@ -23,9 +23,20 @@ bitflags! {
     /// Represents checkpoint / constant pool header mask values.
     #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     pub struct CheckpointType: i8 {
+        /// A generic checkpoint event with no special semantics.
+        ///
+        /// Probably just regular constant pool data.
+        const GENERIC = 0;
         /// Finishes a flush segment.
         const Flush = 1;
         /// Contains chunk header information in the first pool.
+        ///
+        /// The inline constant pool data contains a single chunk header value.
+        /// The class ID reference should resolve to `jdk.types.ChunkHeader`,
+        /// which is a simple wrapper to a byte array. This byte array holds
+        /// a chunk header data structure.
+        ///
+        /// The Flush flag is likely also set when this flag is set.
         const ChunkHeader = 2;
         /// Static values that don't change between chunks.
         const Statics = 4;
