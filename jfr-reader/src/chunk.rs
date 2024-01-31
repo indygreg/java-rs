@@ -133,7 +133,7 @@ pub struct ChunkEventSummary<'chunk> {
 }
 
 /// Describes common properties of entities that can read JFR chunks.
-pub trait ChunkReader<'chunk, 'reader: 'chunk> {
+pub trait ChunkReader<'reader, 'chunk: 'reader> {
     /// Obtains the parsed header for this chunk.
     fn header(&'reader self) -> &'reader ChunkHeader;
 
@@ -321,7 +321,7 @@ impl<'chunk> SliceReader<'chunk> {
     }
 }
 
-impl<'chunk, 'reader: 'chunk> ChunkReader<'chunk, 'reader> for SliceReader<'chunk> {
+impl<'reader, 'chunk: 'reader> ChunkReader<'reader, 'chunk> for SliceReader<'chunk> {
     fn header(&'reader self) -> &ChunkHeader {
         &self.header
     }
