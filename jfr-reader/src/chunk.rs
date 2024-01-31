@@ -133,7 +133,7 @@ pub struct ChunkEventSummary<'a> {
 }
 
 /// Describes common properties of entities that can read JFR chunks.
-pub trait ChunkReader<'a, 'reader: 'a> {
+pub trait ChunkReader<'chunk, 'reader: 'chunk> {
     /// Obtains the parsed header for this chunk.
     fn header(&'reader self) -> &'reader ChunkHeader;
 
@@ -141,7 +141,7 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     fn metadata_header(&'reader self) -> &'reader MetadataHeader;
 
     /// Resolves metadata in this chunk.
-    fn metadata(&'reader self) -> Result<Metadata<'a>>;
+    fn metadata(&'reader self) -> Result<Metadata<'chunk>>;
 
     /// Iterate event records in this chunk.
     ///
@@ -159,7 +159,7 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     /// delivered to the chunk writer. So events can arrive out-of-order.
     fn iter_event_records(
         &'reader self,
-    ) -> Box<dyn Iterator<Item = Result<EventRecord<'a>>> + 'reader>;
+    ) -> Box<dyn Iterator<Item = Result<EventRecord<'chunk>>> + 'reader>;
 
     /// Obtain event records sorted in start time order.
     ///
@@ -173,7 +173,7 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     ///
     /// Returns Err if there is a failure to read any [EventRecord] in the
     /// chunk.
-    fn event_records_sorted(&'reader self) -> Result<Vec<EventRecord<'a>>> {
+    fn event_records_sorted(&'reader self) -> Result<Vec<EventRecord<'chunk>>> {
         let mut events = self.iter_event_records().collect::<Result<Vec<_>>>()?;
 
         events.sort_by_cached_key(|e| e.start_ticks().unwrap_or(0));
@@ -193,13 +193,13 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     /// pool events and doesn't require decoding event headers for every event.
     fn iter_constant_pool_events(
         &'reader self,
-    ) -> Box<dyn Iterator<Item = Result<ConstantPoolEvent<'a>>> + 'reader>;
+    ) -> Box<dyn Iterator<Item = Result<ConstantPoolEvent<'chunk>>> + 'reader>;
 
     /// Obtain a resolver for this chunk.
     ///
     /// The resolver is used to perform the heavy lifting to assemble events
     /// using class/type metadata and constants pools.
-    fn resolver(&'reader self) -> Result<EventResolver<'a>> {
+    fn resolver(&'reader self) -> Result<EventResolver<'chunk>> {
         let metadata = self.metadata()?;
 
         let constant_pools = self
@@ -210,7 +210,7 @@ pub trait ChunkReader<'a, 'reader: 'a> {
     }
 
     /// Obtain a summary of event counts and sizes grouped by class ID.
-    fn event_counts(&'reader self, names: bool) -> Result<Vec<ChunkEventSummary<'a>>> {
+    fn event_counts(&'reader self, names: bool) -> Result<Vec<ChunkEventSummary<'chunk>>> {
         let metadata = self.metadata()?;
 
         let mut classes = FxHashMap::with_capacity_and_hasher(
@@ -247,9 +247,9 @@ pub trait ChunkReader<'a, 'reader: 'a> {
 /// Read chunks from memory slices.
 ///
 /// Instances can only be constructed if the full chunk data is available.
-pub struct SliceReader<'a> {
+pub struct SliceReader<'chunk> {
     /// Original source data for this chunk, including the header.
-    data: &'a [u8],
+    data: &'chunk [u8],
 
     header: ChunkHeader,
 
@@ -257,10 +257,10 @@ pub struct SliceReader<'a> {
     metadata_header: MetadataHeader,
 
     /// Slice holding the full metadata event data.
-    metadata_event_data: &'a [u8],
+    metadata_event_data: &'chunk [u8],
 }
 
-impl<'a> SliceReader<'a> {
+impl<'chunk> SliceReader<'chunk> {
     /// Resolve a full chunk backed by in-memory data.
     ///
     /// Returns the remaining bytes from the input slice after this chunk's
@@ -271,7 +271,7 @@ impl<'a> SliceReader<'a> {
     /// the metadata records or attempt to resolve the data structures within.
     /// This behavior facilitates scanning chunks without incurring metadata
     /// loading overhead.
-    pub fn new(data: &'a [u8]) -> Result<(&'a [u8], Self)> {
+    pub fn new(data: &'chunk [u8]) -> Result<(&'chunk [u8], Self)> {
         let (_, header) = context("parsing chunk header", ChunkHeader::parse)(data)?;
 
         // chunk_data is inclusive of the header.
@@ -310,7 +310,7 @@ impl<'a> SliceReader<'a> {
     }
 
     /// Attempt to parse a constant pool event at a given chunk offset.
-    fn parse_constant_pool_event(&self, offset: usize) -> ParseResult<ConstantPoolEvent<'a>> {
+    fn parse_constant_pool_event(&self, offset: usize) -> ParseResult<ConstantPoolEvent<'chunk>> {
         let (event_data, _) =
             context("resolving content pool event data", take(offset))(self.data)?;
 
@@ -321,7 +321,7 @@ impl<'a> SliceReader<'a> {
     }
 }
 
-impl<'a, 'reader: 'a> ChunkReader<'a, 'reader> for SliceReader<'a> {
+impl<'chunk, 'reader: 'chunk> ChunkReader<'chunk, 'reader> for SliceReader<'chunk> {
     fn header(&'reader self) -> &ChunkHeader {
         &self.header
     }
@@ -330,7 +330,7 @@ impl<'a, 'reader: 'a> ChunkReader<'a, 'reader> for SliceReader<'a> {
         &self.metadata_header
     }
 
-    fn metadata(&'reader self) -> Result<Metadata<'a>> {
+    fn metadata(&'reader self) -> Result<Metadata<'chunk>> {
         // This redundantly parses the header. But that should be trivial overhead.
         let (_, metadata) = Metadata::parse(self.metadata_event_data)?;
 
@@ -343,7 +343,7 @@ impl<'a, 'reader: 'a> ChunkReader<'a, 'reader> for SliceReader<'a> {
     /// want to exclude them by since they are handled specially.
     fn iter_event_records(
         &'reader self,
-    ) -> Box<dyn Iterator<Item = Result<EventRecord<'a>>> + 'reader> {
+    ) -> Box<dyn Iterator<Item = Result<EventRecord<'chunk>>> + 'reader> {
         // Taking slice directly should be safe since we did parse it.
         let mut events_data = &self.data[ChunkHeader::HEADER_SIZE as _..];
 
@@ -369,7 +369,7 @@ impl<'a, 'reader: 'a> ChunkReader<'a, 'reader> for SliceReader<'a> {
     /// backwards.
     fn iter_constant_pool_events(
         &'reader self,
-    ) -> Box<dyn Iterator<Item = Result<ConstantPoolEvent<'a>>> + 'reader> {
+    ) -> Box<dyn Iterator<Item = Result<ConstantPoolEvent<'chunk>>> + 'reader> {
         let mut offset = 0;
         let mut delta = self.header.constant_pool_position as i64;
 
