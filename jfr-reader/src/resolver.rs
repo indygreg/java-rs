@@ -24,6 +24,7 @@ use crate::{
 };
 use chrono::{DateTime, Duration, FixedOffset, TimeZone, Utc};
 use rustc_hash::FxHashMap;
+use std::sync::Arc;
 
 /// Describes an entity that can resolve constants.
 pub trait ConstantResolver<'chunk>: Sized {
@@ -219,7 +220,7 @@ impl TimeResolver {
 /// all of this without parsing the constants pool at all. This enables consumers
 /// to filter on event field values without having to pay additional costs.
 pub struct EventResolver<'chunk> {
-    classes: FxHashMap<i64, ClassElement<'chunk>>,
+    classes: FxHashMap<i64, Arc<ClassElement<'chunk>>>,
     constant_pools: Vec<ConstantPoolEvent<'chunk>>,
     primitive_parsers: FxHashMap<i64, fn(&'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>>>,
     time_resolver: TimeResolver,
@@ -240,7 +241,7 @@ impl<'chunk> EventResolver<'chunk> {
                 .metadata
                 .classes
                 .into_iter()
-                .map(|x| (x.id, x)),
+                .map(|x| (x.id, Arc::new(x))),
         );
 
         let constant_pools = constant_pools.collect::<Vec<_>>();
@@ -262,7 +263,7 @@ impl<'chunk> EventResolver<'chunk> {
     }
 
     pub fn get_class(&self, id: i64) -> Option<&ClassElement<'chunk>> {
-        self.classes.get(&id)
+        self.classes.get(&id).map(|x| x.as_ref())
     }
 
     /// Resolve the name of the class having the specified ID.
