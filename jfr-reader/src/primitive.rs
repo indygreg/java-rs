@@ -71,7 +71,7 @@ pub fn parse_char(s: &[u8]) -> ParseResult<char> {
 
 /// A Java primitive value.
 #[derive(Clone, Debug)]
-pub enum Primitive<'a> {
+pub enum Primitive<'chunk> {
     Boolean(bool),
     Byte(i8),
     Short(i16),
@@ -83,101 +83,101 @@ pub enum Primitive<'a> {
     /// The null string.
     NullString,
     /// A string with resolved value.
-    String(Cow<'a, str>),
+    String(Cow<'chunk, str>),
     /// A string whose value is stored in the constants pool under java.lang.String.
     StringConstantPool(i64),
 }
 
-impl<'a> Default for Primitive<'a> {
+impl<'chunk> Default for Primitive<'chunk> {
     fn default() -> Self {
         Self::Boolean(false)
     }
 }
 
-impl<'a> From<bool> for Primitive<'a> {
+impl<'chunk> From<bool> for Primitive<'chunk> {
     fn from(v: bool) -> Self {
         Self::Boolean(v)
     }
 }
 
-impl<'a> From<i8> for Primitive<'a> {
+impl<'chunk> From<i8> for Primitive<'chunk> {
     fn from(v: i8) -> Self {
         Self::Byte(v)
     }
 }
 
-impl<'a> From<i16> for Primitive<'a> {
+impl<'chunk> From<i16> for Primitive<'chunk> {
     fn from(v: i16) -> Self {
         Self::Short(v)
     }
 }
 
-impl<'a> From<i32> for Primitive<'a> {
+impl<'chunk> From<i32> for Primitive<'chunk> {
     fn from(v: i32) -> Self {
         Self::Integer(v)
     }
 }
 
-impl<'a> From<i64> for Primitive<'a> {
+impl<'chunk> From<i64> for Primitive<'chunk> {
     fn from(v: i64) -> Self {
         Self::Long(v)
     }
 }
 
-impl<'a> From<f32> for Primitive<'a> {
+impl<'chunk> From<f32> for Primitive<'chunk> {
     fn from(v: f32) -> Self {
         Self::Float(v)
     }
 }
 
-impl<'a> From<f64> for Primitive<'a> {
+impl<'chunk> From<f64> for Primitive<'chunk> {
     fn from(v: f64) -> Self {
         Self::Double(v)
     }
 }
 
-impl<'a> Primitive<'a> {
-    pub fn parse_boolean(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+impl<'chunk> Primitive<'chunk> {
+    pub fn parse_boolean(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_boolean(s)?;
         Ok((s, Self::Boolean(v)))
     }
 
-    pub fn parse_char(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_char(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_char(s)?;
         Ok((s, Self::Character(v)))
     }
 
-    pub fn parse_float(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_float(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_float(s)?;
         Ok((s, Self::Float(v)))
     }
 
-    pub fn parse_double(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_double(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_double(s)?;
         Ok((s, Self::Double(v)))
     }
 
-    pub fn parse_byte(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_byte(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_byte(s)?;
         Ok((s, Self::Byte(v)))
     }
 
-    pub fn parse_short(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_short(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_short(s)?;
         Ok((s, Self::Short(v)))
     }
 
-    pub fn parse_int(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_int(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_int(s)?;
         Ok((s, Self::Integer(v)))
     }
 
-    pub fn parse_long(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_long(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_long(s)?;
         Ok((s, Self::Long(v)))
     }
 
-    pub fn parse_string(s: &'a [u8]) -> ParseResult<'a, Primitive<'a>> {
+    pub fn parse_string(s: &'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>> {
         let (s, v) = parse_java_lang_string(s)?;
 
         let v = match v {
@@ -190,7 +190,9 @@ impl<'a> Primitive<'a> {
     }
 
     /// Resolve a parser function for a primitive value, if available.
-    pub fn resolve_parser(name: &str) -> Option<fn(&'a [u8]) -> ParseResult<'a, Primitive<'a>>> {
+    pub fn resolve_parser(
+        name: &str,
+    ) -> Option<fn(&'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>>> {
         match name {
             "boolean" => Some(Self::parse_boolean),
             "char" => Some(Self::parse_char),
@@ -208,7 +210,10 @@ impl<'a> Primitive<'a> {
     /// Attempt to parse data as a primitive having the specified class name.
     ///
     /// If the name is not a known primitive, no data should be read.
-    pub fn try_parse_from_name(name: &str, s: &'a [u8]) -> ParseResult<'a, Option<Primitive<'a>>> {
+    pub fn try_parse_from_name(
+        name: &str,
+        s: &'chunk [u8],
+    ) -> ParseResult<'chunk, Option<Primitive<'chunk>>> {
         if let Some(parser) = Self::resolve_parser(name) {
             parser(s).map(|(s, v)| (s, Some(v)))
         } else {
