@@ -63,14 +63,15 @@ impl<'chunk, 'resolver> Object<'chunk, 'resolver> {
     }
 
     /// Obtain the class being described.
-    pub fn class(&self) -> &ClassElement {
+    pub fn class(&self) -> &'resolver ClassElement {
         self.class
     }
 
     /// Iterate fields and their respective values.
     pub fn iter_fields_and_values(
         &self,
-    ) -> impl Iterator<Item = (&FieldElement<'chunk>, &Value<'chunk, 'resolver>)> + '_ {
+    ) -> impl Iterator<Item = (&'resolver FieldElement<'chunk>, &Value<'chunk, 'resolver>)> + '_
+    {
         self.class.fields.iter().zip(self.fields.iter())
     }
 
