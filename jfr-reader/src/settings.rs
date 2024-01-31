@@ -259,48 +259,48 @@ pub struct GenericSetting<'class, 'data: 'class> {
 
 /// A parsed setting value.
 #[derive(Clone, Debug)]
-pub enum SettingValue<'a> {
+pub enum SettingValue<'chunk> {
     Cutoff(Cutoff),
     Enabled(Enabled),
     Period(Period),
     StackTrace(StackTrace),
     Threshold(Threshold),
     Throttle(Throttle),
-    Unknown(Cow<'a, str>),
+    Unknown(Cow<'chunk, str>),
 }
 
-impl<'a> SettingValue<'a> {
-    pub fn from_cutoff(el: &SettingsElement<'a>) -> Result<Self> {
+impl<'chunk> SettingValue<'chunk> {
+    pub fn from_cutoff(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Cutoff(Cutoff::from_str(el.default_value.as_ref())?))
     }
 
-    pub fn from_enabled(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_enabled(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Enabled(Enabled::from_str(el.default_value.as_ref())?))
     }
 
-    pub fn from_period(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_period(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Period(Period::from_str(el.default_value.as_ref())?))
     }
 
-    pub fn from_stack_trace(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_stack_trace(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::StackTrace(StackTrace::from_str(
             el.default_value.as_ref(),
         )?))
     }
 
-    pub fn from_threshold(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_threshold(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Threshold(Threshold::from_str(
             el.default_value.as_ref(),
         )?))
     }
 
-    pub fn from_throttle(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_throttle(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Throttle(Throttle::from_str(
             el.default_value.as_ref(),
         )?))
     }
 
-    pub fn from_unknown(el: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_unknown(el: &SettingsElement<'chunk>) -> Result<Self> {
         Ok(Self::Unknown(el.default_value.clone()))
     }
 
@@ -309,7 +309,10 @@ impl<'a> SettingValue<'a> {
     /// Boolean indicates whether this is a setting type known to this crate.
     pub fn resolve_parser(
         name: &str,
-    ) -> (bool, fn(&SettingsElement<'a>) -> Result<SettingValue<'a>>) {
+    ) -> (
+        bool,
+        fn(&SettingsElement<'chunk>) -> Result<SettingValue<'chunk>>,
+    ) {
         match name {
             "cutoff" => (true, Self::from_cutoff),
             "enabled" => (true, Self::from_enabled),
@@ -324,7 +327,7 @@ impl<'a> SettingValue<'a> {
     /// Construct an instance from a [SettingsElement].
     ///
     /// This will trigger parsing of the setting value for known setting types.
-    pub fn from_element(setting: &SettingsElement<'a>) -> Result<Self> {
+    pub fn from_element(setting: &SettingsElement<'chunk>) -> Result<Self> {
         let parser = Self::resolve_parser(setting.name.as_ref()).1;
 
         parser(setting)
@@ -332,14 +335,14 @@ impl<'a> SettingValue<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Setting<'el, 'a: 'el> {
-    pub element: &'el SettingsElement<'a>,
-    pub value: SettingValue<'a>,
+pub struct Setting<'el, 'chunk: 'el> {
+    pub element: &'el SettingsElement<'chunk>,
+    pub value: SettingValue<'chunk>,
 }
 
-impl<'el, 'a: 'el> Setting<'el, 'a> {
+impl<'el, 'chunk: 'el> Setting<'el, 'chunk> {
     /// Construct an instance from a [SettingsElement] instance.
-    pub fn from_element(element: &'el SettingsElement<'a>) -> Result<Self> {
+    pub fn from_element(element: &'el SettingsElement<'chunk>) -> Result<Self> {
         let value = SettingValue::from_element(element)?;
 
         Ok(Self { element, value })
