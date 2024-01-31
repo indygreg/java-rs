@@ -75,17 +75,17 @@ impl BooleanFlag {
 ///
 /// Just a wrapper to facilitate code reuse.
 #[derive(Clone, Debug)]
-pub struct Category<'a>(pub Vec<Cow<'a, str>>);
+pub struct Category<'chunk>(pub Vec<Cow<'chunk, str>>);
 
-impl<'a> Deref for Category<'a> {
-    type Target = Vec<Cow<'a, str>>;
+impl<'chunk> Deref for Category<'chunk> {
+    type Target = Vec<Cow<'chunk, str>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> Annotation for Category<'a> {
+impl<'chunk> Annotation for Category<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Category"
     }
@@ -95,8 +95,8 @@ impl<'a> Annotation for Category<'a> {
     }
 }
 
-impl<'a> Category<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Category<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let values = el.values.iter().map(|(_, v)| v.clone()).collect::<Vec<_>>();
 
         Ok(Self(values))
@@ -127,13 +127,13 @@ impl ContentType {
 ///
 /// Represents a `jdk.jfr.DataAmount` instance.
 #[derive(Clone, Debug)]
-pub enum DataAmount<'a> {
+pub enum DataAmount<'chunk> {
     Bits,
     Bytes,
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for DataAmount<'a> {
+impl<'chunk> Annotation for DataAmount<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.DataAmount"
     }
@@ -143,8 +143,8 @@ impl<'a> Annotation for DataAmount<'a> {
     }
 }
 
-impl<'a> DataAmount<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> DataAmount<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         // Should only be a single value.
         let (_, value) = el.values.first().ok_or_else(|| {
             Error::AnnotationParse("jdk.jfr.DataAmount lacks a value".to_string())
@@ -160,17 +160,17 @@ impl<'a> DataAmount<'a> {
 
 /// A `jdk.jfr.Description` annotation.
 #[derive(Clone, Debug)]
-pub struct Description<'a>(pub Cow<'a, str>);
+pub struct Description<'chunk>(pub Cow<'chunk, str>);
 
-impl<'a> Deref for Description<'a> {
-    type Target = Cow<'a, str>;
+impl<'chunk> Deref for Description<'chunk> {
+    type Target = Cow<'chunk, str>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> Annotation for Description<'a> {
+impl<'chunk> Annotation for Description<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Description"
     }
@@ -180,8 +180,8 @@ impl<'a> Annotation for Description<'a> {
     }
 }
 
-impl<'a> Description<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Description<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el.values.first().ok_or_else(|| {
             Error::AnnotationParse("jdk.jfr.Description lacks a value".to_string())
         })?;
@@ -282,17 +282,17 @@ impl Frequency {
 ///
 /// Just a wrapper to facilitate code reuse.
 #[derive(Clone, Debug)]
-pub struct Label<'a>(Cow<'a, str>);
+pub struct Label<'chunk>(Cow<'chunk, str>);
 
-impl<'a> Deref for Label<'a> {
-    type Target = Cow<'a, str>;
+impl<'chunk> Deref for Label<'chunk> {
+    type Target = Cow<'chunk, str>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> Annotation for Label<'a> {
+impl<'chunk> Annotation for Label<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Label"
     }
@@ -302,8 +302,8 @@ impl<'a> Annotation for Label<'a> {
     }
 }
 
-impl<'a> Label<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Label<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -357,17 +357,17 @@ impl MetadataDefinition {
 ///
 /// Just a wrapper to facilitate code reuse.
 #[derive(Clone, Debug)]
-pub struct Name<'a>(Cow<'a, str>);
+pub struct Name<'chunk>(Cow<'chunk, str>);
 
-impl<'a> Deref for Name<'a> {
-    type Target = Cow<'a, str>;
+impl<'chunk> Deref for Name<'chunk> {
+    type Target = Cow<'chunk, str>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a> Annotation for Name<'a> {
+impl<'chunk> Annotation for Name<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Name"
     }
@@ -377,8 +377,8 @@ impl<'a> Annotation for Name<'a> {
     }
 }
 
-impl<'a> Name<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Name<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -410,7 +410,7 @@ impl Percentage {
 
 /// Default setting for a periodic event.
 #[derive(Clone, Debug)]
-pub enum Period<'a> {
+pub enum Period<'chunk> {
     // TODO there are other special values on the settings equivalent. Shouldn't they be here?
     EveryChunk,
     Nanoseconds(u64),
@@ -420,10 +420,10 @@ pub enum Period<'a> {
     Minutes(u64),
     Hours(u64),
     Days(u64),
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Period<'a> {
+impl<'chunk> Annotation for Period<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Period"
     }
@@ -433,8 +433,8 @@ impl<'a> Annotation for Period<'a> {
     }
 }
 
-impl<'a> Period<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Period<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -564,7 +564,7 @@ impl StackTrace {
 }
 
 #[derive(Clone, Debug)]
-pub enum Threshold<'a> {
+pub enum Threshold<'chunk> {
     Nanoseconds(u64),
     Microseconds(u64),
     Milliseconds(u64),
@@ -572,10 +572,10 @@ pub enum Threshold<'a> {
     Minutes(u64),
     Hours(u64),
     Days(u64),
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Threshold<'a> {
+impl<'chunk> Annotation for Threshold<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Threshold"
     }
@@ -585,8 +585,8 @@ impl<'a> Annotation for Threshold<'a> {
     }
 }
 
-impl<'a> Threshold<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Threshold<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -616,16 +616,16 @@ impl<'a> Threshold<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub enum Timespan<'a> {
+pub enum Timespan<'chunk> {
     Ticks,
     Seconds,
     Milliseconds,
     Microseconds,
     Nanoseconds,
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Timespan<'a> {
+impl<'chunk> Annotation for Timespan<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Timespan"
     }
@@ -635,8 +635,8 @@ impl<'a> Annotation for Timespan<'a> {
     }
 }
 
-impl<'a> Timespan<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Timespan<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -654,13 +654,13 @@ impl<'a> Timespan<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub enum Timestamp<'a> {
+pub enum Timestamp<'chunk> {
     MillisecondsSinceEpoch,
     Ticks,
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Timestamp<'a> {
+impl<'chunk> Annotation for Timestamp<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.Timestamp"
     }
@@ -670,8 +670,8 @@ impl<'a> Annotation for Timestamp<'a> {
     }
 }
 
-impl<'a> Timestamp<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Timestamp<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el
             .values
             .first()
@@ -746,7 +746,7 @@ impl Unsigned {
 }
 
 #[derive(Clone, Debug)]
-pub enum Cutoff<'a> {
+pub enum Cutoff<'chunk> {
     Infinity,
     Nanoseconds(u64),
     Microseconds(u64),
@@ -755,10 +755,10 @@ pub enum Cutoff<'a> {
     Minutes(u64),
     Hours(u64),
     Days(u64),
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Cutoff<'a> {
+impl<'chunk> Annotation for Cutoff<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.internal.Cutoff"
     }
@@ -768,8 +768,8 @@ impl<'a> Annotation for Cutoff<'a> {
     }
 }
 
-impl<'a> Cutoff<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Cutoff<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el.values.first().ok_or_else(|| {
             Error::AnnotationParse("jdk.jfr.internal.Cutoff lacks value".to_string())
         })?;
@@ -823,7 +823,7 @@ impl Mirror {
 }
 
 #[derive(Clone, Debug)]
-pub enum Throttle<'a> {
+pub enum Throttle<'chunk> {
     Off,
     Nanoseconds(u64),
     Microseconds(u64),
@@ -832,10 +832,10 @@ pub enum Throttle<'a> {
     Minutes(u64),
     Hours(u64),
     Days(u64),
-    Other(Cow<'a, str>),
+    Other(Cow<'chunk, str>),
 }
 
-impl<'a> Annotation for Throttle<'a> {
+impl<'chunk> Annotation for Throttle<'chunk> {
     fn class_name() -> &'static str {
         "jdk.jfr.internal.Throttle"
     }
@@ -845,8 +845,8 @@ impl<'a> Annotation for Throttle<'a> {
     }
 }
 
-impl<'a> Throttle<'a> {
-    fn from_element(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> Throttle<'chunk> {
+    fn from_element(el: &AnnotationElement<'chunk>) -> Result<Self> {
         let (_, value) = el.values.first().ok_or_else(|| {
             Error::AnnotationParse("jdk.jfr.internal.Throttle lacks value".to_string())
         })?;
@@ -881,151 +881,151 @@ impl<'a> Throttle<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub enum AnnotationValue<'a> {
+pub enum AnnotationValue<'chunk> {
     BooleanFlag(BooleanFlag),
-    Category(Category<'a>),
+    Category(Category<'chunk>),
     ContentType(ContentType),
-    DataAmount(DataAmount<'a>),
-    Description(Description<'a>),
+    DataAmount(DataAmount<'chunk>),
+    Description(Description<'chunk>),
     Enabled(Enabled),
     Experimental(Experimental),
     Frequency(Frequency),
-    Label(Label<'a>),
+    Label(Label<'chunk>),
     MemoryAddress(MemoryAddress),
     MetadataDefinition(MetadataDefinition),
-    Name(Name<'a>),
+    Name(Name<'chunk>),
     Percentage(Percentage),
-    Period(Period<'a>),
+    Period(Period<'chunk>),
     Registered(Registered),
     Relational(Relational),
     SettingDefinition(SettingDefinition),
     StackTrace(StackTrace),
-    Threshold(Threshold<'a>),
-    Timespan(Timespan<'a>),
-    Timestamp(Timestamp<'a>),
+    Threshold(Threshold<'chunk>),
+    Timespan(Timespan<'chunk>),
+    Timestamp(Timestamp<'chunk>),
     TransitionFrom(TransitionFrom),
     TransitionTo(TransitionTo),
     Unsigned(Unsigned),
-    Cutoff(Cutoff<'a>),
+    Cutoff(Cutoff<'chunk>),
     Mirror(Mirror),
-    Throttle(Throttle<'a>),
-    Unknown(Vec<(Cow<'a, str>, Cow<'a, str>)>),
+    Throttle(Throttle<'chunk>),
+    Unknown(Vec<(Cow<'chunk, str>, Cow<'chunk, str>)>),
 }
 
-impl<'a> AnnotationValue<'a> {
-    fn from_boolean_flag(el: &AnnotationElement<'a>) -> Result<Self> {
+impl<'chunk> AnnotationValue<'chunk> {
+    fn from_boolean_flag(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::BooleanFlag(BooleanFlag::from_element(el)?))
     }
 
-    fn from_category(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_category(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Category(Category::from_element(el)?))
     }
 
-    fn from_content_type(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_content_type(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::ContentType(ContentType::from_element(el)?))
     }
 
-    fn from_data_amount(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_data_amount(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::DataAmount(DataAmount::from_element(el)?))
     }
 
-    fn from_description(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_description(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Description(Description::from_element(el)?))
     }
 
-    fn from_enabled(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_enabled(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Enabled(Enabled::from_element(el)?))
     }
 
-    fn from_experimental(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_experimental(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Experimental(Experimental::from_element(el)?))
     }
 
-    fn from_frequency(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_frequency(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Frequency(Frequency::from_element(el)?))
     }
 
-    fn from_label(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_label(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Label(Label::from_element(el)?))
     }
 
-    fn from_memory_address(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_memory_address(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::MemoryAddress(MemoryAddress::from_element(el)?))
     }
 
-    fn from_metadata_definition(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_metadata_definition(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::MetadataDefinition(MetadataDefinition::from_element(
             el,
         )?))
     }
 
-    fn from_name(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_name(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Name(Name::from_element(el)?))
     }
 
-    fn from_percentage(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_percentage(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Percentage(Percentage::from_element(el)?))
     }
 
-    fn from_period(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_period(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Period(Period::from_element(el)?))
     }
 
-    fn from_relational(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_relational(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Relational(Relational::from_element(el)?))
     }
 
-    fn from_registered(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_registered(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Registered(Registered::from_element(el)?))
     }
 
-    fn from_setting_definition(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_setting_definition(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::SettingDefinition(SettingDefinition::from_element(
             el,
         )?))
     }
 
-    fn from_stack_trace(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_stack_trace(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::StackTrace(StackTrace::from_element(el)?))
     }
 
-    fn from_threshold(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_threshold(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Threshold(Threshold::from_element(el)?))
     }
 
-    fn from_timespan(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_timespan(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Timespan(Timespan::from_element(el)?))
     }
 
-    fn from_timestamp(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_timestamp(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Timestamp(Timestamp::from_element(el)?))
     }
 
-    fn from_transition_from(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_transition_from(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::TransitionFrom(TransitionFrom::from_element(el)?))
     }
 
-    fn from_transition_to(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_transition_to(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::TransitionTo(TransitionTo::from_element(el)?))
     }
 
-    fn from_unsigned(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_unsigned(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Unsigned(Unsigned::from_element(el)?))
     }
 
-    fn from_cutoff(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_cutoff(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Cutoff(Cutoff::from_element(el)?))
     }
 
-    fn from_mirror(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_mirror(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Mirror(Mirror::from_element(el)?))
     }
 
-    fn from_throttle(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_throttle(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Throttle(Throttle::from_element(el)?))
     }
 
-    fn from_unknown(el: &AnnotationElement<'a>) -> Result<Self> {
+    fn from_unknown(el: &AnnotationElement<'chunk>) -> Result<Self> {
         Ok(Self::Unknown(el.values.clone()))
     }
 
@@ -1038,7 +1038,7 @@ impl<'a> AnnotationValue<'a> {
         class_name: &str,
     ) -> (
         bool,
-        fn(&AnnotationElement<'a>) -> Result<AnnotationValue<'a>>,
+        fn(&AnnotationElement<'chunk>) -> Result<AnnotationValue<'chunk>>,
     ) {
         match class_name {
             "jdk.jfr.BooleanFlag" => (true, Self::from_boolean_flag),
@@ -1075,8 +1075,8 @@ impl<'a> AnnotationValue<'a> {
     /// Construct a parsed annotation from its raw metadata [AnnotationElement] and
     /// associated [ClassElement].
     pub fn from_elements(
-        annotation: &AnnotationElement<'a>,
-        class: &ClassElement<'a>,
+        annotation: &AnnotationElement<'chunk>,
+        class: &ClassElement<'chunk>,
     ) -> Result<Self> {
         if annotation.type_id != class.id {
             return Err(Error::AnnotationParse(format!(
@@ -1097,23 +1097,23 @@ impl<'a> AnnotationValue<'a> {
 }
 
 /// A parsed annotation.
-pub struct ParsedAnnotation<'class, 'a: 'class> {
+pub struct ParsedAnnotation<'class, 'chunk: 'class> {
     /// The class from which this annotation came.
-    pub class: &'class ClassElement<'a>,
+    pub class: &'class ClassElement<'chunk>,
 
     /// The parsed value for this annotation.
-    pub value: AnnotationValue<'a>,
+    pub value: AnnotationValue<'chunk>,
 }
 
-impl<'class, 'a: 'class> ParsedAnnotation<'class, 'a> {
+impl<'class, 'chunk: 'class> ParsedAnnotation<'class, 'chunk> {
     /// Construct an instance from an [AnnotationElement] and a [ClassElement].
     ///
     /// The [ClassElement] should match the class ID in the [AnnotationElement].
     ///
     /// Just a convenience function.
     pub fn from_elements(
-        annotation: &AnnotationElement<'a>,
-        class: &'class ClassElement<'a>,
+        annotation: &AnnotationElement<'chunk>,
+        class: &'class ClassElement<'chunk>,
     ) -> Result<Self> {
         let value = AnnotationValue::from_elements(annotation, class)?;
 
