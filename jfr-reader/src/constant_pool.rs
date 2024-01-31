@@ -114,11 +114,11 @@ impl ConstantPoolHeader {
     }
 }
 
-fn parse_constant_pool_value<'chunk, 'r>(
+fn parse_constant_pool_value<'resolver, 'chunk: 'resolver>(
     s: &'chunk [u8],
-    resolver: &'r EventResolver<'chunk>,
+    resolver: &'resolver EventResolver<'chunk>,
     class_id: i64,
-) -> Result<(&'chunk [u8], i64, Value<'chunk, 'r>)> {
+) -> Result<(&'chunk [u8], i64, Value<'resolver, 'chunk>)> {
     let (s, pool_index) = leb128_i64(s)?;
 
     // Constant pool values can resolve to primitives (notably strings). So
@@ -128,10 +128,10 @@ fn parse_constant_pool_value<'chunk, 'r>(
     Ok((s, pool_index, value))
 }
 
-fn parse_constant_pool_class<'chunk, 'r>(
+fn parse_constant_pool_class<'resolver, 'chunk: 'resolver>(
     s: &'chunk [u8],
-    resolver: &'r EventResolver<'chunk>,
-) -> Result<(&'chunk [u8], i64, Vec<(i64, Value<'chunk, 'r>)>)> {
+    resolver: &'resolver EventResolver<'chunk>,
+) -> Result<(&'chunk [u8], i64, Vec<(i64, Value<'resolver, 'chunk>)>)> {
     let (mut s, (class_id, constant_count)) = context(
         "parsing constant pool class entry",
         pair(leb128_i64, leb128_i32),
@@ -183,7 +183,7 @@ impl<'chunk> ConstantPoolEvent<'chunk> {
     pub fn resolve_constants<'r>(
         &self,
         resolver: &'r EventResolver<'chunk>,
-    ) -> Result<Vec<(i64, Vec<(i64, Value<'chunk, 'r>)>)>> {
+    ) -> Result<Vec<(i64, Vec<(i64, Value<'r, 'chunk>)>)>> {
         let mut s = self.pool_data;
 
         let mut res = Vec::new();

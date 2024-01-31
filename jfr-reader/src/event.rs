@@ -172,7 +172,7 @@ pub trait EventType<'slf, EventThread: 'slf, StackTrace: 'slf> {
     }
 }
 
-pub struct GenericEvent<'chunk, 'resolver, 'cr, CR>
+pub struct GenericEvent<'resolver, 'cr: 'resolver, 'chunk: 'resolver, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -180,7 +180,7 @@ where
     constants: &'cr CR,
 }
 
-impl<'chunk, 'resolver, 'cr, CR> GenericEvent<'chunk, 'resolver, 'cr, CR>
+impl<'resolver, 'cr: 'resolver, 'chunk: 'resolver, CR> GenericEvent<'resolver, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
