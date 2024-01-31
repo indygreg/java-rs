@@ -340,7 +340,7 @@ impl<'chunk> EventResolver<'chunk> {
         &self,
         s: &'chunk [u8],
         class_id: i64,
-    ) -> Result<(&[u8], Object<'chunk, '_>)> {
+    ) -> Result<(&[u8], Object<'_, 'chunk>)> {
         let (s, v) = self.parse_value(s, class_id)?;
 
         if let Value::Object(o) = v {

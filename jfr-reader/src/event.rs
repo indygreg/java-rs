@@ -176,7 +176,7 @@ pub struct GenericEvent<'chunk, 'resolver, 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    object: Object<'chunk, 'resolver>,
+    object: Object<'resolver, 'chunk>,
     constants: &'cr CR,
 }
 
@@ -185,7 +185,7 @@ where
     CR: ConstantResolver<'chunk>,
 {
     /// Construct an instance from an owned [Object] and a [ConstantResolver].
-    pub fn new(object: Object<'chunk, 'resolver>, constants: &'cr CR) -> Self {
+    pub fn new(object: Object<'resolver, 'chunk>, constants: &'cr CR) -> Self {
         Self { object, constants }
     }
 

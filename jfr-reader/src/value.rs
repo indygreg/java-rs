@@ -48,12 +48,12 @@ pub enum ConstantValueMapped<T> {
 
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
-pub struct Object<'chunk, 'resolver> {
+pub struct Object<'resolver, 'chunk: 'resolver> {
     class: &'resolver ClassElement<'chunk>,
     fields: Vec<Value<'chunk, 'resolver>>,
 }
 
-impl<'chunk, 'resolver> Object<'chunk, 'resolver> {
+impl<'resolver, 'chunk: 'resolver> Object<'resolver, 'chunk> {
     /// Construct a new instance.
     pub fn new(
         class: &'resolver ClassElement<'chunk>,
@@ -105,7 +105,7 @@ struct ObjectDeserializer<'de, 'chunk: 'de, 'resolver: 'de, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    object: &'de Object<'chunk, 'resolver>,
+    object: &'de Object<'resolver, 'chunk>,
     constants: &'de CR,
     field_index: usize,
 }
@@ -161,7 +161,7 @@ pub enum Value<'chunk, 'resolver> {
     Primitive(Primitive<'chunk>),
 
     /// A generic, untyped object.
-    Object(Object<'chunk, 'resolver>),
+    Object(Object<'resolver, 'chunk>),
 
     /// A reference to a constant in the constants pool.
     ///
@@ -179,7 +179,7 @@ pub enum Value<'chunk, 'resolver> {
 
 impl<'chunk, 'resolver> Value<'chunk, 'resolver> {
     /// Obtain the inner [Object] if this is an object variant.
-    pub fn as_object(&self) -> Option<&Object<'chunk, 'resolver>> {
+    pub fn as_object(&self) -> Option<&Object<'resolver, 'chunk>> {
         if let Value::Object(o) = self {
             Some(o)
         } else {
