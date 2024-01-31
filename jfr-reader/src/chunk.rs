@@ -121,11 +121,11 @@ impl ChunkHeader {
 }
 
 /// Describes occurrences of an event type within a chunk.
-pub struct ChunkEventSummary<'a> {
+pub struct ChunkEventSummary<'chunk> {
     /// Class ID.
     pub class_id: i64,
     /// Class name.
-    pub name: Option<Cow<'a, str>>,
+    pub name: Option<Cow<'chunk, str>>,
     /// The number of events of this type.
     pub count: u64,
     /// The total size of events of this type.
