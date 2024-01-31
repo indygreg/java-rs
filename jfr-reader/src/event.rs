@@ -172,20 +172,20 @@ pub trait EventType<'slf, EventThread: 'slf, StackTrace: 'slf> {
     }
 }
 
-pub struct GenericEvent<'a, 'cr, CR>
+pub struct GenericEvent<'chunk, 'cr, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
-    object: Object<'a>,
+    object: Object<'chunk>,
     constants: &'cr CR,
 }
 
-impl<'a, 'cr, CR> GenericEvent<'a, 'cr, CR>
+impl<'chunk, 'cr, CR> GenericEvent<'chunk, 'cr, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     /// Construct an instance from an owned [Object] and a [ConstantResolver].
-    pub fn new(object: Object<'a>, constants: &'cr CR) -> Self {
+    pub fn new(object: Object<'chunk>, constants: &'cr CR) -> Self {
         Self { object, constants }
     }
 
