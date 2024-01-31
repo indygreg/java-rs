@@ -114,11 +114,11 @@ impl ConstantPoolHeader {
     }
 }
 
-fn parse_constant_pool_value<'a, 'r>(
-    s: &'a [u8],
-    resolver: &'r EventResolver<'a>,
+fn parse_constant_pool_value<'chunk, 'r>(
+    s: &'chunk [u8],
+    resolver: &'r EventResolver<'chunk>,
     class_id: i64,
-) -> Result<(&'a [u8], i64, Value<'r>)> {
+) -> Result<(&'chunk [u8], i64, Value<'r>)> {
     let (s, pool_index) = leb128_i64(s)?;
 
     // Constant pool values can resolve to primitives (notably strings). So
@@ -128,10 +128,10 @@ fn parse_constant_pool_value<'a, 'r>(
     Ok((s, pool_index, value))
 }
 
-fn parse_constant_pool_class<'a, 'r>(
-    s: &'a [u8],
-    resolver: &'r EventResolver<'a>,
-) -> Result<(&'a [u8], i64, Vec<(i64, Value<'r>)>)> {
+fn parse_constant_pool_class<'chunk, 'r>(
+    s: &'chunk [u8],
+    resolver: &'r EventResolver<'chunk>,
+) -> Result<(&'chunk [u8], i64, Vec<(i64, Value<'r>)>)> {
     let (mut s, (class_id, constant_count)) = context(
         "parsing constant pool class entry",
         pair(leb128_i64, leb128_i32),
@@ -150,16 +150,16 @@ fn parse_constant_pool_class<'a, 'r>(
 
 /// Holds a parsed constants pool header and a reference to its data.
 #[derive(Clone, Debug)]
-pub struct ConstantPoolEvent<'a> {
+pub struct ConstantPoolEvent<'chunk> {
     pub header: ConstantPoolHeader,
     /// Holds constants pool data.
     ///
     /// Not inclusive of header.
-    pub pool_data: &'a [u8],
+    pub pool_data: &'chunk [u8],
 }
 
-impl<'a> ConstantPoolEvent<'a> {
-    pub fn parse(s: &'a [u8]) -> ParseResult<Self> {
+impl<'chunk> ConstantPoolEvent<'chunk> {
+    pub fn parse(s: &'chunk [u8]) -> ParseResult<Self> {
         let (pool_data, header) =
             context("parsing constant pool header", ConstantPoolHeader::parse)(s)?;
 
@@ -182,7 +182,7 @@ impl<'a> ConstantPoolEvent<'a> {
     /// to identify boundaries between constants in the pool.
     pub fn resolve_constants<'r>(
         &self,
-        resolver: &'r EventResolver<'a>,
+        resolver: &'r EventResolver<'chunk>,
     ) -> Result<Vec<(i64, Vec<(i64, Value<'r>)>)>> {
         let mut s = self.pool_data;
 
