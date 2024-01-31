@@ -255,25 +255,25 @@ pub struct RawClassElement {
 
 /// Defines a Java class/type.
 #[derive(Clone, Debug)]
-pub struct ClassElement<'a> {
+pub struct ClassElement<'chunk> {
     /// Holds any further annotations that can be present on instances of this class.
-    pub annotations: Vec<AnnotationElement<'a>>,
+    pub annotations: Vec<AnnotationElement<'chunk>>,
     /// Describes the fields of instances of this type.
-    pub fields: Vec<FieldElement<'a>>,
+    pub fields: Vec<FieldElement<'chunk>>,
     /// Describes any settings related to this type.
-    pub settings: Vec<SettingsElement<'a>>,
+    pub settings: Vec<SettingsElement<'chunk>>,
     /// The name of the class. e.g. `java.lang.String`.
-    pub name: Cow<'a, str>,
+    pub name: Cow<'chunk, str>,
     /// The super/parent class name.
-    pub super_type: Option<Cow<'a, str>>,
+    pub super_type: Option<Cow<'chunk, str>>,
     /// Whether this is a primitive / built-in type.
-    pub simple_type: Option<Cow<'a, str>>,
+    pub simple_type: Option<Cow<'chunk, str>>,
     /// The class ID used to refer to this class.
     pub id: i64,
 }
 
-impl<'a> ClassElement<'a> {
-    pub fn from_raw(el: RawClassElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> ClassElement<'chunk> {
+    pub fn from_raw(el: RawClassElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         let annotations = el
             .annotations
             .into_iter()
@@ -348,7 +348,7 @@ impl<'a> ClassElement<'a> {
     ///
     /// Resolves the annotations for the class, fields, and settings. There may
     /// be duplicate entries in the stream.
-    pub fn all_annotations(&self) -> impl Iterator<Item = &AnnotationElement<'a>> + '_ {
+    pub fn all_annotations(&self) -> impl Iterator<Item = &AnnotationElement<'chunk>> + '_ {
         self.annotations
             .iter()
             .chain(self.fields.iter().flat_map(|f| f.annotations.iter()))

@@ -119,7 +119,7 @@ impl StringRecordHeader {
 /// The inline string data is not decoded. So instances should be relatively
 /// cheap to create.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum StringRecord<'a> {
+pub enum StringRecord<'chunk> {
     /// The null entry. No data.
     Null,
 
@@ -130,7 +130,7 @@ pub enum StringRecord<'a> {
     ConstantPool(i64),
 
     /// A UTF-8 string.
-    Utf8ByteArray(&'a [u8]),
+    Utf8ByteArray(&'chunk [u8]),
 
     /// A character array.
     ///
@@ -138,10 +138,10 @@ pub enum StringRecord<'a> {
     CharArray(Vec<i32>),
 
     /// A string composed of Latin-1 encoded characters.
-    Latin1ByteArray(&'a [u8]),
+    Latin1ByteArray(&'chunk [u8]),
 }
 
-impl<'a> StringRecord<'a> {
+impl<'chunk> StringRecord<'chunk> {
     /// Parse a string record.
     ///
     /// Records can be as short as 1 byte and as long as 2 + 2^31-1 bytes.
@@ -151,7 +151,7 @@ impl<'a> StringRecord<'a> {
     /// inline string data is. Assuming this to be true, any errors should indicate
     /// how many remaining bytes of data need to be acquired to obtain a reference
     /// to inline string data.
-    pub fn parse(s: &'a [u8]) -> ParseResult<Self> {
+    pub fn parse(s: &'chunk [u8]) -> ParseResult<Self> {
         let (s, header) = StringRecordHeader::parse(s)?;
 
         let (s, res) = match header {
@@ -225,16 +225,16 @@ impl<'a> StringRecord<'a> {
 }
 
 /// Represents a decoded string value.
-pub enum StringValue<'a> {
+pub enum StringValue<'chunk> {
     /// The null string.
     Null,
     /// String is stored in the constants pool for java.lang.String at this index.
     ConstantPoolRef(i64),
     /// The decoded string content.
-    String(Cow<'a, str>),
+    String(Cow<'chunk, str>),
 }
 
-impl<'a> StringValue<'a> {
+impl<'chunk> StringValue<'chunk> {
     /// Obtain the str representation of self if available.
     ///
     /// Null strings and constant pool references return None.
@@ -246,7 +246,7 @@ impl<'a> StringValue<'a> {
         }
     }
 
-    pub fn as_cow(&self) -> Option<Cow<'a, str>> {
+    pub fn as_cow(&self) -> Option<Cow<'chunk, str>> {
         if let Self::String(v) = self {
             Some(v.clone())
         } else {
@@ -255,14 +255,14 @@ impl<'a> StringValue<'a> {
     }
 }
 
-enum LazilyDecodedString<'a> {
-    Unparsed(StringRecord<'a>),
+enum LazilyDecodedString<'chunk> {
+    Unparsed(StringRecord<'chunk>),
     Parsed(Result<StringValue<'static>>),
 }
 
-struct LazilyDecodedRecord<'a>(LazilyDecodedString<'a>);
+struct LazilyDecodedRecord<'chunk>(LazilyDecodedString<'chunk>);
 
-impl<'a> LazilyDecodedRecord<'a> {
+impl<'chunk> LazilyDecodedRecord<'chunk> {
     fn ensure_resolved(&mut self) {
         let res = match &self.0 {
             LazilyDecodedString::Parsed(_) => {
@@ -279,12 +279,12 @@ impl<'a> LazilyDecodedRecord<'a> {
 }
 
 /// A string table that lazily converts memory slices to string types.
-pub struct LazyStringTable<'a> {
-    entries: Vec<LazilyDecodedRecord<'a>>,
+pub struct LazyStringTable<'chunk> {
+    entries: Vec<LazilyDecodedRecord<'chunk>>,
 }
 
-impl<'a> From<Vec<StringRecord<'a>>> for LazyStringTable<'a> {
-    fn from(records: Vec<StringRecord<'a>>) -> Self {
+impl<'chunk> From<Vec<StringRecord<'chunk>>> for LazyStringTable<'chunk> {
+    fn from(records: Vec<StringRecord<'chunk>>) -> Self {
         Self {
             entries: records
                 .into_iter()
@@ -294,7 +294,7 @@ impl<'a> From<Vec<StringRecord<'a>>> for LazyStringTable<'a> {
     }
 }
 
-impl<'a> LazyStringTable<'a> {
+impl<'chunk> LazyStringTable<'chunk> {
     /// The count of entries in this table.
     pub fn len(&self) -> usize {
         self.entries.len()
@@ -310,7 +310,7 @@ impl<'a> LazyStringTable<'a> {
     /// The result of string decoding is cached on the instance. Subsequent
     /// lookups of this key will return a reference to an already decoded string
     /// or an error for its failure to decode.
-    pub fn get(&mut self, index: usize) -> Result<&StringValue<'a>> {
+    pub fn get(&mut self, index: usize) -> Result<&StringValue<'chunk>> {
         match self.entries.get_mut(index) {
             None => Err(Error::StringTableUnknownIndex(index)),
             Some(record) => {
