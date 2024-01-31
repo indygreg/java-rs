@@ -21,21 +21,21 @@ use serde::{
 };
 
 /// Holds a constant's value.
-pub enum ConstantValue<'a, 'r> {
+pub enum ConstantValue<'chunk, 'r> {
     /// The constant evaluates to null.
     Null,
     /// The value of the constant.
     ///
     /// Can contain other constant pool references.
-    Value(&'r Value<'a>),
+    Value(&'r Value<'chunk>),
     /// No constant known. Missing index in the constant pool.
     Missing,
 }
 
 /// Holds a constant's value with all constants resolved recursively.
-pub enum ResolvedConstantValue<'a> {
+pub enum ResolvedConstantValue<'chunk> {
     Null,
-    Value(Result<Value<'a>>),
+    Value(Result<Value<'chunk>>),
     Missing,
 }
 
@@ -48,14 +48,14 @@ pub enum ConstantValueMapped<T> {
 
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
-pub struct Object<'a> {
-    class: &'a ClassElement<'a>,
-    fields: Vec<Value<'a>>,
+pub struct Object<'chunk> {
+    class: &'chunk ClassElement<'chunk>,
+    fields: Vec<Value<'chunk>>,
 }
 
-impl<'a> Object<'a> {
+impl<'chunk> Object<'chunk> {
     /// Construct a new instance.
-    pub fn new(class: &'a ClassElement<'a>, fields: Vec<Value<'a>>) -> Self {
+    pub fn new(class: &'chunk ClassElement<'chunk>, fields: Vec<Value<'chunk>>) -> Self {
         Self { class, fields }
     }
 
@@ -67,22 +67,22 @@ impl<'a> Object<'a> {
     /// Iterate fields and their respective values.
     pub fn iter_fields_and_values(
         &self,
-    ) -> impl Iterator<Item = (&FieldElement<'a>, &Value<'a>)> + '_ {
+    ) -> impl Iterator<Item = (&FieldElement<'chunk>, &Value<'chunk>)> + '_ {
         self.class.fields.iter().zip(self.fields.iter())
     }
 
     /// Iterate over field values in this instance.
-    pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'a>> + '_ {
+    pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'chunk>> + '_ {
         self.fields.iter()
     }
 
     /// Obtain the field [Value] at a given field index.
-    pub fn field_at(&self, index: usize) -> Option<&Value<'a>> {
+    pub fn field_at(&self, index: usize) -> Option<&Value<'chunk>> {
         self.fields.get(index)
     }
 
     /// Resolve all constants references in this instance recursively.
-    pub fn resolve_constants(mut self, constants: &impl ConstantResolver<'a>) -> Result<Self> {
+    pub fn resolve_constants(mut self, constants: &impl ConstantResolver<'chunk>) -> Result<Self> {
         self.fields = self
             .fields
             .into_iter()
@@ -94,18 +94,18 @@ impl<'a> Object<'a> {
 }
 
 /// A deserializer for [Object] instances.
-struct ObjectDeserializer<'de, 'a: 'de, CR>
+struct ObjectDeserializer<'de, 'chunk: 'de, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
-    object: &'de Object<'a>,
+    object: &'de Object<'chunk>,
     constants: &'de CR,
     field_index: usize,
 }
 
-impl<'de, 'a: 'de, CR> MapAccess<'de> for ObjectDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> MapAccess<'de> for ObjectDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
 
