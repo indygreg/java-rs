@@ -237,10 +237,7 @@ impl<'chunk> Value<'chunk> {
     }
 
     /// Deserialize an instance to a type.
-    pub fn deserialize<'slf, 'cr: 'slf, T>(
-        &'slf self,
-        constants: &'cr impl ConstantResolver<'chunk>,
-    ) -> Result<T>
+    pub fn deserialize<T>(&self, constants: &impl ConstantResolver<'chunk>) -> Result<T>
     where
         T: DeserializeOwned,
     {
@@ -257,10 +254,7 @@ impl<'chunk> Value<'chunk> {
     ///
     /// If the target enum does not have a variant matching the class
     /// name, an error occurs.
-    pub fn deserialize_enum<'slf, 'cr: 'slf, T>(
-        &'slf self,
-        constants: &'cr impl ConstantResolver<'chunk>,
-    ) -> Result<T>
+    pub fn deserialize_enum<T>(&self, constants: &impl ConstantResolver<'chunk>) -> Result<T>
     where
         T: DeserializeOwned,
     {
