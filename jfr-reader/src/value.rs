@@ -146,14 +146,14 @@ where
 // Reconcile with Primitive::NullString.
 /// Enumeration for different value types.
 #[derive(Clone, Debug)]
-pub enum Value<'a> {
+pub enum Value<'chunk> {
     /// A JVM primitive/built-in value.
     ///
     /// Represents simple/common values.
-    Primitive(Primitive<'a>),
+    Primitive(Primitive<'chunk>),
 
     /// A generic, untyped object.
-    Object(Object<'a>),
+    Object(Object<'chunk>),
 
     /// A reference to a constant in the constants pool.
     ///
@@ -166,12 +166,12 @@ pub enum Value<'a> {
     ConstantPoolNull,
 
     /// An array of other values.
-    Array(Vec<Value<'a>>),
+    Array(Vec<Value<'chunk>>),
 }
 
-impl<'a> Value<'a> {
+impl<'chunk> Value<'chunk> {
     /// Obtain the inner [Object] if this is an object variant.
-    pub fn as_object(&self) -> Option<&Object<'a>> {
+    pub fn as_object(&self) -> Option<&Object<'chunk>> {
         if let Value::Object(o) = self {
             Some(o)
         } else {
@@ -180,7 +180,7 @@ impl<'a> Value<'a> {
     }
 
     /// Obtain the inner [Primitive] if this is a primitive variant.
-    pub fn as_primitive(&self) -> Option<&Primitive<'a>> {
+    pub fn as_primitive(&self) -> Option<&Primitive<'chunk>> {
         if let Value::Primitive(p) = self {
             Some(p)
         } else {
@@ -191,7 +191,7 @@ impl<'a> Value<'a> {
     /// Resolve all constants references in this value recursively.
     ///
     /// The resulting Value should not have any instances of the Value::ConstantPool variant.
-    pub fn resolve_constants(self, constants: &impl ConstantResolver<'a>) -> Result<Self> {
+    pub fn resolve_constants(self, constants: &impl ConstantResolver<'chunk>) -> Result<Self> {
         match self {
             Self::Primitive(v) => Ok(Self::Primitive(v)),
             Self::Object(mut o) => {
@@ -232,7 +232,7 @@ impl<'a> Value<'a> {
     /// Deserialize an instance to a type.
     pub fn deserialize<'de, 'slf: 'de, 'cr: 'de, T>(
         &'slf self,
-        constants: &'cr impl ConstantResolver<'a>,
+        constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
     where
         T: Deserialize<'de>,
@@ -252,7 +252,7 @@ impl<'a> Value<'a> {
     /// name, an error occurs.
     pub fn deserialize_enum<'de, 'slf: 'de, 'cr: 'de, T>(
         &'slf self,
-        constants: &'cr impl ConstantResolver<'a>,
+        constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
     where
         T: Deserialize<'de>,
@@ -264,18 +264,18 @@ impl<'a> Value<'a> {
 }
 
 /// A deserializer for an array of values.
-struct ArrayDeserializer<'de, 'a: 'de, CR>
+struct ArrayDeserializer<'de, 'chunk: 'de, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
-    array: &'de Vec<Value<'a>>,
+    array: &'de Vec<Value<'chunk>>,
     constants: &'de CR,
     index: usize,
 }
 
-impl<'de, 'a: 'de, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
 
@@ -322,27 +322,27 @@ where
 /// not correct. But it is the most user-friendly behavior. If we
 /// wanted to be more strict, we could potentially have a flag to
 /// control behavior.
-pub struct ValueDeserializer<'de, 'a: 'de, CR>
+pub struct ValueDeserializer<'de, 'chunk: 'de, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
-    value: &'de Value<'a>,
+    value: &'de Value<'chunk>,
     constants: &'de CR,
 }
 
-impl<'de, 'a: 'de, CR> ValueDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> ValueDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     /// Construct an instance from a [Value].
-    pub fn new(value: &'de Value<'a>, constants: &'de CR) -> Self {
+    pub fn new(value: &'de Value<'chunk>, constants: &'de CR) -> Self {
         Self { value, constants }
     }
 }
 
-impl<'de, 'a: 'de, CR> Deserializer<'de> for ValueDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> Deserializer<'de> for ValueDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
 
@@ -436,27 +436,27 @@ where
 /// class name.
 ///
 /// Currently only works on [Value::Object] variants.
-pub struct EventsEnumDeserializer<'de, 'a: 'de, CR>
+pub struct EventsEnumDeserializer<'de, 'chunk: 'de, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
-    value: &'de Value<'a>,
+    value: &'de Value<'chunk>,
     constants: &'de CR,
 }
 
-impl<'de, 'a: 'de, CR> EventsEnumDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> EventsEnumDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     /// Construct a new instance from a [Value] and [ConstantResolver].
-    pub fn new(value: &'de Value<'a>, constants: &'de CR) -> Self {
+    pub fn new(value: &'de Value<'chunk>, constants: &'de CR) -> Self {
         Self { value, constants }
     }
 }
 
-impl<'de, 'a: 'de, CR> EnumAccess<'de> for EventsEnumDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> EnumAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
     type Variant = Self;
@@ -485,9 +485,9 @@ where
     }
 }
 
-impl<'de, 'a: 'de, CR> VariantAccess<'de> for EventsEnumDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> VariantAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
 
@@ -530,9 +530,9 @@ where
     }
 }
 
-impl<'de, 'a: 'de, CR> Deserializer<'de> for EventsEnumDeserializer<'de, 'a, CR>
+impl<'de, 'chunk: 'de, CR> Deserializer<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
-    CR: ConstantResolver<'a>,
+    CR: ConstantResolver<'chunk>,
 {
     type Error = Error;
 
