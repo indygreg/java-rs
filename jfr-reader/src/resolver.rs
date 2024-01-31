@@ -37,7 +37,7 @@ pub trait ConstantResolver<'chunk>: Sized {
     fn get(&self, class_id: i64, index: i64) -> ConstantValue<'chunk, '_>;
 
     /// Get the value of a constant and recursively expand constant references.
-    fn get_recursive(&self, class_id: i64, index: i64) -> ResolvedConstantValue<'chunk> {
+    fn get_recursive(&self, class_id: i64, index: i64) -> ResolvedConstantValue<'chunk, '_> {
         match self.get(class_id, index) {
             ConstantValue::Null => ResolvedConstantValue::Null,
             ConstantValue::Missing => ResolvedConstantValue::Missing,
@@ -57,7 +57,7 @@ pub trait ConstantResolver<'chunk>: Sized {
         &self,
         class_id: i64,
         index: i64,
-        map_fn: fn(&'_ Value<'chunk>) -> Result<T>,
+        map_fn: fn(&'_ Value<'chunk, '_>) -> Result<T>,
     ) -> ConstantValueMapped<T> {
         match self.get(class_id, index) {
             ConstantValue::Null => ConstantValueMapped::Null,
@@ -92,8 +92,8 @@ pub trait ConstantResolver<'chunk>: Sized {
 }
 
 /// Holds resolved values in the constants pool.
-pub struct ConstantPoolValues<'chunk> {
-    inner: FxHashMap<i64, FxHashMap<i64, Value<'chunk>>>,
+pub struct ConstantPoolValues<'chunk, 'resolver> {
+    inner: FxHashMap<i64, FxHashMap<i64, Value<'chunk, 'resolver>>>,
     /// The class ID for java.lang.String.
     ///
     /// Stored to facilitate efficient lookups of constant pool references
@@ -101,7 +101,7 @@ pub struct ConstantPoolValues<'chunk> {
     string_class_id: Option<i64>,
 }
 
-impl<'chunk> ConstantResolver<'chunk> for ConstantPoolValues<'chunk> {
+impl<'chunk, 'resolver> ConstantResolver<'chunk> for ConstantPoolValues<'chunk, 'resolver> {
     fn iter_class_ids(&self) -> Box<dyn Iterator<Item = i64> + '_> {
         Box::new(self.inner.keys().copied())
     }
@@ -281,7 +281,7 @@ impl<'chunk> EventResolver<'chunk> {
     }
 
     /// Obtain a data structure allowing retrieval of resolved constant pool values.
-    pub fn constant_pool_values(&self) -> Result<ConstantPoolValues<'_>> {
+    pub fn constant_pool_values(&self) -> Result<ConstantPoolValues<'chunk, '_>> {
         let mut inner = FxHashMap::<i64, FxHashMap<i64, Value>>::default();
 
         for e in &self.constant_pools {
@@ -308,12 +308,12 @@ impl<'chunk> EventResolver<'chunk> {
     }
 
     /// Parse event fields data into a [GenericEvent].
-    pub fn parse_event<'slf, 'cr, CR: ConstantResolver<'slf>>(
+    pub fn parse_event<'slf, 'cr, CR: ConstantResolver<'chunk>>(
         &'slf self,
         s: &'chunk [u8],
         class_id: i64,
         cr: &'cr CR,
-    ) -> Result<(&[u8], GenericEvent<'slf, 'cr, CR>)> {
+    ) -> Result<(&[u8], GenericEvent<'chunk, 'slf, 'cr, CR>)> {
         let (s, o) = self.parse_event_object(s, class_id)?;
 
         let res = GenericEvent::new(o, cr);
@@ -325,7 +325,11 @@ impl<'chunk> EventResolver<'chunk> {
     ///
     /// The class ID of the event class to resolve is passed in. The value
     /// should come from the event's header in the chunk data.
-    pub fn parse_event_value(&self, s: &'chunk [u8], class_id: i64) -> Result<(&[u8], Value<'_>)> {
+    pub fn parse_event_value(
+        &self,
+        s: &'chunk [u8],
+        class_id: i64,
+    ) -> Result<(&[u8], Value<'chunk, '_>)> {
         self.parse_value(s, class_id)
     }
 
@@ -336,7 +340,7 @@ impl<'chunk> EventResolver<'chunk> {
         &self,
         s: &'chunk [u8],
         class_id: i64,
-    ) -> Result<(&[u8], Object<'_>)> {
+    ) -> Result<(&[u8], Object<'chunk, '_>)> {
         let (s, v) = self.parse_value(s, class_id)?;
 
         if let Value::Object(o) = v {
@@ -361,7 +365,7 @@ impl<'chunk> EventResolver<'chunk> {
         &self,
         mut s: &'chunk [u8],
         class_id: i64,
-    ) -> Result<(&'chunk [u8], Value<'_>)> {
+    ) -> Result<(&'chunk [u8], Value<'chunk, '_>)> {
         // Use a cached lookup table of parsers for common classes so we can avoid both the class
         // lookup (fast) and the string compare to locate the parser function (slow).
         // TODO support registering additional parser functions to make this fully generic.
@@ -403,7 +407,7 @@ impl<'chunk> EventResolver<'chunk> {
         &self,
         s: &'chunk [u8],
         field: &FieldElement<'chunk>,
-    ) -> Result<(&'chunk [u8], Value<'_>)> {
+    ) -> Result<(&'chunk [u8], Value<'chunk, '_>)> {
         // This seems to always be "true" if present. Don't bother checking it.
         if field.constant_pool.is_some() {
             let (s, constant_index) = leb128_i64(s).map_err(Error::from)?;
@@ -427,7 +431,7 @@ impl<'chunk> EventResolver<'chunk> {
         &self,
         s: &'chunk [u8],
         field: &FieldElement<'chunk>,
-    ) -> Result<(&'chunk [u8], Value<'_>)> {
+    ) -> Result<(&'chunk [u8], Value<'chunk, '_>)> {
         let (mut s, array_length) = leb128_i32(s).map_err(Error::from)?;
 
         let mut els = Vec::with_capacity(array_length as _);

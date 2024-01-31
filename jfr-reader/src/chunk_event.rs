@@ -152,25 +152,31 @@ impl<'chunk> EventRecord<'chunk> {
     }
 
     /// Resolve a [GenericEvent] for this event record.
-    pub fn resolve_event<'r, 'cr, CR: ConstantResolver<'r>>(
+    pub fn resolve_event<'resolver, 'cr, CR: ConstantResolver<'chunk>>(
         &self,
-        resolver: &'r EventResolver<'chunk>,
+        resolver: &'resolver EventResolver<'chunk>,
         cr: &'cr CR,
-    ) -> Result<GenericEvent<'r, 'cr, CR>> {
+    ) -> Result<GenericEvent<'chunk, 'resolver, 'cr, CR>> {
         Ok(resolver
             .parse_event(self.fields_data()?, self.header.event_type, cr)?
             .1)
     }
 
     /// Resolve a [Value] for this event record.
-    pub fn resolve_value<'r>(&self, resolver: &'r EventResolver<'chunk>) -> Result<Value<'r>> {
+    pub fn resolve_value<'r>(
+        &self,
+        resolver: &'r EventResolver<'chunk>,
+    ) -> Result<Value<'chunk, 'r>> {
         let (_, v) = resolver.parse_event_value(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
     }
 
     /// Parse the event fields in this instance into an [Object] using an [EventResolver].
-    pub fn resolve_object<'r>(&self, resolver: &'r EventResolver<'chunk>) -> Result<Object<'r>> {
+    pub fn resolve_object<'r>(
+        &self,
+        resolver: &'r EventResolver<'chunk>,
+    ) -> Result<Object<'chunk, 'r>> {
         let (_, v) = resolver.parse_event_object(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
