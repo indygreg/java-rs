@@ -163,20 +163,20 @@ impl<'chunk> EventRecord<'chunk> {
     }
 
     /// Resolve a [Value] for this event record.
-    pub fn resolve_value<'r>(
+    pub fn resolve_value<'resolver>(
         &self,
-        resolver: &'r EventResolver<'chunk>,
-    ) -> Result<Value<'r, 'chunk>> {
+        resolver: &'resolver EventResolver<'chunk>,
+    ) -> Result<Value<'resolver, 'chunk>> {
         let (_, v) = resolver.parse_event_value(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
     }
 
     /// Parse the event fields in this instance into an [Object] using an [EventResolver].
-    pub fn resolve_object<'r>(
+    pub fn resolve_object<'resolver>(
         &self,
-        resolver: &'r EventResolver<'chunk>,
-    ) -> Result<Object<'r, 'chunk>> {
+        resolver: &'resolver EventResolver<'chunk>,
+    ) -> Result<Object<'resolver, 'chunk>> {
         let (_, v) = resolver.parse_event_object(self.fields_data()?, self.header.event_type)?;
 
         Ok(v)
