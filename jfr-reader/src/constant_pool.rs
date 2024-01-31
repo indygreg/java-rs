@@ -114,11 +114,11 @@ impl ConstantPoolHeader {
     }
 }
 
-fn parse_constant_pool_value<'resolver, 'chunk: 'resolver>(
+fn parse_constant_pool_value<'chunk>(
     s: &'chunk [u8],
-    resolver: &'resolver EventResolver<'chunk>,
+    resolver: &EventResolver<'chunk>,
     class_id: i64,
-) -> Result<(&'chunk [u8], i64, Value<'resolver, 'chunk>)> {
+) -> Result<(&'chunk [u8], i64, Value<'chunk>)> {
     let (s, pool_index) = leb128_i64(s)?;
 
     // Constant pool values can resolve to primitives (notably strings). So
@@ -128,10 +128,10 @@ fn parse_constant_pool_value<'resolver, 'chunk: 'resolver>(
     Ok((s, pool_index, value))
 }
 
-fn parse_constant_pool_class<'resolver, 'chunk: 'resolver>(
+fn parse_constant_pool_class<'chunk>(
     s: &'chunk [u8],
-    resolver: &'resolver EventResolver<'chunk>,
-) -> Result<(&'chunk [u8], i64, Vec<(i64, Value<'resolver, 'chunk>)>)> {
+    resolver: &EventResolver<'chunk>,
+) -> Result<(&'chunk [u8], i64, Vec<(i64, Value<'chunk>)>)> {
     let (mut s, (class_id, constant_count)) = context(
         "parsing constant pool class entry",
         pair(leb128_i64, leb128_i32),
@@ -180,10 +180,10 @@ impl<'chunk> ConstantPoolEvent<'chunk> {
     /// values because the entries do not encode their own size. We need to
     /// decode each entry in full using the chunk's typing metadata in order
     /// to identify boundaries between constants in the pool.
-    pub fn resolve_constants<'r>(
+    pub fn resolve_constants(
         &self,
-        resolver: &'r EventResolver<'chunk>,
-    ) -> Result<Vec<(i64, Vec<(i64, Value<'r, 'chunk>)>)>> {
+        resolver: &EventResolver<'chunk>,
+    ) -> Result<Vec<(i64, Vec<(i64, Value<'chunk>)>)>> {
         let mut s = self.pool_data;
 
         let mut res = Vec::new();

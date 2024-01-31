@@ -16,6 +16,7 @@ use crate::{
 };
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use serde::Deserialize;
+use std::sync::Arc;
 
 /// Common event fields.
 ///
@@ -172,25 +173,25 @@ pub trait EventType<'slf, EventThread: 'slf, StackTrace: 'slf> {
     }
 }
 
-pub struct GenericEvent<'resolver, 'cr: 'resolver, 'chunk: 'resolver, CR>
+pub struct GenericEvent<'cr, 'chunk: 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    object: Object<'resolver, 'chunk>,
+    object: Object<'chunk>,
     constants: &'cr CR,
 }
 
-impl<'resolver, 'cr: 'resolver, 'chunk: 'resolver, CR> GenericEvent<'resolver, 'cr, 'chunk, CR>
+impl<'cr, 'chunk: 'cr, CR> GenericEvent<'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     /// Construct an instance from an owned [Object] and a [ConstantResolver].
-    pub fn new(object: Object<'resolver, 'chunk>, constants: &'cr CR) -> Self {
+    pub fn new(object: Object<'chunk>, constants: &'cr CR) -> Self {
         Self { object, constants }
     }
 
     /// Obtain the [ClassElement] being defined.
-    pub fn class(&self) -> &ClassElement {
+    pub fn class(&self) -> &ClassElement<'chunk> {
         self.object.class()
     }
 

@@ -19,23 +19,24 @@ use serde::{
     },
     forward_to_deserialize_any, Deserialize, Deserializer,
 };
+use std::sync::Arc;
 
 /// Holds a constant's value.
-pub enum ConstantValue<'resolver, 'chunk: 'resolver> {
+pub enum ConstantValue<'cr, 'chunk: 'cr> {
     /// The constant evaluates to null.
     Null,
     /// The value of the constant.
     ///
     /// Can contain other constant pool references.
-    Value(&'resolver Value<'resolver, 'chunk>),
+    Value(&'cr Value<'chunk>),
     /// No constant known. Missing index in the constant pool.
     Missing,
 }
 
 /// Holds a constant's value with all constants resolved recursively.
-pub enum ResolvedConstantValue<'resolver, 'chunk: 'resolver> {
+pub enum ResolvedConstantValue<'chunk> {
     Null,
-    Value(Result<Value<'resolver, 'chunk>>),
+    Value(Result<Value<'chunk>>),
     Missing,
 }
 
@@ -48,45 +49,41 @@ pub enum ConstantValueMapped<T> {
 
 /// An instance of a class with resolved values. Or in Java parlance an *Object*.
 #[derive(Clone, Debug)]
-pub struct Object<'resolver, 'chunk: 'resolver> {
-    class: &'resolver ClassElement<'chunk>,
-    fields: Vec<Value<'resolver, 'chunk>>,
+pub struct Object<'chunk> {
+    class: Arc<ClassElement<'chunk>>,
+    fields: Vec<Value<'chunk>>,
 }
 
-impl<'resolver, 'chunk: 'resolver> Object<'resolver, 'chunk> {
+impl<'chunk> Object<'chunk> {
     /// Construct a new instance.
-    pub fn new(
-        class: &'resolver ClassElement<'chunk>,
-        fields: Vec<Value<'resolver, 'chunk>>,
-    ) -> Self {
+    pub fn new(class: Arc<ClassElement<'chunk>>, fields: Vec<Value<'chunk>>) -> Self {
         Self { class, fields }
     }
 
     /// Obtain the class being described.
-    pub fn class(&self) -> &'resolver ClassElement {
-        self.class
+    pub fn class(&self) -> &ClassElement<'chunk> {
+        self.class.as_ref()
     }
 
     /// Iterate fields and their respective values.
     pub fn iter_fields_and_values(
         &self,
-    ) -> impl Iterator<Item = (&'resolver FieldElement<'chunk>, &Value<'resolver, 'chunk>)> + '_
-    {
+    ) -> impl Iterator<Item = (&FieldElement<'chunk>, &Value<'chunk>)> + '_ {
         self.class.fields.iter().zip(self.fields.iter())
     }
 
     /// Iterate over field values in this instance.
-    pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'resolver, 'chunk>> + '_ {
+    pub fn iter_fields(&self) -> impl Iterator<Item = &Value<'chunk>> + '_ {
         self.fields.iter()
     }
 
     /// Obtain the field [Value] at a given field index.
-    pub fn field_at(&self, index: usize) -> Option<&Value<'resolver, 'chunk>> {
+    pub fn field_at(&self, index: usize) -> Option<&Value<'chunk>> {
         self.fields.get(index)
     }
 
     /// Resolve all constants references in this instance recursively.
-    pub fn resolve_constants<'cr: 'resolver>(
+    pub fn resolve_constants<'cr>(
         mut self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<Self> {
@@ -101,17 +98,16 @@ impl<'resolver, 'chunk: 'resolver> Object<'resolver, 'chunk> {
 }
 
 /// A deserializer for [Object] instances.
-struct ObjectDeserializer<'de, 'chunk: 'de, 'resolver: 'de, CR>
+struct ObjectDeserializer<'de, 'chunk: 'de, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    object: &'de Object<'resolver, 'chunk>,
+    object: &'de Object<'chunk>,
     constants: &'de CR,
     field_index: usize,
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> MapAccess<'de>
-    for ObjectDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> MapAccess<'de> for ObjectDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -154,14 +150,14 @@ where
 // Reconcile with Primitive::NullString.
 /// Enumeration for different value types.
 #[derive(Clone, Debug)]
-pub enum Value<'resolver, 'chunk: 'resolver> {
+pub enum Value<'chunk> {
     /// A JVM primitive/built-in value.
     ///
     /// Represents simple/common values.
     Primitive(Primitive<'chunk>),
 
     /// A generic, untyped object.
-    Object(Object<'resolver, 'chunk>),
+    Object(Object<'chunk>),
 
     /// A reference to a constant in the constants pool.
     ///
@@ -174,12 +170,12 @@ pub enum Value<'resolver, 'chunk: 'resolver> {
     ConstantPoolNull,
 
     /// An array of other values.
-    Array(Vec<Value<'resolver, 'chunk>>),
+    Array(Vec<Value<'chunk>>),
 }
 
-impl<'resolver, 'chunk: 'resolver> Value<'resolver, 'chunk> {
+impl<'chunk> Value<'chunk> {
     /// Obtain the inner [Object] if this is an object variant.
-    pub fn as_object(&self) -> Option<&Object<'resolver, 'chunk>> {
+    pub fn as_object(&self) -> Option<&Object<'chunk>> {
         if let Value::Object(o) = self {
             Some(o)
         } else {
@@ -199,7 +195,7 @@ impl<'resolver, 'chunk: 'resolver> Value<'resolver, 'chunk> {
     /// Resolve all constants references in this value recursively.
     ///
     /// The resulting Value should not have any instances of the Value::ConstantPool variant.
-    pub fn resolve_constants<'cr: 'resolver>(
+    pub fn resolve_constants<'cr>(
         self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<Self> {
@@ -275,17 +271,16 @@ impl<'resolver, 'chunk: 'resolver> Value<'resolver, 'chunk> {
 }
 
 /// A deserializer for an array of values.
-struct ArrayDeserializer<'de, 'chunk: 'de, 'resolver: 'de, CR>
+struct ArrayDeserializer<'de, 'chunk: 'de, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    array: &'de Vec<Value<'resolver, 'chunk>>,
+    array: &'de Vec<Value<'chunk>>,
     constants: &'de CR,
     index: usize,
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> SeqAccess<'de>
-    for ArrayDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -334,27 +329,25 @@ where
 /// not correct. But it is the most user-friendly behavior. If we
 /// wanted to be more strict, we could potentially have a flag to
 /// control behavior.
-pub struct ValueDeserializer<'de, 'chunk: 'de, 'resolver: 'de, 'cr: 'de, CR>
+pub struct ValueDeserializer<'de, 'chunk: 'de, 'cr: 'de, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    value: &'de Value<'resolver, 'chunk>,
+    value: &'de Value<'chunk>,
     constants: &'cr CR,
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, 'cr: 'de, CR>
-    ValueDeserializer<'de, 'chunk, 'resolver, 'cr, CR>
+impl<'de, 'chunk: 'de, 'cr: 'de, CR> ValueDeserializer<'de, 'chunk, 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     /// Construct an instance from a [Value].
-    pub fn new(value: &'de Value<'resolver, 'chunk>, constants: &'cr CR) -> Self {
+    pub fn new(value: &'de Value<'chunk>, constants: &'cr CR) -> Self {
         Self { value, constants }
     }
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, 'cr: 'de + 'resolver, CR> Deserializer<'de>
-    for ValueDeserializer<'de, 'chunk, 'resolver, 'cr, CR>
+impl<'de, 'chunk: 'de, 'cr: 'de, CR> Deserializer<'de> for ValueDeserializer<'de, 'chunk, 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -450,26 +443,25 @@ where
 /// class name.
 ///
 /// Currently only works on [Value::Object] variants.
-pub struct EventsEnumDeserializer<'de, 'chunk: 'de, 'resolver: 'de, CR>
+pub struct EventsEnumDeserializer<'de, 'chunk: 'de, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
-    value: &'de Value<'resolver, 'chunk>,
+    value: &'de Value<'chunk>,
     constants: &'de CR,
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> EventsEnumDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> EventsEnumDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     /// Construct a new instance from a [Value] and [ConstantResolver].
-    pub fn new(value: &'de Value<'resolver, 'chunk>, constants: &'de CR) -> Self {
+    pub fn new(value: &'de Value<'chunk>, constants: &'de CR) -> Self {
         Self { value, constants }
     }
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> EnumAccess<'de>
-    for EventsEnumDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> EnumAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -500,8 +492,7 @@ where
     }
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> VariantAccess<'de>
-    for EventsEnumDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> VariantAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -546,8 +537,7 @@ where
     }
 }
 
-impl<'de, 'chunk: 'de, 'resolver: 'de, CR> Deserializer<'de>
-    for EventsEnumDeserializer<'de, 'chunk, 'resolver, CR>
+impl<'de, 'chunk: 'de, CR> Deserializer<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
