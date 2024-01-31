@@ -169,14 +169,14 @@ impl ElementRecord {
 /// This is mostly a bag of integers holding the results of lightly parsing the
 /// string table and element tree.
 #[derive(Clone, Debug)]
-pub struct MetadataRecords<'a> {
+pub struct MetadataRecords<'chunk> {
     header: MetadataHeader,
-    string_records: Vec<StringRecord<'a>>,
+    string_records: Vec<StringRecord<'chunk>>,
     root: ElementRecord,
 }
 
-impl<'a> MetadataRecords<'a> {
-    pub fn parse(s: &'a [u8]) -> ParseResult<Self> {
+impl<'chunk> MetadataRecords<'chunk> {
+    pub fn parse(s: &'chunk [u8]) -> ParseResult<Self> {
         let (s, header) = context("parsing metadata event header", MetadataHeader::parse)(s)?;
 
         let (s, string_records) = context(
@@ -197,7 +197,7 @@ impl<'a> MetadataRecords<'a> {
     }
 }
 
-fn get_str<'a>(st: &mut LazyStringTable<'a>, index: i32) -> Result<Cow<'a, str>> {
+fn get_str<'chunk>(st: &mut LazyStringTable<'chunk>, index: i32) -> Result<Cow<'chunk, str>> {
     st.get(index as _)?.as_cow().ok_or_else(move || {
         Error::ElementConstructLogic("referenced string does not have inline data".to_string())
     })
@@ -209,13 +209,13 @@ pub struct RawAnnotationElement {
 }
 
 #[derive(Clone, Debug)]
-pub struct AnnotationElement<'a> {
+pub struct AnnotationElement<'chunk> {
     pub type_id: i64,
-    pub values: Vec<(Cow<'a, str>, Cow<'a, str>)>,
+    pub values: Vec<(Cow<'chunk, str>, Cow<'chunk, str>)>,
 }
 
-impl<'a> AnnotationElement<'a> {
-    pub fn from_raw(el: RawAnnotationElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> AnnotationElement<'chunk> {
+    pub fn from_raw(el: RawAnnotationElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         // There is a single type ID attribute. All others are generic values.
         let mut type_id = None;
         let mut values = Vec::with_capacity(el.attributes.len() - 1);
@@ -364,22 +364,22 @@ pub struct RawFieldElement {
 
 /// Describes a field in a class / type.
 #[derive(Clone, Debug)]
-pub struct FieldElement<'a> {
+pub struct FieldElement<'chunk> {
     /// Additional annotations for this field.
-    pub annotations: Vec<AnnotationElement<'a>>,
+    pub annotations: Vec<AnnotationElement<'chunk>>,
     /// The name of this field.
-    pub name: Cow<'a, str>,
+    pub name: Cow<'chunk, str>,
     /// The class id / type of this field.
     pub type_id: i64,
     /// Number of dimensions. A value > 0 means this is an array.
     pub dimension: Option<i64>,
     /// The value for the field is a LEB-128 reference to a constant pool index
     /// for this field's class/type ID instead of an inline value.
-    pub constant_pool: Option<Cow<'a, str>>,
+    pub constant_pool: Option<Cow<'chunk, str>>,
 }
 
-impl<'a> FieldElement<'a> {
-    pub fn from_raw(el: RawFieldElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> FieldElement<'chunk> {
+    pub fn from_raw(el: RawFieldElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         let annotations = el
             .annotations
             .into_iter()
@@ -463,13 +463,13 @@ pub struct RawMetadataElement {
 
 /// Describes chunk metadata.
 #[derive(Clone, Debug)]
-pub struct MetadataElement<'a> {
+pub struct MetadataElement<'chunk> {
     /// The classes/types this chunk references.
-    pub classes: Vec<ClassElement<'a>>,
+    pub classes: Vec<ClassElement<'chunk>>,
 }
 
-impl<'a> MetadataElement<'a> {
-    pub fn from_raw(el: RawMetadataElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> MetadataElement<'chunk> {
+    pub fn from_raw(el: RawMetadataElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         let classes = el
             .classes
             .into_iter()
@@ -493,16 +493,19 @@ pub struct RawRegionElement {
 
 /// Encodes information about the locale / region from whence this chunk came.
 #[derive(Clone, Debug)]
-pub struct RegionElement<'a> {
-    pub locale: Cow<'a, str>,
+pub struct RegionElement<'chunk> {
+    pub locale: Cow<'chunk, str>,
     /// The timezone offset, in milliseconds.
     ///
     /// Why this is milliseconds we have no clue.
     pub gmt_offset: i32,
 }
 
-impl<'a> RegionElement<'a> {
-    pub fn from_raw(el: RawRegionElement, string_table: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> RegionElement<'chunk> {
+    pub fn from_raw(
+        el: RawRegionElement,
+        string_table: &mut LazyStringTable<'chunk>,
+    ) -> Result<Self> {
         let mut locale = None;
         let mut gmt_offset = None;
 
@@ -561,13 +564,13 @@ pub struct RawRootElement {
 ///
 /// This element exists to hold the other top-level elements.
 #[derive(Clone, Debug)]
-pub struct RootElement<'a> {
-    pub metadata: MetadataElement<'a>,
-    pub region: RegionElement<'a>,
+pub struct RootElement<'chunk> {
+    pub metadata: MetadataElement<'chunk>,
+    pub region: RegionElement<'chunk>,
 }
 
-impl<'a> RootElement<'a> {
-    pub fn from_raw(el: RawRootElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> RootElement<'chunk> {
+    pub fn from_raw(el: RawRootElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         let metadata = MetadataElement::from_raw(el.metadata, st)?;
         let region = RegionElement::from_raw(el.region, st)?;
 
@@ -589,19 +592,19 @@ pub struct RawSettingsElement {
 
 /// Settings related to a class/type.
 #[derive(Clone, Debug)]
-pub struct SettingsElement<'a> {
+pub struct SettingsElement<'chunk> {
     /// Additional annotations for these settings.
-    pub annotations: Vec<AnnotationElement<'a>>,
+    pub annotations: Vec<AnnotationElement<'chunk>>,
     /// The name of the setting.
-    pub name: Cow<'a, str>,
+    pub name: Cow<'chunk, str>,
     /// The class / type ID for the value of this setting.
     pub type_id: i64,
     /// The default value for this setting.
-    pub default_value: Cow<'a, str>,
+    pub default_value: Cow<'chunk, str>,
 }
 
-impl<'a> SettingsElement<'a> {
-    pub fn from_raw(el: RawSettingsElement, st: &mut LazyStringTable<'a>) -> Result<Self> {
+impl<'chunk> SettingsElement<'chunk> {
+    pub fn from_raw(el: RawSettingsElement, st: &mut LazyStringTable<'chunk>) -> Result<Self> {
         let annotations = el
             .annotations
             .into_iter()
@@ -868,24 +871,24 @@ impl RawElement {
 /// The element, its attributes, its children, and all its attributes
 /// are fully parsed. All element data is available.
 #[derive(Clone, Debug)]
-pub enum Element<'a> {
-    Annotation(AnnotationElement<'a>),
-    Class(ClassElement<'a>),
-    Field(FieldElement<'a>),
-    Metadata(MetadataElement<'a>),
-    Region(RegionElement<'a>),
-    Root(RootElement<'a>),
-    Setting(SettingsElement<'a>),
+pub enum Element<'chunk> {
+    Annotation(AnnotationElement<'chunk>),
+    Class(ClassElement<'chunk>),
+    Field(FieldElement<'chunk>),
+    Metadata(MetadataElement<'chunk>),
+    Region(RegionElement<'chunk>),
+    Root(RootElement<'chunk>),
+    Setting(SettingsElement<'chunk>),
 }
 
-impl<'a> Element<'a> {
+impl<'chunk> Element<'chunk> {
     /// Construct an instance from a [RawElement].
     ///
     /// This effectively parses attributes and performs type checking against
     /// attributes.
     ///
     /// Parsing operates recursively to child elements.
-    pub fn from_raw<'st>(el: RawElement, st: &'st mut LazyStringTable<'a>) -> Result<Self> {
+    pub fn from_raw<'st>(el: RawElement, st: &'st mut LazyStringTable<'chunk>) -> Result<Self> {
         match el {
             RawElement::Annotation(x) => Ok(Self::Annotation(AnnotationElement::from_raw(x, st)?)),
             RawElement::Class(x) => Ok(Self::Class(ClassElement::from_raw(x, st)?)),
@@ -908,26 +911,26 @@ impl<'a> Element<'a> {
 ///
 /// Instances of this type are used to resolve class/type information from
 /// integer references to class IDs.
-pub struct Metadata<'a> {
+pub struct Metadata<'chunk> {
     /// The metadata header from whence we came.
     pub header: MetadataHeader,
 
     /// The string table within the event data.
-    pub string_table: LazyStringTable<'a>,
+    pub string_table: LazyStringTable<'chunk>,
 
     /// The root element in the element tree.
-    pub root: RootElement<'a>,
+    pub root: RootElement<'chunk>,
 
     /// A mapping of class / type IDs to class elements describing them.
-    pub class_map: FxHashMap<i64, ClassElement<'a>>,
+    pub class_map: FxHashMap<i64, ClassElement<'chunk>>,
 }
 
-impl<'a> Metadata<'a> {
+impl<'chunk> Metadata<'chunk> {
     /// Construct an instance from metadata event data.
     ///
     /// Input should be the beginning of a chunk event record. The size and event
     /// type will be parsed.
-    pub fn parse(s: &'a [u8]) -> Result<(&'a [u8], Self)> {
+    pub fn parse(s: &'chunk [u8]) -> Result<(&'chunk [u8], Self)> {
         let (s, records) = MetadataRecords::parse(s)?;
 
         let metadata = Self::from_records(records)?;
@@ -939,7 +942,7 @@ impl<'a> Metadata<'a> {
     ///
     /// This performs the work of resolving integer references to strings and
     /// other typed values. It also constructs the class map.
-    pub fn from_records(records: MetadataRecords<'a>) -> Result<Self> {
+    pub fn from_records(records: MetadataRecords<'chunk>) -> Result<Self> {
         let mut string_table = LazyStringTable::from(records.string_records);
 
         // Cast to typed elements.
