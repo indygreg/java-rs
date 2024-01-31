@@ -26,7 +26,7 @@ use chrono::{DateTime, Duration, FixedOffset, TimeZone, Utc};
 use rustc_hash::FxHashMap;
 
 /// Describes an entity that can resolve constants.
-pub trait ConstantResolver<'a>: Sized {
+pub trait ConstantResolver<'chunk>: Sized {
     /// Iterate over class IDs known to this resolver.
     fn iter_class_ids(&self) -> Box<dyn Iterator<Item = i64> + '_>;
 
@@ -34,10 +34,10 @@ pub trait ConstantResolver<'a>: Sized {
     fn iter_class_indices(&self, class_id: i64) -> Box<dyn Iterator<Item = i64> + '_>;
 
     /// Get the value of a constant.
-    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_>;
+    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'chunk, '_>;
 
     /// Get the value of a constant and recursively expand constant references.
-    fn get_recursive(&self, class_id: i64, index: i64) -> ResolvedConstantValue<'a> {
+    fn get_recursive(&self, class_id: i64, index: i64) -> ResolvedConstantValue<'chunk> {
         match self.get(class_id, index) {
             ConstantValue::Null => ResolvedConstantValue::Null,
             ConstantValue::Missing => ResolvedConstantValue::Missing,
@@ -57,7 +57,7 @@ pub trait ConstantResolver<'a>: Sized {
         &self,
         class_id: i64,
         index: i64,
-        map_fn: fn(&'_ Value<'a>) -> Result<T>,
+        map_fn: fn(&'_ Value<'chunk>) -> Result<T>,
     ) -> ConstantValueMapped<T> {
         match self.get(class_id, index) {
             ConstantValue::Null => ConstantValueMapped::Null,
@@ -92,8 +92,8 @@ pub trait ConstantResolver<'a>: Sized {
 }
 
 /// Holds resolved values in the constants pool.
-pub struct ConstantPoolValues<'a> {
-    inner: FxHashMap<i64, FxHashMap<i64, Value<'a>>>,
+pub struct ConstantPoolValues<'chunk> {
+    inner: FxHashMap<i64, FxHashMap<i64, Value<'chunk>>>,
     /// The class ID for java.lang.String.
     ///
     /// Stored to facilitate efficient lookups of constant pool references
@@ -101,7 +101,7 @@ pub struct ConstantPoolValues<'a> {
     string_class_id: Option<i64>,
 }
 
-impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
+impl<'chunk> ConstantResolver<'chunk> for ConstantPoolValues<'chunk> {
     fn iter_class_ids(&self) -> Box<dyn Iterator<Item = i64> + '_> {
         Box::new(self.inner.keys().copied())
     }
@@ -114,7 +114,7 @@ impl<'a> ConstantResolver<'a> for ConstantPoolValues<'a> {
         }
     }
 
-    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'a, '_> {
+    fn get(&self, class_id: i64, index: i64) -> ConstantValue<'chunk, '_> {
         match self.inner.get(&class_id) {
             Some(x) => match x.get(&index) {
                 Some(v) => ConstantValue::Value(v),
