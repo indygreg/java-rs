@@ -216,19 +216,19 @@ impl TimeResolver {
 /// settings, or referenced values in the constants pool. It is possible to do
 /// all of this without parsing the constants pool at all. This enables consumers
 /// to filter on event field values without having to pay additional costs.
-pub struct EventResolver<'a> {
-    classes: FxHashMap<i64, ClassElement<'a>>,
-    constant_pools: Vec<ConstantPoolEvent<'a>>,
-    primitive_parsers: FxHashMap<i64, fn(&'a [u8]) -> ParseResult<'a, Primitive<'a>>>,
+pub struct EventResolver<'chunk> {
+    classes: FxHashMap<i64, ClassElement<'chunk>>,
+    constant_pools: Vec<ConstantPoolEvent<'chunk>>,
+    primitive_parsers: FxHashMap<i64, fn(&'chunk [u8]) -> ParseResult<'chunk, Primitive<'chunk>>>,
     time_resolver: TimeResolver,
 }
 
-impl<'a> EventResolver<'a> {
+impl<'chunk> EventResolver<'chunk> {
     /// Construct an instance from metadata and lightly parsed constants pools.
     pub fn new(
         chunk_header: &ChunkHeader,
-        metadata: Metadata<'a>,
-        constant_pools: impl Iterator<Item = ConstantPoolEvent<'a>>,
+        metadata: Metadata<'chunk>,
+        constant_pools: impl Iterator<Item = ConstantPoolEvent<'chunk>>,
     ) -> Result<Self> {
         let time_resolver = TimeResolver::new(chunk_header, &metadata)?;
 
@@ -259,7 +259,7 @@ impl<'a> EventResolver<'a> {
         })
     }
 
-    pub fn get_class(&self, id: i64) -> Option<&ClassElement<'a>> {
+    pub fn get_class(&self, id: i64) -> Option<&ClassElement<'chunk>> {
         self.classes.get(&id)
     }
 
@@ -310,7 +310,7 @@ impl<'a> EventResolver<'a> {
     /// Parse event fields data into a [GenericEvent].
     pub fn parse_event<'slf, 'cr, CR: ConstantResolver<'slf>>(
         &'slf self,
-        s: &'a [u8],
+        s: &'chunk [u8],
         class_id: i64,
         cr: &'cr CR,
     ) -> Result<(&[u8], GenericEvent<'slf, 'cr, CR>)> {
@@ -325,14 +325,18 @@ impl<'a> EventResolver<'a> {
     ///
     /// The class ID of the event class to resolve is passed in. The value
     /// should come from the event's header in the chunk data.
-    pub fn parse_event_value(&self, s: &'a [u8], class_id: i64) -> Result<(&[u8], Value<'_>)> {
+    pub fn parse_event_value(&self, s: &'chunk [u8], class_id: i64) -> Result<(&[u8], Value<'_>)> {
         self.parse_value(s, class_id)
     }
 
     /// Parse event fields data into an [Object].
     ///
     /// Like [Self::parse_event_value()] but downcasts to an [Object].
-    pub fn parse_event_object(&self, s: &'a [u8], class_id: i64) -> Result<(&[u8], Object<'_>)> {
+    pub fn parse_event_object(
+        &self,
+        s: &'chunk [u8],
+        class_id: i64,
+    ) -> Result<(&[u8], Object<'_>)> {
         let (s, v) = self.parse_value(s, class_id)?;
 
         if let Value::Object(o) = v {
@@ -355,9 +359,9 @@ impl<'a> EventResolver<'a> {
     /// slice so all referenced data is captured.
     pub(crate) fn parse_value(
         &self,
-        mut s: &'a [u8],
+        mut s: &'chunk [u8],
         class_id: i64,
-    ) -> Result<(&'a [u8], Value<'_>)> {
+    ) -> Result<(&'chunk [u8], Value<'_>)> {
         // Use a cached lookup table of parsers for common classes so we can avoid both the class
         // lookup (fast) and the string compare to locate the parser function (slow).
         // TODO support registering additional parser functions to make this fully generic.
@@ -397,9 +401,9 @@ impl<'a> EventResolver<'a> {
     /// a class.
     fn parse_field_single(
         &self,
-        s: &'a [u8],
-        field: &FieldElement<'a>,
-    ) -> Result<(&'a [u8], Value<'_>)> {
+        s: &'chunk [u8],
+        field: &FieldElement<'chunk>,
+    ) -> Result<(&'chunk [u8], Value<'_>)> {
         // This seems to always be "true" if present. Don't bother checking it.
         if field.constant_pool.is_some() {
             let (s, constant_index) = leb128_i64(s).map_err(Error::from)?;
@@ -421,9 +425,9 @@ impl<'a> EventResolver<'a> {
     /// the field is an array.
     fn parse_field_array(
         &self,
-        s: &'a [u8],
-        field: &FieldElement<'a>,
-    ) -> Result<(&'a [u8], Value<'_>)> {
+        s: &'chunk [u8],
+        field: &FieldElement<'chunk>,
+    ) -> Result<(&'chunk [u8], Value<'_>)> {
         let (mut s, array_length) = leb128_i32(s).map_err(Error::from)?;
 
         let mut els = Vec::with_capacity(array_length as _);
