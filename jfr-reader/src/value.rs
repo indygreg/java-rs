@@ -14,10 +14,10 @@ use crate::{
 };
 use serde::{
     de::{
-        value::StrDeserializer, DeserializeSeed, EnumAccess, IntoDeserializer, MapAccess,
-        SeqAccess, Unexpected, VariantAccess, Visitor,
+        value::StrDeserializer, DeserializeOwned, DeserializeSeed, EnumAccess, IntoDeserializer,
+        MapAccess, SeqAccess, Unexpected, VariantAccess, Visitor,
     },
-    forward_to_deserialize_any, Deserialize, Deserializer,
+    forward_to_deserialize_any, Deserializer,
 };
 use std::sync::Arc;
 
@@ -237,12 +237,12 @@ impl<'chunk> Value<'chunk> {
     }
 
     /// Deserialize an instance to a type.
-    pub fn deserialize<'de, 'slf: 'de, 'cr: 'slf, T>(
+    pub fn deserialize<'slf, 'cr: 'slf, T>(
         &'slf self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
     where
-        T: Deserialize<'de>,
+        T: DeserializeOwned,
     {
         Ok(T::deserialize(ValueDeserializer::new(self, constants))?)
     }
@@ -257,12 +257,12 @@ impl<'chunk> Value<'chunk> {
     ///
     /// If the target enum does not have a variant matching the class
     /// name, an error occurs.
-    pub fn deserialize_enum<'de, 'slf: 'de, 'cr: 'slf, T>(
+    pub fn deserialize_enum<'slf, 'cr: 'slf, T>(
         &'slf self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
     where
-        T: Deserialize<'de>,
+        T: DeserializeOwned,
     {
         Ok(T::deserialize(EventsEnumDeserializer::new(
             self, constants,
