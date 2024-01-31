@@ -98,16 +98,16 @@ impl<'chunk> Object<'chunk> {
 }
 
 /// A deserializer for [Object] instances.
-struct ObjectDeserializer<'de, 'chunk: 'de, CR>
+struct ObjectDeserializer<'de, 'cr: 'de, 'chunk: 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     object: &'de Object<'chunk>,
-    constants: &'de CR,
+    constants: &'cr CR,
     field_index: usize,
 }
 
-impl<'de, 'chunk: 'de, CR> MapAccess<'de> for ObjectDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> MapAccess<'de> for ObjectDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -237,7 +237,7 @@ impl<'chunk> Value<'chunk> {
     }
 
     /// Deserialize an instance to a type.
-    pub fn deserialize<'de, 'slf: 'de, 'cr: 'de, T>(
+    pub fn deserialize<'de, 'slf: 'de, 'cr: 'slf, T>(
         &'slf self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
@@ -257,7 +257,7 @@ impl<'chunk> Value<'chunk> {
     ///
     /// If the target enum does not have a variant matching the class
     /// name, an error occurs.
-    pub fn deserialize_enum<'de, 'slf: 'de, 'cr: 'de, T>(
+    pub fn deserialize_enum<'de, 'slf: 'de, 'cr: 'slf, T>(
         &'slf self,
         constants: &'cr impl ConstantResolver<'chunk>,
     ) -> Result<T>
@@ -271,16 +271,16 @@ impl<'chunk> Value<'chunk> {
 }
 
 /// A deserializer for an array of values.
-struct ArrayDeserializer<'de, 'chunk: 'de, CR>
+struct ArrayDeserializer<'de, 'cr: 'de, 'chunk: 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     array: &'de Vec<Value<'chunk>>,
-    constants: &'de CR,
+    constants: &'cr CR,
     index: usize,
 }
 
-impl<'de, 'chunk: 'de, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> SeqAccess<'de> for ArrayDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -329,7 +329,7 @@ where
 /// not correct. But it is the most user-friendly behavior. If we
 /// wanted to be more strict, we could potentially have a flag to
 /// control behavior.
-pub struct ValueDeserializer<'de, 'chunk: 'de, 'cr: 'de, CR>
+pub struct ValueDeserializer<'de, 'cr: 'de, 'chunk: 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -337,7 +337,7 @@ where
     constants: &'cr CR,
 }
 
-impl<'de, 'chunk: 'de, 'cr: 'de, CR> ValueDeserializer<'de, 'chunk, 'cr, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> ValueDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -347,7 +347,7 @@ where
     }
 }
 
-impl<'de, 'chunk: 'de, 'cr: 'de, CR> Deserializer<'de> for ValueDeserializer<'de, 'chunk, 'cr, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> Deserializer<'de> for ValueDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -443,25 +443,26 @@ where
 /// class name.
 ///
 /// Currently only works on [Value::Object] variants.
-pub struct EventsEnumDeserializer<'de, 'chunk: 'de, CR>
+pub struct EventsEnumDeserializer<'de, 'cr: 'de, 'chunk: 'cr, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     value: &'de Value<'chunk>,
-    constants: &'de CR,
+    constants: &'cr CR,
 }
 
-impl<'de, 'chunk: 'de, CR> EventsEnumDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> EventsEnumDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
     /// Construct a new instance from a [Value] and [ConstantResolver].
-    pub fn new(value: &'de Value<'chunk>, constants: &'de CR) -> Self {
+    pub fn new(value: &'de Value<'chunk>, constants: &'cr CR) -> Self {
         Self { value, constants }
     }
 }
 
-impl<'de, 'chunk: 'de, CR> EnumAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> EnumAccess<'de>
+    for EventsEnumDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -492,7 +493,8 @@ where
     }
 }
 
-impl<'de, 'chunk: 'de, CR> VariantAccess<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> VariantAccess<'de>
+    for EventsEnumDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
@@ -537,7 +539,8 @@ where
     }
 }
 
-impl<'de, 'chunk: 'de, CR> Deserializer<'de> for EventsEnumDeserializer<'de, 'chunk, CR>
+impl<'de, 'cr: 'de, 'chunk: 'cr, CR> Deserializer<'de>
+    for EventsEnumDeserializer<'de, 'cr, 'chunk, CR>
 where
     CR: ConstantResolver<'chunk>,
 {
