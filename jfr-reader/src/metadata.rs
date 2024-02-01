@@ -499,6 +499,12 @@ pub struct RegionElement<'chunk> {
     ///
     /// Why this is milliseconds we have no clue.
     pub gmt_offset: i32,
+    /// Whether daylight savings time is active.
+    ///
+    /// Values can be 0 or 1.
+    ///
+    /// Introduced in OpenJDK 20. Set to None if not present.
+    pub dst: Option<i32>,
 }
 
 impl<'chunk> RegionElement<'chunk> {
@@ -508,6 +514,7 @@ impl<'chunk> RegionElement<'chunk> {
     ) -> Result<Self> {
         let mut locale = None;
         let mut gmt_offset = None;
+        let mut dst = None;
 
         for (k, v) in el.attributes {
             let k = get_str(string_table, k)?;
@@ -519,6 +526,9 @@ impl<'chunk> RegionElement<'chunk> {
                 }
                 "gmtOffset" => {
                     gmt_offset.replace(v);
+                }
+                "dst" => {
+                    dst.replace(v);
                 }
                 name => {
                     return Err(Error::ElementConstructLogic(format!(
@@ -541,8 +551,22 @@ impl<'chunk> RegionElement<'chunk> {
                 e
             ))
         })?;
+        let dst = if let Some(v) = dst {
+            Some(i32::from_str(v.as_ref()).map_err(|e| {
+                Error::ElementConstructLogic(format!(
+                    "region element failed to parse dst value to inger: {}",
+                    e
+                ))
+            })?)
+        } else {
+            None
+        };
 
-        Ok(Self { locale, gmt_offset })
+        Ok(Self {
+            locale,
+            gmt_offset,
+            dst,
+        })
     }
 
     /// Obtain the parsed timezone offset.
