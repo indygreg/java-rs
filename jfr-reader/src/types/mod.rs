@@ -10,3 +10,5 @@
 
 #[cfg(feature = "openjdk17")]
 pub mod openjdk17;
+#[cfg(feature = "openjdk21")]
+pub mod openjdk21;
