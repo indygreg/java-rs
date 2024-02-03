@@ -46,10 +46,13 @@ zstd = "0.13.0"
 
 [features]
 default = [
+    "async-profiler",
     "metadata-xml-derive",
     "openjdk17",
     "openjdk21",
 ]
+# Event types for async-profiler.
+async-profiler = []
 # Event types for OpenJDK 17.
 openjdk17 = []
 # Event types for OpenJDK 21.

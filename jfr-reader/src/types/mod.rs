@@ -8,6 +8,8 @@
 
 //! Defines high-level event types and referenced data structures.
 
+#[cfg(feature = "async-profiler")]
+pub mod async_profiler;
 #[cfg(feature = "openjdk17")]
 pub mod openjdk17;
 #[cfg(feature = "openjdk21")]
